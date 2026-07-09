@@ -1,13 +1,5 @@
 [build]
-  command = "npm install && node build-images.js"
   publish = "."
-
-[build.environment]
-  NODE_VERSION = "20"
-  BUILD_TIMEOUT_MIN = "24"
-
-[build.processing]
-  skip_processing = false
 
 [[headers]]
   for = "/img/*"
