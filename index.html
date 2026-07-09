@@ -1332,14 +1332,24 @@ async function buildSlabIndex(){
 async function loadManifest(){
   if(_manifestLoaded)return;
   _manifestLoaded=true;
+  // Try CDN manifest first (built by Netlify pipeline — fastest, no auth needed)
+  try{
+    const res=await fetch('/image-manifest-cdn.json');
+    if(res.ok){
+      const data=await res.json();
+      _manifest=data.manifest||null;
+      if(_manifest){console.log('CDN manifest loaded:',data.slabMatches,'slab,',data.projectMatches,'project matches');return;}
+    }
+  }catch(e){/* not yet built — fall through */}
+  // Fall back to Drive manifest (built by Apps Script — always current)
   try{
     const file=await driveFindFile(STOCK_FOLDER_ID,MANIFEST_FILENAME||'image-manifest.json');
-    if(!file){console.warn('image-manifest.json not found in Stock folder — falling back to live Drive queries');return;}
+    if(!file){console.warn('No manifest found — falling back to live Drive queries');return;}
     const text=await driveReadFileContent(file.id);
     if(!text)return;
     const data=JSON.parse(text);
     _manifest=data.manifest||null;
-    if(_manifest)console.log('Manifest loaded:',data.slabMatches,'slab matches,',data.projectMatches,'project matches, built',data.built);
+    if(_manifest)console.log('Drive manifest loaded:',data.slabMatches,'slab,',data.projectMatches,'project matches, built',data.built);
   }catch(e){console.warn('Manifest load failed, falling back to live Drive queries:',e.message);}
 }
 
