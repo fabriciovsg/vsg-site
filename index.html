@@ -1247,7 +1247,7 @@ function parseStockRows(rows){
     if(!mat)continue;
     if(colMap.location!==undefined){
       const loc=String(r[colMap.location]||'').trim();
-      const enabled=(g('enabledLocations')||['VSG']);
+      const enabled=(typeof g==='function'?g('enabledLocations'):null)||(window.cms&&cms.enabledLocations)||['VSG'];
       if(loc&&!enabled.includes(loc))continue;
     }
     const lot=String(r[colMap.lot]||'').trim();
