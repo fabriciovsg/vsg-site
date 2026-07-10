@@ -18,7 +18,7 @@ const PROJECT_DIR = path.join(OUT_DIR, 'projects');
 const CACHE_FILE  = process.env.HOME + '/.vsg-image-cache.json'; // persists between runs on Mac
 const CDN_MANIFEST = path.join(process.cwd(), 'image-manifest-cdn.json');
 
-const QUALITY  = 90;
+const QUALITY  = 95;
 const WIDTHS   = [400, 800, 1200, 1600];
 const PARALLEL = 8; // concurrent image downloads+process
 const TIMEOUT_BUFFER_MS = 3 * 60 * 1000; // stop 3min before limit to save cache+manifest
@@ -103,15 +103,15 @@ async function main() {
     const r = results[lot] || {};
     const slabId = entry.slab ? extractFileId(entry.slab) : null;
     const slab800  = slabId && cache[slabId]?.path800;
-    const slab1200 = slabId && cache[slabId]?.path1200;
+    const slab1600 = slabId && (cache[slabId]?.path1600 || cache[slabId]?.path1200);
     const projects = (entry.projects || []).map((url, i) => {
       const id = extractFileId(url);
-      return { thumb: cache[id]?.path800 || null, full: cache[id]?.path1200 || cache[id]?.path800 || null };
+      return { thumb: cache[id]?.path800 || null, full: cache[id]?.path1600 || cache[id]?.path1200 || cache[id]?.path800 || null };
     }).filter(p => p.thumb);
     if (slab800 || projects.length) {
       cdnManifest[lot] = {
         slab:      slab800  || null,
-        slabFull:  slab1200 || slab800 || null,
+        slabFull:  slab1600 || slab800 || null,
         slabSrcset: slabId ? buildSrcset(cache[slabId]) : null,
         projects:      projects.map(p => p.thumb),
         projectsFull:  projects.map(p => p.full),
