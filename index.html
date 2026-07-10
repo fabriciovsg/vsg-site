@@ -1185,7 +1185,15 @@ async function loadStock(){
     if(!resp.ok){setStatus('error',`Drive error: ${resp.status} ${resp.statusText}`);return;}
     const buf=await resp.arrayBuffer();
     const wb=XLSX.read(new Uint8Array(buf),{type:'array'});
-    const ws=wb.Sheets[wb.SheetNames[0]];
+    // Find the sheet containing stock data — look for one with MATERIAL or LOT # in headers
+    let ws=null;
+    for(const name of wb.SheetNames){
+      const candidate=wb.Sheets[name];
+      const rows=XLSX.utils.sheet_to_json(candidate,{header:1,range:0});
+      const header=(rows[0]||[]).map(c=>String(c||'').toUpperCase());
+      if(header.includes('MATERIAL')||header.includes('LOT #')){ws=candidate;break;}
+    }
+    if(!ws)ws=wb.Sheets[wb.SheetNames[0]]; // fallback
     _rawStockRows=XLSX.utils.sheet_to_json(ws,{header:1});
     parseStockRows(_rawStockRows,(window.cms&&cms.enabledLocations)||['VSG']);
   }catch(e){
@@ -2936,9 +2944,9 @@ document.querySelectorAll('.nav-links a,.nav-links button').forEach(el=>{
 });
 
 // Script is at end of body so DOM is already ready — call directly
-loadCMS();  // fetch from Drive, applyCMS() called after — no premature render to avoid image flash
+// loadCMS must complete before loadStock so enabledLocations is set correctly for the location filter
+loadCMS().then(()=>{loadStock();});
 updateShortlistUI();
-loadStock();
 loadClientsData().then(()=>updateClientUI());
 </script>
 </body>
