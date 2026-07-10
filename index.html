@@ -1460,7 +1460,7 @@ async function loadSlabImages(stones){
       const entry=_manifest[key];
       if(entry&&entry.slab){
         stone.image=entry.slab;           // 800px — used for grid card
-        stone.imageFull=entry.slabFull||entry.slab;  // 1200px — used for modal
+        stone.imageFull=entry.slabFull||entry.slab;  // 1600px — used for modal
         stone.noImage=false;
         refreshCardImage(stone);
       }else{
