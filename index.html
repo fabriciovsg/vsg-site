@@ -1195,7 +1195,7 @@ async function loadStock(){
     }
     if(!ws)ws=wb.Sheets[wb.SheetNames[0]]; // fallback
     _rawStockRows=XLSX.utils.sheet_to_json(ws,{header:1});
-    parseStockRows(_rawStockRows,(window.cms&&cms.enabledLocations)||['VSG']);
+    parseStockRows(_rawStockRows,g('enabledLocations')||['VSG']);
   }catch(e){
     console.error('Stock load error:',e);
     setStatus('error','Error: '+e.message+' — see console for details');
@@ -2392,7 +2392,7 @@ async function saveAdminContent(){
   if(hnpEl)cms.hideNoPhoto=hnpEl.value==='true';
   const locChecks=[...document.querySelectorAll('[id^="af-loc-"]')].filter(c=>c.checked).map(c=>c.value);
   if(locChecks.length){
-    const locChanged=JSON.stringify(locChecks.sort())!==JSON.stringify((cms.enabledLocations||['VSG']).slice().sort());
+    const locChanged=JSON.stringify(locChecks.sort())!==JSON.stringify((g('enabledLocations')||['VSG']).slice().sort());
     cms.enabledLocations=locChecks;
     if(locChanged&&_rawStockRows){
       // Re-parse the cached stock rows with the new location filter
