@@ -18,8 +18,8 @@ const PROJECT_DIR = path.join(OUT_DIR, 'projects');
 const CACHE_FILE  = '/opt/build/cache/vsg-image-cache.json'; // Netlify persistent cache
 const CDN_MANIFEST = path.join(process.cwd(), 'image-manifest-cdn.json');
 
-const QUALITY  = 82;
-const WIDTHS   = [400, 800, 1600];
+const QUALITY  = 90;
+const WIDTHS   = [400, 800, 1200, 1600];
 const PARALLEL = 8; // concurrent image downloads+process
 const TIMEOUT_BUFFER_MS = 3 * 60 * 1000; // stop 3min before limit to save cache+manifest
 
@@ -102,17 +102,20 @@ async function main() {
   for (const [lot, entry] of Object.entries(manifest)) {
     const r = results[lot] || {};
     const slabId = entry.slab ? extractFileId(entry.slab) : null;
-    const slab800 = slabId && cache[slabId]?.path800;
+    const slab800  = slabId && cache[slabId]?.path800;
+    const slab1200 = slabId && cache[slabId]?.path1200;
     const projects = (entry.projects || []).map((url, i) => {
       const id = extractFileId(url);
-      return cache[id]?.path800 || null;
-    }).filter(Boolean);
+      return { thumb: cache[id]?.path800 || null, full: cache[id]?.path1200 || cache[id]?.path800 || null };
+    }).filter(p => p.thumb);
     if (slab800 || projects.length) {
       cdnManifest[lot] = {
-        slab: slab800 || null,
+        slab:      slab800  || null,
+        slabFull:  slab1200 || slab800 || null,
         slabSrcset: slabId ? buildSrcset(cache[slabId]) : null,
-        projects: projects,
-        projectCount: projects.length
+        projects:      projects.map(p => p.thumb),
+        projectsFull:  projects.map(p => p.full),
+        projectCount:  projects.length
       };
     }
   }
@@ -168,9 +171,15 @@ async function getDriveMeta(fileId, token) {
 }
 
 async function downloadFile(fileId, dest, token) {
+  // Download the original full-resolution file — NOT the thumbnail.
+  // Thumbnails are pre-compressed JPEGs; recompressing them to WebP degrades quality.
+  // The original file gives Sharp a high-res source to work from.
   return new Promise((resolve, reject) => {
     const options = { headers: { Authorization: `Bearer ${token}` } };
     https.get(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, options, res => {
+      if (res.statusCode === 403 || res.statusCode === 404) {
+        reject(new Error(`HTTP ${res.statusCode} for file ${fileId}`)); return;
+      }
       if (res.statusCode !== 200) { reject(new Error(`HTTP ${res.statusCode}`)); return; }
       const ws = createWriteStream(dest);
       res.pipe(ws);
