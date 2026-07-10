@@ -15,7 +15,7 @@ const MANIFEST_FILENAME = 'image-manifest.json';
 const OUT_DIR     = path.join(process.cwd(), 'img');
 const SLAB_DIR    = path.join(OUT_DIR, 'slabs');
 const PROJECT_DIR = path.join(OUT_DIR, 'projects');
-const CACHE_FILE  = '/opt/build/cache/vsg-image-cache.json'; // Netlify persistent cache
+const CACHE_FILE  = process.env.HOME + '/.vsg-image-cache.json'; // persists between runs on Mac
 const CDN_MANIFEST = path.join(process.cwd(), 'image-manifest-cdn.json');
 
 const QUALITY  = 90;
