@@ -1163,7 +1163,7 @@ async function driveWriteFile(folderId,filename,fileId,contentObj){
 }
 
 // ── STOCK ─────────────────────────────────────────────────────
-let allStones=[],filteredStones=[],displayedCount=0;
+let allStones=[],filteredStones=[],displayedCount=0,_rawStockRows=null;
 const PAGE_SIZE=24;
 let activeCategory='All',activeSort='newest';
 let accessToken2=null;
@@ -1186,7 +1186,8 @@ async function loadStock(){
     const buf=await resp.arrayBuffer();
     const wb=XLSX.read(new Uint8Array(buf),{type:'array'});
     const ws=wb.Sheets[wb.SheetNames[0]];
-    parseStockRows(XLSX.utils.sheet_to_json(ws,{header:1}),(window.cms&&cms.enabledLocations)||['VSG']);
+    _rawStockRows=XLSX.utils.sheet_to_json(ws,{header:1});
+    parseStockRows(_rawStockRows,(window.cms&&cms.enabledLocations)||['VSG']);
   }catch(e){
     console.error('Stock load error:',e);
     setStatus('error','Error: '+e.message+' — see console for details');
@@ -2382,7 +2383,15 @@ async function saveAdminContent(){
   const hnpEl=document.getElementById('af-hideNoPhoto');
   if(hnpEl)cms.hideNoPhoto=hnpEl.value==='true';
   const locChecks=[...document.querySelectorAll('[id^="af-loc-"]')].filter(c=>c.checked).map(c=>c.value);
-  if(locChecks.length){cms.enabledLocations=locChecks;if(allStones.length)applyFilter();}
+  if(locChecks.length){
+    const locChanged=JSON.stringify(locChecks.sort())!==JSON.stringify((cms.enabledLocations||['VSG']).slice().sort());
+    cms.enabledLocations=locChecks;
+    if(locChanged&&_rawStockRows){
+      // Re-parse the cached stock rows with the new location filter
+      parseStockRows(_rawStockRows,locChecks);
+      loadSlabImages(allStones).then(()=>{applyFilter();loadProjectBadges();});
+    }
+  }
   const modeEl=document.getElementById('af-priceDisplayMode');
   if(modeEl)cms.priceDisplayMode=modeEl.value;
   const t1El=document.getElementById('af-priceT1');
