@@ -1202,7 +1202,8 @@ function sanitiseFinish(val){
   return t.charAt(0).toUpperCase()+t.slice(1);
 }
 
-function parseStockRows(rows,enabledLocations){   enabledLocations=enabledLocations||['VSG'];
+function parseStockRows(rows,enabledLocations){
+  enabledLocations=enabledLocations||['VSG'];
   if(!rows.length){loadStaticFallback();return;}
   let headerRow=-1,colMap={};
   for(let i=0;i<Math.min(10,rows.length);i++){
@@ -1247,7 +1248,6 @@ function parseStockRows(rows,enabledLocations){   enabledLocations=enabledLocati
     if(!mat)continue;
     if(colMap.location!==undefined){
       const loc=String(r[colMap.location]||'').trim();
-      const enabled=(typeof g==='function'?g('enabledLocations'):null)||(window.cms&&cms.enabledLocations)||['VSG'];
       if(loc&&!enabledLocations.includes(loc))continue;
     }
     const lot=String(r[colMap.lot]||'').trim();
@@ -2382,7 +2382,7 @@ async function saveAdminContent(){
   const hnpEl=document.getElementById('af-hideNoPhoto');
   if(hnpEl)cms.hideNoPhoto=hnpEl.value==='true';
   const locChecks=[...document.querySelectorAll('[id^="af-loc-"]')].filter(c=>c.checked).map(c=>c.value);
-  if(locChecks.length)cms.enabledLocations=locChecks;
+  if(locChecks.length){cms.enabledLocations=locChecks;if(allStones.length)applyFilter();}
   const modeEl=document.getElementById('af-priceDisplayMode');
   if(modeEl)cms.priceDisplayMode=modeEl.value;
   const t1El=document.getElementById('af-priceT1');
