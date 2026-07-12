@@ -779,13 +779,17 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
     </div>
     <div>
       <p class="section-body" style="margin-bottom:28px" id="cms-contact-body">Send us a message and we'll get back to you shortly. Or simply come in &#8212; we'd love to show you around.</p>
-      <div class="contact-form">
-        <input class="form-input" type="text" placeholder="Your name">
-        <input class="form-input" type="email" placeholder="Email address">
-        <input class="form-input" type="text" placeholder="Phone (optional)">
-        <textarea class="form-input" placeholder="Tell us about your project&#8230;"></textarea>
-        <button class="btn-primary">Send Message</button>
-      </div>
+      <form class="contact-form" name="contact" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" id="contactForm">
+        <input type="hidden" name="form-name" value="contact">
+        <input type="hidden" name="bot-field" style="display:none">
+        <input class="form-input" type="text" name="name" placeholder="Your name" required>
+        <input class="form-input" type="email" name="email" placeholder="Email address" required>
+        <input class="form-input" type="text" name="phone" placeholder="Phone (optional)">
+        <textarea class="form-input" name="message" placeholder="Tell us about your project&#8230;" required></textarea>
+        <button class="btn-primary" type="submit">Send Message</button>
+        <div id="contactSuccess" style="display:none;color:var(--gold);font-size:13px;letter-spacing:.05em;padding:12px 0">Thank you — we'll be in touch shortly.</div>
+        <div id="contactError" style="display:none;color:#c94444;font-size:13px;padding:12px 0">Something went wrong. Please email us directly at sales@victoriastonegallery.com.au</div>
+      </form>
     </div>
   </div>
 </section>
@@ -964,7 +968,7 @@ const CMS_DEFAULTS={
   bookingUrl:"",
   slabDisplay:"lowstock", // "count" = show number, "lowstock" = show "Low Stock" under 4, "hide" = hide bar entirely
   hideNoPhoto:true, // hide lots that have no slab photo from the public grid and the live count
-  enabledLocations:['VSG'], // which Vavastone location codes to include; default main gallery only
+  enabledLocations:['VSG','JRD','SUR','AMU'], // default: all locations except SYD
   priceFilterVisible:true, // show price range filter pills on public showroom
   priceDisplayMode:'symbols', // 'symbols' = $/$$/$$$/$$$$, 'ranges' = actual dollar ranges
   priceT1:0, // threshold between $ and $$ (0 = use dynamic)
@@ -2871,6 +2875,33 @@ function showToast(msg){
   if(!t){t=document.createElement('div');t.id='adminToast';t.style.cssText='position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--gold);color:white;padding:10px 24px;font-size:12px;letter-spacing:.1em;font-family:"Jost",sans-serif;z-index:1000;border-radius:2px;pointer-events:none;';document.body.appendChild(t);}
   t.textContent=msg;t.style.opacity='1';setTimeout(()=>t.style.opacity='0',2500);
 }
+
+// ── CONTACT FORM ──────────────────────────────────────────────
+document.getElementById('contactForm').addEventListener('submit',async function(e){
+  e.preventDefault();
+  const btn=this.querySelector('button[type="submit"]');
+  const success=document.getElementById('contactSuccess');
+  const error=document.getElementById('contactError');
+  btn.textContent='Sending…';btn.disabled=true;
+  success.style.display='none';error.style.display='none';
+  try{
+    const resp=await fetch('/',{
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:new URLSearchParams(new FormData(this)).toString()
+    });
+    if(resp.ok){
+      success.style.display='block';
+      this.reset();
+    }else{
+      error.style.display='block';
+    }
+  }catch(err){
+    error.style.display='block';
+  }finally{
+    btn.textContent='Send Message';btn.disabled=false;
+  }
+});
 
 // ── LIGHTBOX KEYBOARD ─────────────────────────────────────────
 document.addEventListener('keydown',e=>{
