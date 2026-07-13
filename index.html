@@ -81,7 +81,9 @@
 }
 </script>
 <!-- uid:64059183 -->
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='8' fill='%231A1714'/%3E%3Ctext y='72' x='50' text-anchor='middle' font-family='Georgia,serif' font-size='62' fill='%23B8963C'%3EV%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon_32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon_180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -745,7 +747,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
     <div class="colour-pill" data-colour="Pink" title="Pink / Red" style="background:linear-gradient(135deg,#c4857a,#a83232)" onclick="filterColour('Pink',this)"></div>
     <div class="colour-pill" data-colour="Red" title="Red" style="background:#8b2020" onclick="filterColour('Red',this)"></div>
     <div class="colour-pill" data-colour="Blue" title="Blue" style="background:#6b8cad" onclick="filterColour('Blue',this)"></div>
-    <div class="min-slabs-wrap">
+    <div class="min-slabs-wrap" id="minSlabsFilter">
       <span class="min-slabs-label">Min slabs</span>
       <input class="min-slabs-input" type="number" id="minSlabsInput" min="1" max="99" value="1" oninput="applyFilter(document.getElementById('stoneSearch').value.toLowerCase())">
     </div>
@@ -1044,6 +1046,7 @@ const CMS_DEFAULTS={
   hideNoPhoto:true, // hide lots that have no slab photo from the public grid and the live count
   enabledLocations:['VSG','JRD','SUR','AMU'], // default: all locations except SYD
   priceFilterVisible:true, // show price range filter pills on public showroom
+  minSlabsFilterVisible:true, // show min slabs quantity filter
   priceDisplayMode:'symbols', // 'symbols' = $/$$/$$$/$$$$, 'ranges' = actual dollar ranges
   priceT1:0, // threshold between $ and $$ (0 = use dynamic)
   priceT2:0, // threshold between $$ and $$$
@@ -1144,6 +1147,7 @@ function applyCMS(){
     // Apply showroom settings
     const pfr=document.getElementById('priceFilterRow');
     if(pfr)pfr.style.display=g('priceFilterVisible')===false?'none':'flex';
+  const msfr=document.getElementById('minSlabsFilter');if(msfr)msfr.style.display=g('minSlabsFilterVisible')===false?'none':'flex';
     if(_priceThresholdsSet)renderPriceFilterButtons();
   }catch(e){console.error('applyCMS error:',e);}
 }
@@ -2028,7 +2032,7 @@ function renderGrid(reset=false){
       priceHTML=`<div class="stone-price">$${clientPrice.toFixed(2)}<span class="stone-price-psqm"> /m² +GST</span></div>`;
     }
     // 4-tier price scale for anonymous visitors
-    const bracket=(!currentClient&&stone.price1)?getPriceBracket(stone):null;
+    const bracket=(!currentClient&&stone.price1&&g('priceFilterVisible')!==false)?getPriceBracket(stone):null;
     const noPriceBadge='';
     const bracketBadge=bracket?`<div class="price-bracket">${bracket}</div>`:noPriceBadge;
     card.innerHTML=`${imgHTML}
@@ -2408,6 +2412,13 @@ function renderAdminContent(){
           ${(window._locationMap?Object.values(window._locationMap):['VSG','JRD','SUR','SYD','AMU']).map(loc=>{const name=typeof loc==='object'?loc.name:loc;const en=(g('enabledLocations')||['VSG']).includes(name);return`<label style="display:flex;align-items:center;gap:8px;margin-bottom:5px;cursor:pointer;font-size:13px;color:var(--cream)"><input type="checkbox" id="af-loc-${name}" value="${name}" ${en?'checked':''}>${name}</label>`;}).join('')}
         </div>
         <div class="admin-field">
+          <div class="admin-label">Min Slabs Filter</div>
+          <select class="admin-input" id="af-minSlabsFilterVisible" style="padding:9px 12px">
+            <option value="true" ${g('minSlabsFilterVisible')!==false?'selected':''}>Visible to public</option>
+            <option value="false" ${g('minSlabsFilterVisible')===false?'selected':''}>Hidden</option>
+          </select>
+        </div>
+        <div class="admin-field">
           <div class="admin-label">Price Filter Visibility</div>
           <select class="admin-input" id="af-priceFilterVisible" style="padding:9px 12px">
             <option value="true" ${g('priceFilterVisible')!==false?'selected':''}>Visible to public</option>
@@ -2466,6 +2477,8 @@ async function saveAdminContent(){
   if(slabEl)cms.slabDisplay=slabEl.value;
   const priceEl=document.getElementById('af-priceFilterVisible');
   if(priceEl)cms.priceFilterVisible=priceEl.value==='true';
+  const msfEl=document.getElementById('af-minSlabsFilterVisible');
+  if(msfEl)cms.minSlabsFilterVisible=msfEl.value==='true';
   const hnpEl=document.getElementById('af-hideNoPhoto');
   if(hnpEl)cms.hideNoPhoto=hnpEl.value==='true';
   const locChecks=[...document.querySelectorAll('[id^="af-loc-"]')].filter(c=>c.checked).map(c=>c.value);
@@ -2495,6 +2508,7 @@ async function saveAdminContent(){
   // Apply price filter row visibility immediately
   const pfr=document.getElementById('priceFilterRow');
   if(pfr)pfr.style.display=g('priceFilterVisible')===false?'none':'flex';
+  const msfr=document.getElementById('minSlabsFilter');if(msfr)msfr.style.display=g('minSlabsFilterVisible')===false?'none':'flex';
   if(allStones.length)applyFilter(document.getElementById('stoneSearch')?.value.toLowerCase().trim()||'');
   if(ok)showToast('Content saved');
 }
