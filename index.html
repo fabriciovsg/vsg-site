@@ -1046,6 +1046,7 @@ const CMS_DEFAULTS={
   hideNoPhoto:true, // hide lots that have no slab photo from the public grid and the live count
   enabledLocations:['VSG','JRD','SUR','AMU'], // default: all locations except SYD
   priceFilterVisible:true, // show price range filter pills on public showroom
+  priceBracketVisible:true, // show $$$$ bracket tag on individual stone cards
   minSlabsFilterVisible:true, // show min slabs quantity filter
   priceDisplayMode:'symbols', // 'symbols' = $/$$/$$$/$$$$, 'ranges' = actual dollar ranges
   priceT1:0, // threshold between $ and $$ (0 = use dynamic)
@@ -2032,7 +2033,7 @@ function renderGrid(reset=false){
       priceHTML=`<div class="stone-price">$${clientPrice.toFixed(2)}<span class="stone-price-psqm"> /m² +GST</span></div>`;
     }
     // 4-tier price scale for anonymous visitors
-    const bracket=(!currentClient&&stone.price1&&g('priceFilterVisible')!==false)?getPriceBracket(stone):null;
+    const bracket=(!currentClient&&stone.price1&&g('priceBracketVisible')!==false)?getPriceBracket(stone):null;
     const noPriceBadge='';
     const bracketBadge=bracket?`<div class="price-bracket">${bracket}</div>`:noPriceBadge;
     card.innerHTML=`${imgHTML}
@@ -2426,6 +2427,13 @@ function renderAdminContent(){
           </select>
         </div>
         <div class="admin-field">
+          <div class="admin-label">Price Bracket on Cards</div>
+          <select class="admin-input" id="af-priceBracketVisible" style="padding:9px 12px">
+            <option value="true" ${g('priceBracketVisible')!==false?'selected':''}>Show $$$ on each card</option>
+            <option value="false" ${g('priceBracketVisible')===false?'selected':''}>Hide from cards</option>
+          </select>
+        </div>
+        <div class="admin-field">
           <div class="admin-label">Price Display Style</div>
           <select class="admin-input" id="af-priceDisplayMode" style="padding:9px 12px">
             <option value="symbols" ${(g('priceDisplayMode')||'symbols')==='symbols'?'selected':''}>$ symbols ($$, $$$, $$$$)</option>
@@ -2477,6 +2485,8 @@ async function saveAdminContent(){
   if(slabEl)cms.slabDisplay=slabEl.value;
   const priceEl=document.getElementById('af-priceFilterVisible');
   if(priceEl)cms.priceFilterVisible=priceEl.value==='true';
+  const pbEl=document.getElementById('af-priceBracketVisible');
+  if(pbEl)cms.priceBracketVisible=pbEl.value==='true';
   const msfEl=document.getElementById('af-minSlabsFilterVisible');
   if(msfEl)cms.minSlabsFilterVisible=msfEl.value==='true';
   const hnpEl=document.getElementById('af-hideNoPhoto');
