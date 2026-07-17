@@ -352,6 +352,19 @@ section{padding:72px 48px;}
 .projects-strip img{width:calc(25% - 3px);aspect-ratio:3/4;object-fit:cover;flex-shrink:0;transition:filter .4s;filter:saturate(.8);}
 .projects-strip img:hover{filter:saturate(1.1);}
 /* EVENTS */
+/* FABRICATORS */
+#fabricators{background:var(--dark);padding:80px 48px;}
+#fabricators .fab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1px;background:rgba(200,184,154,.08);margin-top:40px;}
+#fabricators .fab-card{background:var(--dark);padding:24px 28px;transition:background .2s;}
+#fabricators .fab-card:hover{background:#161310;}
+#fabricators .fab-name{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:400;color:var(--cream);margin-bottom:8px;}
+#fabricators .fab-address{font-size:12px;color:rgba(200,184,154,.5);line-height:1.6;margin-bottom:6px;}
+#fabricators .fab-phone{font-size:12px;color:rgba(200,184,154,.6);margin-bottom:10px;}
+#fabricators .fab-link{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(200,148,58,.3);padding-bottom:1px;transition:border-color .2s;}
+#fabricators .fab-link:hover{border-color:var(--gold);}
+#fabricators .fab-disclaimer{font-size:11px;color:rgba(200,184,154,.35);margin-top:32px;line-height:1.6;max-width:700px;}
+@media(max-width:768px){#fabricators{padding:64px 20px;}#fabricators .fab-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){#fabricators .fab-grid{grid-template-columns:1fr;}}
 /* ARRIVING SOON */
 #arriving{background:#0f0d0b;padding:80px 48px;}
 #arriving .section-label{color:var(--gold-light);}
@@ -691,7 +704,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
     <li><a href="#showroom">Showroom</a></li>
     <li><a href="#about">About</a></li>
     <li><a href="#why">Why VSG</a></li>
-    <li><a href="/stones/">Stone Knowledge</a></li>
+    <li><a href="/stones/">Stone Knowledge</a></li><li><a href="#fabricators">Fabricators</a></li>
     <li><button class="nav-shortlist-btn" onclick="openShortlist()">&#9825; My Shortlist <span class="shortlist-badge" id="navBadge">0</span></button></li>
     <li><a href="#contact" class="nav-cta">Contact Us</a></li>
   </ul>
@@ -829,6 +842,15 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
   <h2 class="section-title" style="max-width:600px">Stones <em>en route</em></h2>
   <p class="section-body" style="max-width:560px;margin:0 auto">A preview of what's on its way — hand-selected on recent sourcing trips and currently in transit. Register your interest and we'll be in touch the moment they arrive.</p>
   <div class="arriving-grid" id="arrivingGrid"><div class="arriving-empty">Loading incoming collection…</div></div>
+</section>
+
+<!-- FABRICATORS -->
+<section id="fabricators">
+  <div class="section-label"><span>TRUSTED PARTNERS</span></div>
+  <h2 class="section-title">Recommended Fabricators</h2>
+  <p class="section-body" style="max-width:600px;margin:0 auto">Our recommended stonemasons and fabricators — experienced professionals who work with natural stone every day and understand what it takes to do it justice.</p>
+  <div class="fab-grid" id="fabricatorsGrid"></div>
+  <p class="fab-disclaimer">Although we intend for the details of these fabricators to be accurate, we do not assume responsibility for the accuracy of the contacts listed, nor for the actions or workmanship of these companies.</p>
 </section>
 
 <!-- EVENTS -->
@@ -996,6 +1018,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
   <button class="admin-bar-btn" id="adminTabTransit" onclick="openAdminTab('transit')">In Transit <span id="adminTransitCount" style="background:rgba(200,184,154,.2);padding:1px 6px;border-radius:10px;font-size:10px;margin-left:4px">&#8230;</span></button>
   <button class="admin-bar-btn" id="adminTabCoverage" onclick="openAdminTab('coverage')">Coverage</button>
   <button class="admin-bar-btn" id="adminTabClients" onclick="openAdminTab('clients')">Clients</button>
+  <button class="admin-bar-btn" id="adminTabFabricators" onclick="openAdminTab('fabricators')">Fabricators</button>
   <button class="admin-bar-btn danger" onclick="adminLogout()" style="margin-left:auto">Sign Out</button>
 </div>
 <div class="admin-panel" id="adminPanel"></div>
@@ -1073,6 +1096,8 @@ const CMS_DEFAULTS={
   priceBracketVisible:true, // show $$$$ bracket tag on individual stone cards
   minSlabsFilterVisible:true, // show min slabs quantity filter
   arrivingSoonVisible:false, // show Arriving Soon section (enable when folder has content)
+  fabricatorsVisible:true, // show Recommended Fabricators section
+  fabricators:[{"name": "Absolutely Marble-Us", "address": "22 Sinclair Drive, Wangaratta VIC 3677", "phone": "(03) 5721 8564", "url": "https://absolutelymarbleus.com.au/"}, {"name": "Benchtop Factory", "address": "35 Industrial Drive, Braeside VIC 3195", "phone": "(03) 9547 1717", "url": "https://www.thebenchtopfactory.com/"}, {"name": "Bluechip Marble & Granite", "address": "39 Malcolm Rd, Braeside VIC 3169", "phone": "(03) 9547 1717", "url": "https://bluechipmarble.com.au/"}, {"name": "Contemporary Stone", "address": "45 Babbage Drive, Dandenong South VIC 3175", "phone": "(03) 3791 3093", "url": "https://www.finechoicestone.com.au/"}, {"name": "Direct Stone", "address": "39 Weerong Road, Drouin VIC 3818", "phone": "(03) 5625 2680", "url": "http://directstone.com.au/"}, {"name": "Eaglestone", "address": "3-4/26 Kyabram St, Coolaroo VIC 3048", "phone": "0432 625 403", "url": "https://eaglestone.com.au/"}, {"name": "Established Stone", "address": "3 Park Drive, Dandenong South VIC 3175", "phone": "(03) 9706 5061", "url": "https://www.establishedstone.com.au/"}, {"name": "G&G Stoneworks", "address": "Factory 4/18-20 Rhur Street, Dandenong South VIC 3175", "phone": "(03) 9794 9062", "url": "https://ggstoneworks.com.au/"}, {"name": "Henderson's Marble & Granite", "address": "1/3 Alick Road, Tottenham VIC 3012", "phone": "(03) 9314 0422", "url": ""}, {"name": "Imperial Stone Industries", "address": "3A 34-36 McIntyre Rd, Sunshine North VIC 3020", "phone": "0423 786 418", "url": ""}, {"name": "Linkstone", "address": "42-44 Jessica Way, Truganina VIC 3029", "phone": "1300 546 578", "url": "https://www.linkstone.com.au/"}, {"name": "Nepean Stone", "address": "1/104 Watt Road, Mornington VIC 3931", "phone": "(03) 5973 4344", "url": "http://nepeanstone.com.au/"}, {"name": "Nexus Stone", "address": "6 Lisa Place, Coolaroo VIC 3048", "phone": "(03) 9939 0203", "url": "https://www.nexusstone.com.au/"}, {"name": "Parthenon Marble", "address": "8 McKay Crescent, Alphington VIC 3078", "phone": "(03) 9499 8833", "url": "https://www.parthenonmarble.com.au/"}, {"name": "Regal Stone", "address": "2 Hall Street, Braeside VIC 3195", "phone": "(03) 9580 8990", "url": "https://www.regalstonemason.com.au/"}, {"name": "Simple Benchtops", "address": "55-57 Williams Road, Dandenong South VIC 3175", "phone": "1300 886 858", "url": "https://simplebenchtops.com.au/"}, {"name": "Stone Direct Solutions", "address": "11 Colbert Road, Campbellfield VIC 3061", "phone": "(03) 9357 9111", "url": "https://stonedirectsolutions.com.au/"}, {"name": "Stonelux", "address": "5/7 Lakewood Boulevard, Carrum Downs VIC 3201", "phone": "(03) 9775 1533", "url": "https://www.stonelux.com.au/"}, {"name": "Tru Stone", "address": "105-109 Moore Street, Moe VIC 3825", "phone": "(03) 5126 2420", "url": "http://www.trustone.com.au/"}, {"name": "V Stone", "address": "104 Beischer Street, Bendigo East VIC 3550", "phone": "(03) 4436 1020", "url": "https://www.vstone.com.au/"}], // list of recommended stonemasons/fabricators
   priceDisplayMode:'symbols', // 'symbols' = $/$$/$$$/$$$$, 'ranges' = actual dollar ranges
   priceT1:0, // threshold between $ and $$ (0 = use dynamic)
   priceT2:0, // threshold between $$ and $$$
@@ -1175,6 +1200,21 @@ function applyCMS(){
     if(pfr)pfr.style.display=g('priceFilterVisible')===false?'none':'flex';
   const msfr=document.getElementById('minSlabsFilter');if(msfr)msfr.style.display=g('minSlabsFilterVisible')===false?'none':'flex';
   const asec=document.getElementById('arriving');if(asec)asec.style.display=g('arrivingSoonVisible')===false?'none':'block';
+  const fsec=document.getElementById('fabricators');
+  if(fsec){
+    fsec.style.display=g('fabricatorsVisible')===false?'none':'block';
+    const grid=document.getElementById('fabricatorsGrid');
+    if(grid){
+      const fabs=(g('fabricators')||[]);
+      grid.innerHTML=fabs.map(f=>`<div class="fab-card">
+        ${f.logo?`<img src="${f.logo}" alt="${f.name} logo" style="height:48px;width:auto;max-width:140px;object-fit:contain;margin-bottom:12px;opacity:.85">`:''}
+        <div class="fab-name">${f.name}</div>
+        <div class="fab-address">${f.address||''}</div>
+        <div class="fab-phone">${f.phone||''}</div>
+        ${f.url?`<a class="fab-link" href="${f.url}" target="_blank" rel="noopener">Visit website</a>`:''}
+      </div>`).join('');
+    }
+  }
     if(_priceThresholdsSet)renderPriceFilterButtons();
   }catch(e){console.error('applyCMS error:',e);}
 }
@@ -2419,6 +2459,7 @@ function openAdminTab(tab){
   else if(tab==='transit')renderAdminTransit();
   else if(tab==='coverage')renderAdminCoverage();
   else if(tab==='clients')renderAdminClients();
+  else if(tab==='fabricators')renderAdminFabricators();
 }
 
 function af(id,label,val,type='text'){
@@ -2488,6 +2529,13 @@ function renderAdminContent(){
           <div class="admin-label">Stock Locations</div>
           <div style="font-size:12px;color:rgba(200,184,154,.55);margin-bottom:8px">Select which Vavastone locations to include. Visitors see no location detail — slabs appear as a unified inventory.</div>
           ${(window._locationMap?Object.values(window._locationMap):['VSG','JRD','SUR','SYD','AMU']).map(loc=>{const name=typeof loc==='object'?loc.name:loc;const en=(g('enabledLocations')||['VSG']).includes(name);return`<label style="display:flex;align-items:center;gap:8px;margin-bottom:5px;cursor:pointer;font-size:13px;color:var(--cream)"><input type="checkbox" id="af-loc-${name}" value="${name}" ${en?'checked':''}>${name}</label>`;}).join('')}
+        </div>
+        <div class="admin-field">
+          <div class="admin-label">Fabricators Section</div>
+          <select class="admin-input" id="af-fabricatorsVisible" style="padding:9px 12px">
+            <option value="true" ${g('fabricatorsVisible')!==false?'selected':''}>Visible to public</option>
+            <option value="false" ${g('fabricatorsVisible')===false?'selected':''}>Hidden</option>
+          </select>
         </div>
         <div class="admin-field">
           <div class="admin-label">Arriving Soon Section</div>
@@ -2573,7 +2621,9 @@ async function saveAdminContent(){
   if(pbEl)cms.priceBracketVisible=pbEl.value==='true';
   const msfEl=document.getElementById('af-minSlabsFilterVisible');
   if(msfEl)cms.minSlabsFilterVisible=msfEl.value==='true';
-  const asEl=document.getElementById('af-arrivingSoonVisible');
+  const fabVisEl=document.getElementById('af-fabricatorsVisible');
+  if(fabVisEl)cms.fabricatorsVisible=fabVisEl.value==='true';
+    const asEl=document.getElementById('af-arrivingSoonVisible');
   if(asEl){cms.arrivingSoonVisible=asEl.value==='true';const asec=document.getElementById('arriving');if(asec)asec.style.display=cms.arrivingSoonVisible?'block':'none';if(cms.arrivingSoonVisible)loadArrivingSoon();}
   const hnpEl=document.getElementById('af-hideNoPhoto');
   if(hnpEl)cms.hideNoPhoto=hnpEl.value==='true';
@@ -2606,6 +2656,20 @@ async function saveAdminContent(){
   if(pfr)pfr.style.display=g('priceFilterVisible')===false?'none':'flex';
   const msfr=document.getElementById('minSlabsFilter');if(msfr)msfr.style.display=g('minSlabsFilterVisible')===false?'none':'flex';
   const asec=document.getElementById('arriving');if(asec)asec.style.display=g('arrivingSoonVisible')===false?'none':'block';
+  const fsec=document.getElementById('fabricators');
+  if(fsec){
+    fsec.style.display=g('fabricatorsVisible')===false?'none':'block';
+    const grid=document.getElementById('fabricatorsGrid');
+    if(grid){
+      const fabs=(g('fabricators')||[]);
+      grid.innerHTML=fabs.map(f=>`<div class="fab-card">
+        <div class="fab-name">${f.name}</div>
+        <div class="fab-address">${f.address||''}</div>
+        <div class="fab-phone">${f.phone||''}</div>
+        ${f.url?`<a class="fab-link" href="${f.url}" target="_blank" rel="noopener">Visit website</a>`:''}
+      </div>`).join('');
+    }
+  }
   if(allStones.length)applyFilter(document.getElementById('stoneSearch')?.value.toLowerCase().trim()||'');
   if(ok)showToast('Content saved');
 }
@@ -2696,6 +2760,87 @@ async function saveAdminCategories(){
   });
   cms.categories=cats;const ok=await saveCMS();applyCMS();if(ok)showToast('Categories saved');
 }
+// ── ADMIN: FABRICATORS ───────────────────────────────────────
+function renderAdminFabricators(){
+  const fabs=g('fabricators')||[];
+  document.getElementById('adminPanel').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:var(--cream)">Recommended Fabricators</h2>
+      <button class="admin-save-btn" onclick="addFabricator()" style="background:rgba(200,184,154,.1);border:1px solid rgba(200,184,154,.3);padding:8px 16px;font-size:12px;letter-spacing:.08em;cursor:pointer;color:var(--cream)">+ Add Fabricator</button>
+    </div>
+    <div style="font-size:12px;color:rgba(200,184,154,.45);margin-bottom:24px">${fabs.length} fabricators listed. Drag to reorder — coming soon. Changes save immediately.</div>
+    <div id="fabAdminList">
+      ${fabs.map((f,i)=>`
+        <div class="admin-field" style="border:1px solid rgba(200,184,154,.1);padding:16px;margin-bottom:8px;position:relative" id="fabItem_${i}">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+            <div>
+              <div class="admin-label" style="margin-bottom:4px">Business Name</div>
+              <input class="admin-input" value="${(f.name||'').replace(/"/g,'&quot;')}" onchange="updateFab(${i},'name',this.value)" style="width:100%">
+            </div>
+            <div>
+              <div class="admin-label" style="margin-bottom:4px">Phone</div>
+              <input class="admin-input" value="${(f.phone||'').replace(/"/g,'&quot;')}" onchange="updateFab(${i},'phone',this.value)" style="width:100%">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+            <div>
+              <div class="admin-label" style="margin-bottom:4px">Address</div>
+              <input class="admin-input" value="${(f.address||'').replace(/"/g,'&quot;')}" onchange="updateFab(${i},'address',this.value)" style="width:100%">
+            </div>
+            <div>
+              <div class="admin-label" style="margin-bottom:4px">Website URL</div>
+              <input class="admin-input" value="${(f.url||'').replace(/"/g,'&quot;')}" onchange="updateFab(${i},'url',this.value)" style="width:100%" placeholder="https://...">
+            </div>
+          </div>
+          <div style="margin-bottom:12px">
+            <div class="admin-label" style="margin-bottom:4px">Logo URL <span style="opacity:.5">(optional — Drive share link or external URL)</span></div>
+            <input class="admin-input" value="${(f.logo||'').replace(/"/g,'&quot;')}" onchange="updateFab(${i},'logo',this.value)" style="width:100%" placeholder="https://drive.google.com/... or https://...">
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px">
+            <button onclick="moveFab(${i},-1)" style="background:none;border:1px solid rgba(200,184,154,.2);color:rgba(200,184,154,.6);padding:4px 10px;cursor:pointer;font-size:11px" ${i===0?'disabled':''}>↑</button>
+            <button onclick="moveFab(${i},1)" style="background:none;border:1px solid rgba(200,184,154,.2);color:rgba(200,184,154,.6);padding:4px 10px;cursor:pointer;font-size:11px" ${i===fabs.length-1?'disabled':''}>↓</button>
+            <button onclick="removeFab(${i})" style="background:none;border:1px solid rgba(200,58,58,.3);color:rgba(220,80,80,.8);padding:4px 10px;cursor:pointer;font-size:11px">Remove</button>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div style="margin-top:20px;display:flex;gap:12px">
+      <button class="admin-save-btn" onclick="saveFabricators()">Save Fabricators</button>
+      <button class="admin-save-btn" onclick="addFabricator()" style="background:rgba(200,184,154,.1)">+ Add Fabricator</button>
+    </div>
+  `;
+}
+function updateFab(i,field,val){
+  if(!cms.fabricators)cms.fabricators=JSON.parse(JSON.stringify(g('fabricators')||[]));
+  cms.fabricators[i][field]=val;
+}
+function addFabricator(){
+  if(!cms.fabricators)cms.fabricators=JSON.parse(JSON.stringify(g('fabricators')||[]));
+  cms.fabricators.push({name:'New Fabricator',address:'',phone:'',url:'',logo:''});
+  renderAdminFabricators();
+  applyCMS();
+}
+function removeFab(i){
+  if(!confirm('Remove this fabricator?'))return;
+  if(!cms.fabricators)cms.fabricators=JSON.parse(JSON.stringify(g('fabricators')||[]));
+  cms.fabricators.splice(i,1);
+  renderAdminFabricators();
+  applyCMS();
+}
+function moveFab(i,dir){
+  if(!cms.fabricators)cms.fabricators=JSON.parse(JSON.stringify(g('fabricators')||[]));
+  const j=i+dir;
+  if(j<0||j>=cms.fabricators.length)return;
+  [cms.fabricators[i],cms.fabricators[j]]=[cms.fabricators[j],cms.fabricators[i]];
+  renderAdminFabricators();
+  applyCMS();
+}
+async function saveFabricators(){
+  const ok=await saveCMS();
+  applyCMS();
+  if(ok)showToast('Fabricators saved');
+  else showToast('Save failed — check connection');
+}
+
 async function resetAdminCategories(){delete cms.categories;const ok=await saveCMS();applyCMS();renderAdminCategories();if(ok)showToast('Categories reset');}
 
 // ── CATEGORY IMAGE PICKER (browses Slab Images Drive folders) ──
