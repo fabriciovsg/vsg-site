@@ -87,7 +87,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root{--cream:#F5F0E8;--warm-white:#FAF8F4;--stone:#C8B89A;--stone-dark:#A09070;--charcoal:#2A2620;--mid:#6B6358;--gold:#B8963C;--gold-light:#D4AF6A;--black:#1A1714;}
+:root{--cream:#F5F0E8;--warm-white:#FAF8F4;--stone:#C8B89A;--stone-dark:#A09070;--charcoal:#2A2620;--mid:#6B6358;--gold:#B8963C;--gold-light:#D4AF6A;--black:#1A1714;
+  --surface-dark:#1A1714;--surface-dark-alt:#13110d;--surface-dark-alt2:#0f0d0b;--surface-nav:rgba(15,13,11,.95);--surface-dark-text:#F5F0E8;--surface-card-dark:#111111;--surface-card-img-dark:#141210;}
+/* Site Theme preview (admin-only) — flips the dark-brand sections to a lighter palette for comparison */
+body[data-theme="light"]{--surface-dark:#FAF8F4;--surface-dark-alt:#F5F0E8;--surface-dark-alt2:#F0EBE3;--surface-nav:rgba(250,248,244,.95);--surface-dark-text:#2A2620;--surface-card-dark:#FFFFFF;--surface-card-img-dark:#F0EBE3;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{font-family:'Jost',sans-serif;background:var(--warm-white);color:var(--charcoal);font-weight:300;overflow-x:hidden;}
@@ -96,17 +99,17 @@ body{font-family:'Jost',sans-serif;background:var(--warm-white);color:var(--char
 .topbar a{color:var(--stone);text-decoration:none;}.topbar a:hover{color:var(--gold-light);}
 .topbar-right{display:flex;gap:20px;align-items:center;}
 /* NAV */
-nav{position:sticky;top:0;z-index:200;background:rgba(15,13,11,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(200,184,154,.12);display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:72px;transition:box-shadow .3s;}
+nav{position:sticky;top:0;z-index:200;background:var(--surface-nav);backdrop-filter:blur(12px);border-bottom:1px solid rgba(200,184,154,.12);display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:72px;transition:box-shadow .3s;}
 nav.scrolled{box-shadow:0 4px 32px rgba(0,0,0,.4);}
 .nav-hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;position:relative;z-index:601;-webkit-tap-highlight-color:transparent;}
-.nav-hamburger span{display:block;width:24px;height:1.5px;background:var(--cream);transition:all .3s;}
+.nav-hamburger span{display:block;width:24px;height:1.5px;background:var(--surface-dark-text);transition:all .3s;}
 .nav-hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
 .nav-hamburger.open span:nth-child(2){opacity:0;}
 .nav-hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
 .nav-logo{text-decoration:none;display:flex;align-items:center;}
-.vsg-logo-svg{display:block;width:auto;color:var(--cream);fill:currentColor;}
+.vsg-logo-svg{display:block;width:auto;color:var(--surface-dark-text);fill:currentColor;}
 .nav-logo-svg{height:30px;}
-.footer-logo-svg{height:34px;color:var(--cream);}
+.footer-logo-svg{height:34px;color:var(--surface-dark-text);}
 .nav-links{display:flex;gap:28px;list-style:none;align-items:center;}
 .nav-links a{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:rgba(200,184,154,.7);text-decoration:none;transition:color .2s;font-weight:400;}
 .nav-links a:hover{color:var(--gold-light);}
@@ -158,8 +161,8 @@ section{padding:72px 48px;}
 .cat-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;color:white;line-height:1.1;}
 .cat-count{font-size:9px;letter-spacing:.1em;color:var(--gold-light);text-transform:uppercase;margin-top:2px;display:block;}
 /* SHOWROOM */
-#showroom{background:var(--black);padding:72px 48px;}
-#showroom .section-title{color:var(--cream);}
+#showroom{background:var(--surface-dark);padding:72px 48px;}
+#showroom .section-title{color:var(--surface-dark-text);}
 #showroom .section-body{color:rgba(200,184,154,.7);}
 #showroom .section-label{color:var(--gold-light);}
 #showroom .section-label::after{background:var(--gold-light);}
@@ -178,10 +181,10 @@ section{padding:72px 48px;}
 .status-dot.error{background:#e05252;animation:none;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .stone-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
-.stone-card{background:#111;cursor:pointer;position:relative;overflow:hidden;transition:transform .35s ease;animation:cardIn .5s ease both;}
+.stone-card{background:var(--surface-card-dark);cursor:pointer;position:relative;overflow:hidden;transition:transform .35s ease;animation:cardIn .5s ease both;}
 @keyframes cardIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
 .stone-card:hover{z-index:2;transform:scale(1.02);}
-.stone-card-img-wrap{position:relative;display:block;overflow:hidden;background:#141210;isolation:isolate;}
+.stone-card-img-wrap{position:relative;display:block;overflow:hidden;background:var(--surface-card-img-dark);isolation:isolate;}
 .stone-card-img-wrap::before{content:'';position:absolute;inset:0;z-index:0;background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.07) 50%,rgba(255,255,255,.04) 75%);background-size:200% 100%;animation:shimmer 1.6s infinite;}
 .stone-card-img-wrap:has(.stone-card-img.loaded)::before,.stone-card-img-wrap:has(.stone-card-img-placeholder)::before{display:none;}
 .stone-card-img{position:relative;z-index:1;width:100%;aspect-ratio:4/3;object-fit:cover;display:block;opacity:0;transition:opacity .5s ease;}
@@ -193,7 +196,7 @@ section{padding:72px 48px;}
 .stone-renders-badge.always-show{opacity:.75;}
 .stone-card-body{padding:16px 18px 18px;}
 .stone-card-category{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:5px;}
-.stone-card-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:400;color:var(--cream);line-height:1.2;margin-bottom:6px;}
+.stone-card-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:400;color:var(--surface-dark-text);line-height:1.2;margin-bottom:6px;}
 .stone-card-name-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
 .stone-card-name-row .stone-card-name{margin-bottom:0;}
 .stone-card-specs{font-size:11px;color:rgba(200,184,154,.55);line-height:1.7;}
@@ -318,7 +321,7 @@ section{padding:72px 48px;}
 .stone-price{font-size:15px;color:var(--gold);font-family:'Jost',sans-serif;letter-spacing:.03em;margin-top:7px;font-weight:600;}
 .stone-price-psqm{font-size:11px;color:rgba(200,184,154,.6);letter-spacing:.06em;font-weight:400;}
 /* NO-PHOTO PLACEHOLDER */
-.stone-card-img-placeholder{width:100%;aspect-ratio:4/3;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:rgba(200,184,154,.25);font-family:'Jost',sans-serif;}
+.stone-card-img-placeholder{width:100%;aspect-ratio:4/3;background:var(--surface-card-dark);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:rgba(200,184,154,.25);font-family:'Jost',sans-serif;}
 .stone-card-img-placeholder svg{width:32px;height:32px;opacity:.3;}
 .stone-card-img-placeholder span{font-size:10px;letter-spacing:.1em;text-transform:uppercase;text-align:center;padding:0 12px;line-height:1.5;}
 /* CLIENT LOGIN LINK */
@@ -353,11 +356,11 @@ section{padding:72px 48px;}
 .projects-strip img:hover{filter:saturate(1.1);}
 /* EVENTS */
 /* FABRICATORS */
-#fabricators{background:#13110d;padding:80px 48px;}
+#fabricators{background:var(--surface-dark-alt);padding:80px 48px;}
 #fabricators .fab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1px;background:rgba(200,184,154,.08);margin-top:40px;}
 #fabricators .fab-card{background:#13110d;padding:24px 28px;transition:background .2s;}
 #fabricators .fab-card:hover{background:#161310;}
-#fabricators .fab-name{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:400;color:var(--cream);margin-bottom:8px;}
+#fabricators .fab-name{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:400;color:var(--surface-dark-text);margin-bottom:8px;}
 #fabricators .fab-address{font-size:12px;color:rgba(200,184,154,.5);line-height:1.6;margin-bottom:6px;}
 #fabricators .fab-phone{font-size:12px;color:rgba(200,184,154,.6);margin-bottom:10px;}
 #fabricators .fab-link{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(200,148,58,.3);padding-bottom:1px;transition:border-color .2s;}
@@ -366,24 +369,24 @@ section{padding:72px 48px;}
 @media(max-width:768px){#fabricators{padding:64px 20px;}#fabricators .fab-grid{grid-template-columns:1fr 1fr;}}
 @media(max-width:480px){#fabricators .fab-grid{grid-template-columns:1fr;}}
 /* ARRIVING SOON */
-#arriving{background:#0f0d0b;padding:80px 48px;}
+#arriving{background:var(--surface-dark-alt2);padding:80px 48px;}
 #arriving .section-label{color:var(--gold-light);}
 #arriving .arriving-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px;margin-top:40px;}
 #arriving .arriving-card{background:#141210;overflow:hidden;position:relative;}
 #arriving .arriving-card-img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;filter:brightness(.85);}
 #arriving .arriving-badge{position:absolute;top:12px;left:12px;background:rgba(200,148,58,.9);color:#13110d;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;}
 #arriving .arriving-card-body{padding:16px 18px 18px;}
-#arriving .arriving-stone-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:400;color:var(--cream);margin-bottom:4px;}
+#arriving .arriving-stone-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:400;color:var(--surface-dark-text);margin-bottom:4px;}
 #arriving .arriving-meta{font-size:11px;color:rgba(200,184,154,.55);letter-spacing:.05em;margin-bottom:14px;}
 #arriving .arriving-btn{display:inline-block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(200,148,58,.4);padding:7px 16px;cursor:pointer;background:none;font-family:'Jost',sans-serif;transition:background .2s,color .2s;}
 #arriving .arriving-btn:hover{background:var(--gold);color:#13110d;}
 #arriving .arriving-empty{color:rgba(200,184,154,.4);font-size:14px;padding:40px 0;text-align:center;}
 @media(max-width:768px){#arriving{padding:64px 20px;}#arriving .arriving-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}}
-#events{background:var(--charcoal);padding:80px 48px;text-align:center;}
+#events{background:var(--surface-dark);padding:80px 48px;text-align:center;}
 #events .section-label{color:var(--gold-light);justify-content:center;}
 #events .section-label::after{display:none;}
 #events .section-label::before{content:'';display:block;flex:1;max-width:48px;height:1px;background:var(--gold-light);}
-#events .section-title{color:var(--cream);margin-left:auto;margin-right:auto;}
+#events .section-title{color:var(--surface-dark-text);margin-left:auto;margin-right:auto;}
 #events .section-body{color:rgba(245,240,232,.6);margin:0 auto 40px;max-width:600px;}
 .events-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;}
 .events-divider{width:1px;height:52px;background:rgba(200,184,154,.15);margin:32px auto;}
@@ -401,7 +404,7 @@ section{padding:72px 48px;}
 .form-input:focus{border-color:var(--gold);}
 textarea.form-input{resize:vertical;min-height:100px;}
 /* FOOTER */
-footer{background:var(--black);padding:64px 48px 32px;}
+footer{background:var(--surface-dark);padding:64px 48px 32px;}
 .footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:48px;border-bottom:1px solid rgba(200,184,154,.12);margin-bottom:32px;}
 .footer-tagline{font-size:13px;color:rgba(200,184,154,.5);line-height:1.7;max-width:280px;margin-top:16px;}
 .footer-col-title{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-light);margin-bottom:20px;}
@@ -734,7 +737,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
 <!-- ONLINE SHOWROOM -->
 <section id="showroom">
   <div class="section-label">Live Stock</div>
-  <h2 class="section-title" style="color:var(--cream)">Current <em style="color:var(--stone)">Collection</em></h2>
+  <h2 class="section-title" style="color:var(--surface-dark-text)">Current <em style="color:var(--stone)">Collection</em></h2>
   <p class="section-body">Browse our current collection — updated directly from our gallery inventory. Each piece is available to view in person at our Dandenong South gallery.</p>
   <div id="clientSessionRow" class="client-login-row" style="display:none">
     <button class="client-login-link" onclick="openClientLogin()">Client Login</button>
@@ -795,7 +798,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
     <div style="background:#111;aspect-ratio:4/3" class="skeleton"></div>
   </div>
   <div class="load-more-wrap" id="loadMoreWrap" style="display:none">
-    <button class="btn-ghost" style="background:transparent;color:var(--cream);border-color:rgba(200,184,154,.35)" id="loadMoreBtn" onclick="loadMore()">Show More Stones</button>
+    <button class="btn-ghost" style="background:transparent;color:var(--surface-dark-text);border-color:rgba(200,184,154,.35)" id="loadMoreBtn" onclick="loadMore()">Show More Stones</button>
   </div>
   <p class="showroom-note">Photography is representative. Natural stone varies in veining, tone and character — we strongly recommend a gallery visit before final selection. Shortlist your favourites and contact us to discuss. Pricing on application.</p>
   <div style="text-align:right;margin-top:8px">
@@ -860,7 +863,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
   <p class="section-body" id="cms-events-body">We regularly host architects, interior designers, stonemasons and developers for guided gallery evenings — an opportunity to understand stone beyond the surface. Origin, geology, formation, fabrication considerations and material behaviour: conversations that inform better design decisions. Accompanied, of course, by good food and wine.</p>
   <div class="events-actions">
     <button class="btn-primary" onclick="openBooking('visit')">Book a Gallery Visit</button>
-    <a href="#contact" class="btn-ghost" style="border-color:rgba(200,184,154,.4);color:rgba(245,240,232,.75)">Enquire About Events</a>
+    <a href="#contact" class="btn-ghost" style="border-color:rgba(200,184,154,.4);color:var(--surface-dark-text)">Enquire About Events</a>
   </div>
   <div class="events-divider"></div>
   <p style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(200,184,154,.35)">Private viewings available by appointment — Monday to Saturday</p>
@@ -1097,6 +1100,7 @@ const CMS_DEFAULTS={
   minSlabsFilterVisible:true, // show min slabs quantity filter
   arrivingSoonVisible:false, // show Arriving Soon section (enable when folder has content)
   fabricatorsVisible:true, // show Recommended Fabricators section
+  siteTheme:'dark', // 'dark' (current brand look) or 'light' (admin preview only — no visitor-facing switch)
   fabricators:[{"name": "Absolutely Marble-Us", "address": "22 Sinclair Drive, Wangaratta VIC 3677", "phone": "(03) 5721 8564", "url": "https://absolutelymarbleus.com.au/"}, {"name": "Benchtop Factory", "address": "35 Industrial Drive, Braeside VIC 3195", "phone": "(03) 9547 1717", "url": "https://www.thebenchtopfactory.com/"}, {"name": "Bluechip Marble & Granite", "address": "39 Malcolm Rd, Braeside VIC 3169", "phone": "(03) 9547 1717", "url": "https://bluechipmarble.com.au/"}, {"name": "Contemporary Stone", "address": "45 Babbage Drive, Dandenong South VIC 3175", "phone": "(03) 3791 3093", "url": "https://www.finechoicestone.com.au/"}, {"name": "Direct Stone", "address": "39 Weerong Road, Drouin VIC 3818", "phone": "(03) 5625 2680", "url": "http://directstone.com.au/"}, {"name": "Eaglestone", "address": "3-4/26 Kyabram St, Coolaroo VIC 3048", "phone": "0432 625 403", "url": "https://eaglestone.com.au/"}, {"name": "Established Stone", "address": "3 Park Drive, Dandenong South VIC 3175", "phone": "(03) 9706 5061", "url": "https://www.establishedstone.com.au/"}, {"name": "G&G Stoneworks", "address": "Factory 4/18-20 Rhur Street, Dandenong South VIC 3175", "phone": "(03) 9794 9062", "url": "https://ggstoneworks.com.au/"}, {"name": "Henderson's Marble & Granite", "address": "1/3 Alick Road, Tottenham VIC 3012", "phone": "(03) 9314 0422", "url": ""}, {"name": "Imperial Stone Industries", "address": "3A 34-36 McIntyre Rd, Sunshine North VIC 3020", "phone": "0423 786 418", "url": ""}, {"name": "Linkstone", "address": "42-44 Jessica Way, Truganina VIC 3029", "phone": "1300 546 578", "url": "https://www.linkstone.com.au/"}, {"name": "Nepean Stone", "address": "1/104 Watt Road, Mornington VIC 3931", "phone": "(03) 5973 4344", "url": "http://nepeanstone.com.au/"}, {"name": "Nexus Stone", "address": "6 Lisa Place, Coolaroo VIC 3048", "phone": "(03) 9939 0203", "url": "https://www.nexusstone.com.au/"}, {"name": "Parthenon Marble", "address": "8 McKay Crescent, Alphington VIC 3078", "phone": "(03) 9499 8833", "url": "https://www.parthenonmarble.com.au/"}, {"name": "Regal Stone", "address": "2 Hall Street, Braeside VIC 3195", "phone": "(03) 9580 8990", "url": "https://www.regalstonemason.com.au/"}, {"name": "Simple Benchtops", "address": "55-57 Williams Road, Dandenong South VIC 3175", "phone": "1300 886 858", "url": "https://simplebenchtops.com.au/"}, {"name": "Stone Direct Solutions", "address": "11 Colbert Road, Campbellfield VIC 3061", "phone": "(03) 9357 9111", "url": "https://stonedirectsolutions.com.au/"}, {"name": "Stonelux", "address": "5/7 Lakewood Boulevard, Carrum Downs VIC 3201", "phone": "(03) 9775 1533", "url": "https://www.stonelux.com.au/"}, {"name": "Tru Stone", "address": "105-109 Moore Street, Moe VIC 3825", "phone": "(03) 5126 2420", "url": "http://www.trustone.com.au/"}, {"name": "V Stone", "address": "104 Beischer Street, Bendigo East VIC 3550", "phone": "(03) 4436 1020", "url": "https://www.vstone.com.au/"}], // list of recommended stonemasons/fabricators
   priceDisplayMode:'symbols', // 'symbols' = $/$$/$$$/$$$$, 'ranges' = actual dollar ranges
   priceT1:0, // threshold between $ and $$ (0 = use dynamic)
@@ -1162,6 +1166,7 @@ function g(k){return cms[k]!==undefined?cms[k]:CMS_DEFAULTS[k];}
 function se(id,prop,val){const el=document.getElementById(id);if(el)el[prop]=val;}
 function applyCMS(){
   try{
+    document.body.setAttribute('data-theme',g('siteTheme')||'dark');
     se('cms-topbar-text','textContent',g('topbarText'));
     const phoneEl=document.getElementById('cms-phone-link');
     if(phoneEl){phoneEl.textContent=g('phone');phoneEl.href='tel:'+g('phone').replace(/\s/g,'');}
@@ -2531,6 +2536,14 @@ function renderAdminContent(){
           ${(window._locationMap?Object.values(window._locationMap):['VSG','JRD','SUR','SYD','AMU']).map(loc=>{const name=typeof loc==='object'?loc.name:loc;const en=(g('enabledLocations')||['VSG']).includes(name);return`<label style="display:flex;align-items:center;gap:8px;margin-bottom:5px;cursor:pointer;font-size:13px;color:var(--cream)"><input type="checkbox" id="af-loc-${name}" value="${name}" ${en?'checked':''}>${name}</label>`;}).join('')}
         </div>
         <div class="admin-field">
+          <div class="admin-label">Site Theme (preview)</div>
+          <div style="font-size:12px;color:rgba(200,184,154,.55);margin-bottom:8px">Flips the dark brand sections (nav, showroom, fabricators, arriving, events, footer) to a lighter palette so you can compare. Applies site-wide for all visitors until switched back — not a per-visitor toggle.</div>
+          <select class="admin-input" id="af-siteTheme" style="padding:9px 12px">
+            <option value="dark" ${(g('siteTheme')||'dark')==='dark'?'selected':''}>Dark (current)</option>
+            <option value="light" ${g('siteTheme')==='light'?'selected':''}>Light (preview)</option>
+          </select>
+        </div>
+        <div class="admin-field">
           <div class="admin-label">Fabricators Section</div>
           <select class="admin-input" id="af-fabricatorsVisible" style="padding:9px 12px">
             <option value="true" ${g('fabricatorsVisible')!==false?'selected':''}>Visible to public</option>
@@ -2623,6 +2636,8 @@ async function saveAdminContent(){
   if(msfEl)cms.minSlabsFilterVisible=msfEl.value==='true';
   const fabVisEl=document.getElementById('af-fabricatorsVisible');
   if(fabVisEl)cms.fabricatorsVisible=fabVisEl.value==='true';
+  const themeEl=document.getElementById('af-siteTheme');
+  if(themeEl)cms.siteTheme=themeEl.value;
     const asEl=document.getElementById('af-arrivingSoonVisible');
   if(asEl){cms.arrivingSoonVisible=asEl.value==='true';const asec=document.getElementById('arriving');if(asec)asec.style.display=cms.arrivingSoonVisible?'block':'none';if(cms.arrivingSoonVisible)loadArrivingSoon();}
   const hnpEl=document.getElementById('af-hideNoPhoto');
