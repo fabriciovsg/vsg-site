@@ -213,6 +213,10 @@ section{padding:72px 48px;}
 .colour-pill:hover{transform:scale(1.15);}
 .colour-pill.active{border-color:var(--gold);}
 .colour-pill-label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(200,184,154,.45);}
+/* Colour filter — name-label variant (admin toggle) */
+.colour-filter-row.style-names .colour-pill{width:auto;height:auto;border-radius:3px;padding:7px 13px;background:transparent!important;border:1px solid rgba(200,184,154,.25);color:rgba(200,184,154,.7);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-family:'Jost',sans-serif;white-space:nowrap;}
+.colour-filter-row.style-names .colour-pill:hover{border-color:rgba(200,184,154,.5);}
+.colour-filter-row.style-names .colour-pill.active{background:var(--gold)!important;border-color:var(--gold);color:white;}
 /* MIN SLABS FILTER */
 .min-slabs-wrap{display:flex;align-items:center;gap:7px;margin-left:auto;}
 .min-slabs-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:rgba(200,184,154,.5);white-space:nowrap;}
@@ -1101,6 +1105,7 @@ const CMS_DEFAULTS={
   arrivingSoonVisible:false, // show Arriving Soon section (enable when folder has content)
   fabricatorsVisible:true, // show Recommended Fabricators section
   siteTheme:'dark', // 'dark' (current brand look) or 'light' (admin preview only — no visitor-facing switch)
+  colourFilterStyle:'pills', // 'pills' = coloured swatches, 'names' = text labels
   fabricators:[{"name": "Absolutely Marble-Us", "address": "22 Sinclair Drive, Wangaratta VIC 3677", "phone": "(03) 5721 8564", "url": "https://absolutelymarbleus.com.au/"}, {"name": "Benchtop Factory", "address": "35 Industrial Drive, Braeside VIC 3195", "phone": "(03) 9547 1717", "url": "https://www.thebenchtopfactory.com/"}, {"name": "Bluechip Marble & Granite", "address": "39 Malcolm Rd, Braeside VIC 3169", "phone": "(03) 9547 1717", "url": "https://bluechipmarble.com.au/"}, {"name": "Contemporary Stone", "address": "45 Babbage Drive, Dandenong South VIC 3175", "phone": "(03) 3791 3093", "url": "https://www.finechoicestone.com.au/"}, {"name": "Direct Stone", "address": "39 Weerong Road, Drouin VIC 3818", "phone": "(03) 5625 2680", "url": "http://directstone.com.au/"}, {"name": "Eaglestone", "address": "3-4/26 Kyabram St, Coolaroo VIC 3048", "phone": "0432 625 403", "url": "https://eaglestone.com.au/"}, {"name": "Established Stone", "address": "3 Park Drive, Dandenong South VIC 3175", "phone": "(03) 9706 5061", "url": "https://www.establishedstone.com.au/"}, {"name": "G&G Stoneworks", "address": "Factory 4/18-20 Rhur Street, Dandenong South VIC 3175", "phone": "(03) 9794 9062", "url": "https://ggstoneworks.com.au/"}, {"name": "Henderson's Marble & Granite", "address": "1/3 Alick Road, Tottenham VIC 3012", "phone": "(03) 9314 0422", "url": ""}, {"name": "Imperial Stone Industries", "address": "3A 34-36 McIntyre Rd, Sunshine North VIC 3020", "phone": "0423 786 418", "url": ""}, {"name": "Linkstone", "address": "42-44 Jessica Way, Truganina VIC 3029", "phone": "1300 546 578", "url": "https://www.linkstone.com.au/"}, {"name": "Nepean Stone", "address": "1/104 Watt Road, Mornington VIC 3931", "phone": "(03) 5973 4344", "url": "http://nepeanstone.com.au/"}, {"name": "Nexus Stone", "address": "6 Lisa Place, Coolaroo VIC 3048", "phone": "(03) 9939 0203", "url": "https://www.nexusstone.com.au/"}, {"name": "Parthenon Marble", "address": "8 McKay Crescent, Alphington VIC 3078", "phone": "(03) 9499 8833", "url": "https://www.parthenonmarble.com.au/"}, {"name": "Regal Stone", "address": "2 Hall Street, Braeside VIC 3195", "phone": "(03) 9580 8990", "url": "https://www.regalstonemason.com.au/"}, {"name": "Simple Benchtops", "address": "55-57 Williams Road, Dandenong South VIC 3175", "phone": "1300 886 858", "url": "https://simplebenchtops.com.au/"}, {"name": "Stone Direct Solutions", "address": "11 Colbert Road, Campbellfield VIC 3061", "phone": "(03) 9357 9111", "url": "https://stonedirectsolutions.com.au/"}, {"name": "Stonelux", "address": "5/7 Lakewood Boulevard, Carrum Downs VIC 3201", "phone": "(03) 9775 1533", "url": "https://www.stonelux.com.au/"}, {"name": "Tru Stone", "address": "105-109 Moore Street, Moe VIC 3825", "phone": "(03) 5126 2420", "url": "http://www.trustone.com.au/"}, {"name": "V Stone", "address": "104 Beischer Street, Bendigo East VIC 3550", "phone": "(03) 4436 1020", "url": "https://www.vstone.com.au/"}], // list of recommended stonemasons/fabricators
   priceDisplayMode:'symbols', // 'symbols' = $/$$/$$$/$$$$, 'ranges' = actual dollar ranges
   priceT1:0, // threshold between $ and $$ (0 = use dynamic)
@@ -1200,6 +1205,7 @@ function applyCMS(){
     se('cms-footer-tagline','textContent',g('footerTagline'));
     renderCategories();
     renderWhyGrid();
+    applyColourFilterStyle();
     // Apply showroom settings
     const pfr=document.getElementById('priceFilterRow');
     if(pfr)pfr.style.display=g('priceFilterVisible')===false?'none':'flex';
@@ -1222,6 +1228,16 @@ function applyCMS(){
   }
     if(_priceThresholdsSet)renderPriceFilterButtons();
   }catch(e){console.error('applyCMS error:',e);}
+}
+
+function applyColourFilterStyle(){
+  const row=document.getElementById('colourFilterRow');
+  if(!row)return;
+  const useNames=g('colourFilterStyle')==='names';
+  row.classList.toggle('style-names',useNames);
+  row.querySelectorAll('.colour-pill').forEach(p=>{
+    p.textContent=useNames?p.dataset.colour:'';
+  });
 }
 
 function renderCategories(){
@@ -2544,6 +2560,13 @@ function renderAdminContent(){
           </select>
         </div>
         <div class="admin-field">
+          <div class="admin-label">Colour Filter Style</div>
+          <select class="admin-input" id="af-colourFilterStyle" style="padding:9px 12px">
+            <option value="pills" ${(g('colourFilterStyle')||'pills')==='pills'?'selected':''}>Coloured pills</option>
+            <option value="names" ${g('colourFilterStyle')==='names'?'selected':''}>Colour names (text)</option>
+          </select>
+        </div>
+        <div class="admin-field">
           <div class="admin-label">Fabricators Section</div>
           <select class="admin-input" id="af-fabricatorsVisible" style="padding:9px 12px">
             <option value="true" ${g('fabricatorsVisible')!==false?'selected':''}>Visible to public</option>
@@ -2638,6 +2661,8 @@ async function saveAdminContent(){
   if(fabVisEl)cms.fabricatorsVisible=fabVisEl.value==='true';
   const themeEl=document.getElementById('af-siteTheme');
   if(themeEl)cms.siteTheme=themeEl.value;
+  const cfsEl=document.getElementById('af-colourFilterStyle');
+  if(cfsEl){cms.colourFilterStyle=cfsEl.value;applyColourFilterStyle();}
     const asEl=document.getElementById('af-arrivingSoonVisible');
   if(asEl){cms.arrivingSoonVisible=asEl.value==='true';const asec=document.getElementById('arriving');if(asec)asec.style.display=cms.arrivingSoonVisible?'block':'none';if(cms.arrivingSoonVisible)loadArrivingSoon();}
   const hnpEl=document.getElementById('af-hideNoPhoto');
