@@ -952,6 +952,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
       <div class="modal-category" id="modalCategory"></div>
       <h2 class="modal-name" id="modalName"></h2>
       <div class="modal-block" id="modalBlock"></div>
+      <div id="modalColourOverride" style="display:none;margin-bottom:16px"></div>
       <div class="modal-specs" id="modalSpecs"></div>
       <div class="modal-divider"></div>
       <div class="modal-actions">
@@ -1874,6 +1875,44 @@ function getStoneColour(stone){
 }
 function cacheAllColours(){} // no-op — colours come from Drive cache now
 
+// ── ADMIN: MANUAL COLOUR OVERRIDE ────────────────────────────
+function renderColourOverride(stone){
+  const wrap=document.getElementById('modalColourOverride');
+  if(!wrap)return;
+  if(!adminUnlocked||!stone.block){wrap.style.display='none';wrap.innerHTML='';return;}
+  const current=getStoneColour(stone)||'';
+  wrap.style.display='block';
+  wrap.innerHTML=`
+    <div style="font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Admin — Colour Tag</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <select id="colourOverrideSelect" class="admin-input" style="padding:8px 10px;width:auto;flex:1">
+        <option value="">— Not set —</option>
+        ${VALID_COLOUR_FAMILIES_JS.map(c=>`<option value="${c}" ${current===c?'selected':''}>${c}</option>`).join('')}
+      </select>
+      <button class="admin-save-btn" style="padding:8px 14px;font-size:11px" onclick="saveColourOverride('${stone.block}')">Save</button>
+    </div>
+    <div id="colourOverrideStatus" style="font-size:11px;color:rgba(200,184,154,.5);margin-top:6px"></div>`;
+}
+const VALID_COLOUR_FAMILIES_JS=['White','Grey','Beige','Black','Green','Gold','Brown','Pink','Blue'];
+
+async function saveColourOverride(block){
+  const sel=document.getElementById('colourOverrideSelect');
+  const status=document.getElementById('colourOverrideStatus');
+  if(!sel)return;
+  const colour=sel.value;
+  status.textContent='Saving…';
+  try{
+    const file=await driveFindFile(STOCK_FOLDER_ID,'colour-cache.json');
+    let fileId=file?file.id:null;
+    if(colour){stoneColourCache[block]=colour;}else{delete stoneColourCache[block];}
+    const ok=await driveWriteFile(STOCK_FOLDER_ID,'colour-cache.json',fileId,stoneColourCache);
+    status.textContent=ok?'Saved — this stone will now use this colour tag.':'Save failed — check connection and try again.';
+    if(ok&&allStones.length)applyFilter(document.getElementById('stoneSearch')?.value.toLowerCase().trim()||'');
+  }catch(e){
+    status.textContent='Save failed: '+e.message;
+  }
+}
+
 // ── PRICE BRACKETS (anonymous visitors) ──────────────────────
 const PRICE_TIERS={price1:'Retail',price2:'Trade',price3:'Bundle',price4:'Wholesale'};
 // 5-tier price system
@@ -2214,6 +2253,7 @@ async function openModal(stone){
   document.getElementById('modalCategory').textContent=stone.category||'';
   document.getElementById('modalName').textContent=stone.name;
   document.getElementById('modalBlock').textContent=stone.block?`Block #${stone.block}`:'';
+  renderColourOverride(stone);
   const _slabMode=(typeof g==="function"?g("slabDisplay"):"")||"lowstock";
   const _q=parseInt(stone.qty||"0",10);
   let qtyField="";
