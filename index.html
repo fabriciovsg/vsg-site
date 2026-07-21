@@ -709,7 +709,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
   <a href="#" class="nav-logo" aria-label="Victoria Stone Gallery"><svg class="vsg-logo-svg nav-logo-svg" viewBox="0 0 2880 528" role="img" aria-label="Victoria Stone Gallery"><use href="#vsgLogo"/></svg></a>
   <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileNav()" aria-label="Menu"><span></span><span></span><span></span></button>
   <ul class="nav-links" id="navLinks">
-    <li><a href="#catalogue">Catalogue</a></li>
+    <li><a href="/catalogue/">Catalogue</a></li>
     <li><a href="#gallery">Live Gallery</a></li>
     <li><a href="#about">About</a></li>
     <li><a href="#why">Why VSG</a></li>
@@ -733,13 +733,6 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
   </div>
 </section>
 <!-- LIVE GALLERY -->
-<!-- CATALOGUE CATEGORIES -->
-<section id="catalogue">
-  <div class="section-label">Product Catalogue</div>
-  <h2 class="section-title">The rare, the refined,<br>the <em>extraordinary</em></h2>
-  <p class="section-body">From timeless marbles to striking quartzites and exotic granites — each collection represents a distinct expression of what natural stone can be at its finest.</p>
-  <div class="cat-grid" id="catGrid" style="opacity:0;transition:opacity .4s"></div>
-</section>
 <!-- LIVE GALLERY -->
 <section id="gallery">
   <div class="section-label">Live Stock</div>
@@ -929,7 +922,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
       <svg class="vsg-logo-svg footer-logo-svg" viewBox="0 0 2880 528" role="img" aria-label="Victoria Stone Gallery"><use href="#vsgLogo"/></svg>
       <p class="footer-tagline" id="cms-footer-tagline">Melbourne's premier wholesaler of natural stone slabs. Hand-selected from quarries around the world, delivered to your project.</p>
     </div>
-    <div><div class="footer-col-title">Explore</div><ul class="footer-links"><li><a href="#about">About Us</a></li><li><a href="#catalogue">Product Catalogue</a></li><li><a href="#gallery">Live Gallery</a></li><li><a href="/stones/">Stone Knowledge</a></li><li><a href="#why">Why VSG</a></li><li><a href="#events">Events</a></li></ul></div>
+    <div><div class="footer-col-title">Explore</div><ul class="footer-links"><li><a href="#about">About Us</a></li><li><a href="/catalogue/">Product Catalogue</a></li><li><a href="#gallery">Live Gallery</a></li><li><a href="/stones/">Stone Knowledge</a></li><li><a href="#why">Why VSG</a></li><li><a href="#events">Events</a></li></ul></div>
     <div><div class="footer-col-title">Stone Types</div><ul class="footer-links"><li><a href="#gallery" onclick="filterCategory('Marble')">Marble</a></li><li><a href="#gallery" onclick="filterCategory('Quartzite')">Quartzite</a></li><li><a href="#gallery" onclick="filterCategory('Granite')">Granite</a></li><li><a href="#gallery" onclick="filterCategory('Dolomite')">Dolomite</a></li><li><a href="#gallery" onclick="filterCategory('Limestone')">Limestone</a></li><li><a href="#gallery" onclick="filterCategory('Travertine')">Travertine</a></li></ul></div>
     <div><div class="footer-col-title">Connect</div><ul class="footer-links"><li><a href="https://www.facebook.com/victoriastonegallery" target="_blank">Facebook</a></li><li><a href="https://www.instagram.com/victoriastonegallery/" target="_blank">Instagram</a></li><li><a href="https://www.pinterest.com.au/victoriastonegallery/pins/" target="_blank">Pinterest</a></li><li><a href="https://www.houzz.com.au/professionals/tile-stone-and-benchtops/victoria-stone-gallery-pfvwau-pf~472554601" target="_blank">Houzz</a></li><li><a href="#contact">Contact Us</a></li></ul></div>
   </div>
@@ -1207,7 +1200,6 @@ function applyCMS(){
     if(ei){ei.textContent=g('email');ei.href='mailto:'+g('email');}
     se('cms-contact-body','textContent',g('contactBody'));
     se('cms-footer-tagline','textContent',g('footerTagline'));
-    renderCategories();
     renderWhyGrid();
     applyColourFilterStyle();
     // Apply showroom settings
