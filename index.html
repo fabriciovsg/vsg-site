@@ -155,17 +155,17 @@ section{padding:72px 48px;}
 #catalogue{background:var(--warm-white);padding-top:64px;}
 .cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px;}
 .cat-card{position:relative;overflow:hidden;aspect-ratio:4/3;cursor:pointer;background:#222;text-decoration:none;border:1px solid rgba(200,184,154,.12);}
-.cat-card img{width:100%;height:100%;object-fit:cover;object-position:center center;transform:scale(1.6);transform-origin:center;transition:transform .8s ease,opacity .3s;}
-.cat-card:hover img{transform:scale(1.68);opacity:.85;}
+.cat-card img{width:100%;height:100%;object-fit:cover;object-position:center center;transform:scale(1.15);transform-origin:center;transition:transform .8s ease,opacity .3s;}
+.cat-card:hover img{transform:scale(1.22);opacity:.85;}
 .cat-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(15,13,11,.88) 0%,rgba(15,13,11,.15) 45%,transparent 70%);display:flex;align-items:flex-end;padding:14px 16px;}
 .cat-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;color:white;line-height:1.1;}
 .cat-count{font-size:9px;letter-spacing:.1em;color:var(--gold-light);text-transform:uppercase;margin-top:2px;display:block;}
-/* SHOWROOM */
-#showroom{background:var(--surface-dark);padding:72px 48px;}
-#showroom .section-title{color:var(--surface-dark-text);}
-#showroom .section-body{color:var(--surface-dark-text-secondary);}
-#showroom .section-label{color:var(--gold-light);}
-#showroom .section-label::after{background:var(--gold-light);}
+/* LIVE GALLERY */
+#gallery{background:var(--surface-dark);padding:72px 48px;}
+#gallery .section-title{color:var(--surface-dark-text);}
+#gallery .section-body{color:var(--surface-dark-text-secondary);}
+#gallery .section-label{color:var(--gold-light);}
+#gallery .section-label::after{background:var(--gold-light);}
 .showroom-controls{display:flex;gap:10px;margin:40px 0 32px;flex-wrap:wrap;align-items:center;}
 .search-box{flex:1;min-width:220px;max-width:320px;position:relative;}
 .search-box input{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(200,184,154,.25);color:var(--surface-dark-text);padding:11px 16px 11px 40px;font-size:12px;font-family:'Jost',sans-serif;letter-spacing:.05em;outline:none;transition:border-color .2s;}
@@ -484,7 +484,7 @@ textarea.admin-input{resize:vertical;min-height:80px;line-height:1.6;}
   #about{grid-template-columns:1fr;gap:40px;padding:64px 20px;}
   .about-images{height:360px;}
   .cat-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
-  #showroom{padding:64px 20px;}
+  #gallery{padding:64px 20px;}
   .stone-grid{grid-template-columns:repeat(2,1fr);}
   .why-grid{grid-template-columns:1fr;gap:32px;}
   .contact-grid{grid-template-columns:1fr;gap:40px;}
@@ -710,7 +710,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
   <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileNav()" aria-label="Menu"><span></span><span></span><span></span></button>
   <ul class="nav-links" id="navLinks">
     <li><a href="#catalogue">Catalogue</a></li>
-    <li><a href="#showroom">Showroom</a></li>
+    <li><a href="#gallery">Live Gallery</a></li>
     <li><a href="#about">About</a></li>
     <li><a href="#why">Why VSG</a></li>
     <li><a href="/stones/">Stone Knowledge</a></li><li><a href="#fabricators">Fabricators</a></li>
@@ -727,12 +727,12 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
     <h1 id="cms-hero-h1">The Gallery of<br><em>Extraordinary</em><br>Surfaces</h1>
     <p class="hero-sub" id="cms-hero-sub">Carrara marble, exotic quartzites, rare granites and dolomites — hand-selected from quarries around the world. Discover your perfect stone.</p>
     <div class="hero-actions">
-      <a href="#showroom" class="btn-primary">Browse Current Stock</a>
+      <a href="#gallery" class="btn-primary">Browse Current Stock</a>
       <a href="#about" class="btn-ghost">Our Story</a>
     </div>
   </div>
 </section>
-<!-- ONLINE SHOWROOM -->
+<!-- LIVE GALLERY -->
 <!-- CATALOGUE CATEGORIES -->
 <section id="catalogue">
   <div class="section-label">Product Catalogue</div>
@@ -740,8 +740,8 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
   <p class="section-body">From timeless marbles to striking quartzites and exotic granites — each collection represents a distinct expression of what natural stone can be at its finest.</p>
   <div class="cat-grid" id="catGrid" style="opacity:0;transition:opacity .4s"></div>
 </section>
-<!-- ONLINE SHOWROOM -->
-<section id="showroom">
+<!-- LIVE GALLERY -->
+<section id="gallery">
   <div class="section-label">Live Stock</div>
   <h2 class="section-title" style="color:var(--surface-dark-text)">Current <em style="color:var(--stone)">Collection</em></h2>
   <p class="section-body">Browse our current collection — updated directly from our gallery inventory. Each piece is available to view in person at our Dandenong South gallery.</p>
@@ -901,7 +901,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
   <h2 class="section-title">Visit the<br><em>Gallery</em></h2>
   <div class="contact-grid">
     <div>
-      <div class="contact-info-block"><div class="contact-info-label">Warehouse &amp; Showroom</div><div class="contact-info-val" id="cms-address">37&#8211;39 Gaine Road<br>Dandenong South VIC 3175</div></div>
+      <div class="contact-info-block"><div class="contact-info-label">Warehouse &amp; Gallery</div><div class="contact-info-val" id="cms-address">37&#8211;39 Gaine Road<br>Dandenong South VIC 3175</div></div>
       <div class="contact-info-block"><div class="contact-info-label">Opening Hours</div><div class="contact-info-val" id="cms-hours">Monday &#8211; Friday: 8am to 4pm<br>Saturday: 9am to 1pm</div></div>
       <div class="contact-info-block"><div class="contact-info-label">Phone</div><div class="contact-info-val"><a href="tel:0397027539" id="cms-phone">03 9702 7539</a></div></div>
       <div class="contact-info-block"><div class="contact-info-label">Email</div><div class="contact-info-val"><a href="mailto:sales@victoriastonegallery.com.au" id="cms-email">sales@victoriastonegallery.com.au</a></div></div>
@@ -929,8 +929,8 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
       <svg class="vsg-logo-svg footer-logo-svg" viewBox="0 0 2880 528" role="img" aria-label="Victoria Stone Gallery"><use href="#vsgLogo"/></svg>
       <p class="footer-tagline" id="cms-footer-tagline">Melbourne's premier wholesaler of natural stone slabs. Hand-selected from quarries around the world, delivered to your project.</p>
     </div>
-    <div><div class="footer-col-title">Explore</div><ul class="footer-links"><li><a href="#about">About Us</a></li><li><a href="#catalogue">Product Catalogue</a></li><li><a href="#showroom">Online Showroom</a></li><li><a href="/stones/">Stone Knowledge</a></li><li><a href="#why">Why VSG</a></li><li><a href="#events">Events</a></li></ul></div>
-    <div><div class="footer-col-title">Stone Types</div><ul class="footer-links"><li><a href="#showroom" onclick="filterCategory('Marble')">Marble</a></li><li><a href="#showroom" onclick="filterCategory('Quartzite')">Quartzite</a></li><li><a href="#showroom" onclick="filterCategory('Granite')">Granite</a></li><li><a href="#showroom" onclick="filterCategory('Dolomite')">Dolomite</a></li><li><a href="#showroom" onclick="filterCategory('Limestone')">Limestone</a></li><li><a href="#showroom" onclick="filterCategory('Travertine')">Travertine</a></li></ul></div>
+    <div><div class="footer-col-title">Explore</div><ul class="footer-links"><li><a href="#about">About Us</a></li><li><a href="#catalogue">Product Catalogue</a></li><li><a href="#gallery">Live Gallery</a></li><li><a href="/stones/">Stone Knowledge</a></li><li><a href="#why">Why VSG</a></li><li><a href="#events">Events</a></li></ul></div>
+    <div><div class="footer-col-title">Stone Types</div><ul class="footer-links"><li><a href="#gallery" onclick="filterCategory('Marble')">Marble</a></li><li><a href="#gallery" onclick="filterCategory('Quartzite')">Quartzite</a></li><li><a href="#gallery" onclick="filterCategory('Granite')">Granite</a></li><li><a href="#gallery" onclick="filterCategory('Dolomite')">Dolomite</a></li><li><a href="#gallery" onclick="filterCategory('Limestone')">Limestone</a></li><li><a href="#gallery" onclick="filterCategory('Travertine')">Travertine</a></li></ul></div>
     <div><div class="footer-col-title">Connect</div><ul class="footer-links"><li><a href="https://www.facebook.com/victoriastonegallery" target="_blank">Facebook</a></li><li><a href="https://www.instagram.com/victoriastonegallery/" target="_blank">Instagram</a></li><li><a href="https://www.pinterest.com.au/victoriastonegallery/pins/" target="_blank">Pinterest</a></li><li><a href="https://www.houzz.com.au/professionals/tile-stone-and-benchtops/victoria-stone-gallery-pfvwau-pf~472554601" target="_blank">Houzz</a></li><li><a href="#contact">Contact Us</a></li></ul></div>
   </div>
   <p class="footer-acknowledgement">We acknowledge the Wurundjeri people who are the Traditional Custodians of the Land where we work, live and play. We offer our eternal respect to the Elders of the Kulin Nation &#8211; past, present &amp; emerging.</p>
@@ -1250,12 +1250,12 @@ function renderCategories(){
   const hasRealImages=cats.some(c=>normaliseImages(c).length>0);
   grid.innerHTML=cats.map(c=>{
     const imgs=normaliseImages(c);
-    const pick=imgs.length?imgs[Math.floor(Math.random()*imgs.length)]:null;
+    const pick=c.closeup&&c.closeup.url?c.closeup:(imgs.length?imgs[Math.floor(Math.random()*imgs.length)]:null);
     const imgHTML=pick
       ?`<img src="${pick.url}" alt="${c.name}" loading="lazy" style="object-position:${pick.position||'center center'}">`
       :`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(200,184,154,.25);font-family:'Cormorant Garamond',serif;font-size:24px">${c.name.charAt(0)}</div>`;
     return `
-    <a class="cat-card" href="#showroom" onclick="filterCategory('${c.filter}')">
+    <a class="cat-card" href="#gallery" onclick="filterCategory('${c.filter}')">
       ${imgHTML}
       <div class="cat-overlay"><div><div class="cat-name">${c.name}</div><span class="cat-count">${c.subtitle}</span></div></div>
     </a>`;
@@ -1501,7 +1501,7 @@ function parseStockRows(rows,enabledLocations){
     sessionStorage.removeItem('vsg-pending-filter');
     const btn=[...document.querySelectorAll('.filter-btn')].find(b=>b.textContent.trim().toLowerCase()===pendingFilter.toLowerCase());
     filterCategory(pendingFilter,btn);
-    setTimeout(()=>{const sr=document.getElementById('showroom');if(sr)sr.scrollIntoView({behavior:'smooth'});},300);
+    setTimeout(()=>{const sr=document.getElementById('gallery');if(sr)sr.scrollIntoView({behavior:'smooth'});},300);
   }else{
     applyFilter();
   }
@@ -2432,7 +2432,7 @@ function openFromQueryParams(){
     for(const s of matches){const sn=s.name.toLowerCase();const sc=toks.filter(t=>sn.includes(t)).length;if(sc>bs){bs=sc;best=s;}}
     if(best)stone=best;
   }
-  const sr=document.getElementById('showroom');
+  const sr=document.getElementById('gallery');
   if(!stone){
     // Sold out / not in current stock — be honest, keep them browsing
     if(sr)sr.scrollIntoView({behavior:'smooth'});
@@ -2516,7 +2516,7 @@ function updateShortlistUI(){
   const count=shortlist.length;
   document.getElementById('navBadge').textContent=count;
   const footer=document.getElementById('shortlistFooter'),items=document.getElementById('shortlistItems');
-  if(count===0){footer.style.display='none';items.innerHTML=`<div class="shortlist-empty"><span class="shortlist-empty-icon">♡</span><div class="shortlist-empty-text">Your shortlist is empty</div><p style="font-size:12px;color:rgba(200,184,154,.3);margin-top:8px">Browse the showroom and tap ♡ to save stones you love</p></div>`;}
+  if(count===0){footer.style.display='none';items.innerHTML=`<div class="shortlist-empty"><span class="shortlist-empty-icon">♡</span><div class="shortlist-empty-text">Your shortlist is empty</div><p style="font-size:12px;color:rgba(200,184,154,.3);margin-top:8px">Browse the gallery and tap ♡ to save stones you love</p></div>`;}
   else{
     footer.style.display='flex';
     document.getElementById('shortlistCountLabel').textContent=`${count} stone${count===1?'':'s'} saved`;
@@ -2527,7 +2527,7 @@ function updateShortlistUI(){
       items.appendChild(el);
     });
     const subj=encodeURIComponent(`Stone Shortlist Enquiry — ${count} stone${count===1?'':'s'}`);
-    const body=encodeURIComponent(`Hi Victoria Stone Gallery,\n\nI'm interested in the following stones from your online showroom:\n\n`+shortlist.map((s,i)=>`${i+1}. ${s.name} — Block #${s.block}${s.finishing?' ('+s.finishing+')':''}`+((s.width&&s.height)?` — Approx. ${s.width} × ${s.height} mm`:'')).join('\n')+`\n\nCould you please provide pricing and availability?\n\nThank you`);
+    const body=encodeURIComponent(`Hi Victoria Stone Gallery,\n\nI'm interested in the following stones from your online gallery:\n\n`+shortlist.map((s,i)=>`${i+1}. ${s.name} — Block #${s.block}${s.finishing?' ('+s.finishing+')':''}`+((s.width&&s.height)?` — Approx. ${s.width} × ${s.height} mm`:'')).join('\n')+`\n\nCould you please provide pricing and availability?\n\nThank you`);
     document.getElementById('shortlistEmailBtn').href=`mailto:sales@victoriastonegallery.com.au?subject=${subj}&body=${body}`;
   }
 }
@@ -2618,7 +2618,7 @@ function renderAdminContent(){
       </div>
     </div>
     <div class="admin-section">
-      <div class="admin-section-title">Showroom Settings</div>
+      <div class="admin-section-title">Gallery Settings</div>
       <div style="display:flex;flex-direction:column;gap:16px">
         <div class="admin-field">
           <div class="admin-label">Slab Quantity Display</div>
@@ -2631,7 +2631,7 @@ function renderAdminContent(){
         <div class="admin-field">
           <div class="admin-label">Lots Without Photos</div>
           <select class="admin-input" id="af-hideNoPhoto" style="padding:9px 12px">
-            <option value="true" ${g('hideNoPhoto')!==false?'selected':''}>Hide from showroom &amp; live count</option>
+            <option value="true" ${g('hideNoPhoto')!==false?'selected':''}>Hide from gallery &amp; live count</option>
             <option value="false" ${g('hideNoPhoto')===false?'selected':''}>Show with placeholder image</option>
           </select>
         </div>
@@ -2642,7 +2642,7 @@ function renderAdminContent(){
         </div>
         <div class="admin-field">
           <div class="admin-label">Site Theme (preview)</div>
-          <div style="font-size:12px;color:rgba(200,184,154,.55);margin-bottom:8px">Flips the dark brand sections (nav, showroom, fabricators, arriving, events, footer) to a lighter palette so you can compare. Applies site-wide for all visitors until switched back — not a per-visitor toggle.</div>
+          <div style="font-size:12px;color:rgba(200,184,154,.55);margin-bottom:8px">Flips the dark brand sections (nav, gallery, fabricators, arriving, events, footer) to a lighter palette so you can compare. Applies site-wide for all visitors until switched back — not a per-visitor toggle.</div>
           <select class="admin-input" id="af-siteTheme" style="padding:9px 12px">
             <option value="dark" ${(g('siteTheme')||'dark')==='dark'?'selected':''}>Dark (current)</option>
             <option value="light" ${g('siteTheme')==='light'?'selected':''}>Light (preview)</option>
@@ -2821,7 +2821,7 @@ function renderAdminCategories(){
   document.getElementById('adminPanel').innerHTML=`
     <div class="admin-section">
       <div class="admin-section-title">Stone Categories</div>
-      <p style="font-size:12px;color:rgba(200,184,154,.45);margin-bottom:20px;line-height:1.6">These appear in the showroom filter tiles. Choose up to 5 photos per category from the Slab Images library — a different one shows each time the page loads. The Filter value must match exactly how the category appears in the stock file.</p>
+      <p style="font-size:12px;color:rgba(200,184,154,.45);margin-bottom:20px;line-height:1.6">These appear in the gallery filter tiles. Choose up to 5 photos per category from the Slab Images library — a different one shows each time the page loads. The Filter value must match exactly how the category appears in the stock file.</p>
       <div id="adminCatList" style="display:flex;flex-direction:column;gap:20px">${cats.map((c,i)=>{
         const imgs=normaliseImages(c);
         return `
@@ -2842,6 +2842,14 @@ function renderAdminCategories(){
             ${Array.from({length:Math.max(0,5-imgs.length)}).map(()=>'<div class="cip-current-empty">Empty</div>').join('')}
           </div>
           <button class="cip-browse-btn" onclick="openCip(${i})">${imgs.length?'Change Photos':'Choose Photos'}</button>
+          <div style="margin-top:20px;padding-top:18px;border-top:1px solid rgba(200,184,154,.12)">
+            <div class="admin-label" style="margin-bottom:4px">Dedicated Close-Up Photo (optional)</div>
+            <p style="font-size:11px;color:rgba(200,184,154,.4);margin-bottom:10px;line-height:1.5">When set, this replaces the rotation photos above for this tile — use once a proper close-up shot exists for this category. Currently pulls from the same Drive folder; swap in a dedicated close-up photo here whenever one's been shot.</p>
+            <div class="cip-current-row">
+              ${c.closeup&&c.closeup.url?renderCipCurrentItem(i,'closeup',c.closeup):'<div class="cip-current-empty">Empty</div>'}
+            </div>
+            <button class="cip-browse-btn" onclick="openCip(${i},'closeup')">${c.closeup&&c.closeup.url?'Change Close-Up Photo':'Choose Close-Up Photo'}</button>
+          </div>
         </div>`;
       }).join('')}
       </div>
@@ -2851,14 +2859,23 @@ function renderAdminCategories(){
   `;
 }
 function renderCipCurrentItem(catIdx,imgIdx,img){
+  const idxArg=typeof imgIdx==='string'?`'${imgIdx}'`:imgIdx;
   return `<div class="cip-current-item">
-    <img src="${img.url}" style="object-position:${img.position||'center center'};cursor:pointer" alt="" onclick="cycleCatImagePosition(${catIdx},${imgIdx})" title="Click to adjust crop position">
-    <button class="cip-current-remove" onclick="event.stopPropagation();removeCatImage(${catIdx},${imgIdx})" title="Remove">&#10005;</button>
+    <img src="${img.url}" style="object-position:${img.position||'center center'};cursor:pointer" alt="" onclick="cycleCatImagePosition(${catIdx},${idxArg})" title="Click to adjust crop position">
+    <button class="cip-current-remove" onclick="event.stopPropagation();removeCatImage(${catIdx},${idxArg})" title="Remove">&#10005;</button>
   </div>`;
 }
 function cycleCatImagePosition(catIdx,imgIdx){
   const positions=['0% 0%','50% 0%','100% 0%','0% 50%','50% 50%','100% 50%','0% 100%','50% 100%','100% 100%'];
   const cats=[...g('categories')];
+  if(imgIdx==='closeup'){
+    const cur=cats[catIdx].closeup;
+    const curIdx=positions.indexOf(cur.position||'50% 50%');
+    cats[catIdx]={...cats[catIdx],closeup:{...cur,position:positions[(curIdx+1)%positions.length]}};
+    cms.categories=cats;
+    renderAdminCategories();
+    return;
+  }
   const imgs=normaliseImages(cats[catIdx]);
   const cur=imgs[imgIdx];
   const curIdx=positions.indexOf(cur.position||'50% 50%');
@@ -2869,6 +2886,12 @@ function cycleCatImagePosition(catIdx,imgIdx){
 }
 async function removeCatImage(catIdx,imgIdx){
   const cats=[...g('categories')];
+  if(imgIdx==='closeup'){
+    cats[catIdx]={...cats[catIdx],closeup:null};
+    cms.categories=cats;
+    renderAdminCategories();
+    return;
+  }
   const imgs=normaliseImages(cats[catIdx]).filter((_,i)=>i!==imgIdx);
   cats[catIdx]={...cats[catIdx],images:imgs};
   delete cats[catIdx].img;
@@ -2885,7 +2908,7 @@ async function saveAdminCategories(){
     const n=document.querySelector(`[data-cat="${i}"][data-field="name"]`);
     const s=document.querySelector(`[data-cat="${i}"][data-field="subtitle"]`);
     const f=document.querySelector(`[data-cat="${i}"][data-field="filter"]`);
-    return{name:n?n.value:c.name,subtitle:s?s.value:c.subtitle,filter:f?f.value:c.filter,images:normaliseImages(c)};
+    return{name:n?n.value:c.name,subtitle:s?s.value:c.subtitle,filter:f?f.value:c.filter,images:normaliseImages(c),closeup:c.closeup||null};
   });
   cms.categories=cats;const ok=await saveCMS();applyCMS();if(ok)showToast('Categories saved');
 }
@@ -2973,12 +2996,13 @@ async function saveFabricators(){
 async function resetAdminCategories(){delete cms.categories;const ok=await saveCMS();applyCMS();renderAdminCategories();if(ok)showToast('Categories reset');}
 
 // ── CATEGORY IMAGE PICKER (browses Slab Images Drive folders) ──
-let cipCurrentCatIdx=null,cipFolderFiles=null;
-async function openCip(catIdx){
+let cipCurrentCatIdx=null,cipFolderFiles=null,cipMode='rotation';
+async function openCip(catIdx,mode='rotation'){
   cipCurrentCatIdx=catIdx;
+  cipMode=mode;
   const cats=g('categories');
   const cat=cats[catIdx];
-  document.getElementById('cipModalTitle').textContent=`Choose Photos — ${cat.name}`;
+  document.getElementById('cipModalTitle').textContent=mode==='closeup'?`Choose Close-Up Photo — ${cat.name}`:`Choose Photos — ${cat.name}`;
   document.getElementById('cipModalGrid').innerHTML='<div class="cip-modal-empty">Loading photos from Drive…</div>';
   document.getElementById('cipModalBackdrop').classList.add('open');
   document.body.style.overflow='hidden';
@@ -3002,7 +3026,9 @@ function renderCipGrid(){
     return;
   }
   const cats=g('categories');
-  const selectedUrls=new Set(normaliseImages(cats[cipCurrentCatIdx]).map(i=>i.url));
+  const selectedUrls=cipMode==='closeup'
+    ?new Set(cats[cipCurrentCatIdx].closeup&&cats[cipCurrentCatIdx].closeup.url?[cats[cipCurrentCatIdx].closeup.url]:[])
+    :new Set(normaliseImages(cats[cipCurrentCatIdx]).map(i=>i.url));
   document.getElementById('cipModalGrid').innerHTML=cipFolderFiles.map(f=>{
     const url=`https://drive.google.com/thumbnail?id=${f.id}&sz=w500`;
     const sel=selectedUrls.has(url);
@@ -3013,6 +3039,13 @@ function renderCipGrid(){
 }
 function toggleCipImage(url,el){
   const cats=[...g('categories')];
+  if(cipMode==='closeup'){
+    const already=cats[cipCurrentCatIdx].closeup&&cats[cipCurrentCatIdx].closeup.url===url;
+    cats[cipCurrentCatIdx]={...cats[cipCurrentCatIdx],closeup:already?null:{url,position:'50% 50%'}};
+    cms.categories=cats;
+    renderCipGrid();
+    return;
+  }
   let imgs=normaliseImages(cats[cipCurrentCatIdx]);
   const exists=imgs.find(i=>i.url===url);
   if(exists){
@@ -3087,7 +3120,7 @@ function renderAdminMissing(){
   document.getElementById('adminPanel').innerHTML=`
     <div class="admin-section">
       <div class="admin-section-title">Missing Slab Images <span style="font-size:14px;color:var(--stone-dark);font-family:'Jost',sans-serif;font-weight:300">(${missing.length} stones hidden from public)</span></div>
-      <p style="font-size:12px;color:rgba(200,184,154,.45);line-height:1.7;margin-bottom:20px">Add a photo to the Slab Images folder in Google Drive. The filename must match the format below. Each stone will appear in the showroom automatically on next page load.</p>
+      <p style="font-size:12px;color:rgba(200,184,154,.45);line-height:1.7;margin-bottom:20px">Add a photo to the Slab Images folder in Google Drive. The filename must match the format below. Each stone will appear in the gallery automatically on next page load.</p>
       <p style="font-size:11px;color:rgba(200,184,154,.3);margin-bottom:12px;font-family:monospace">Format: StoneName-Finish-BlockNumber-VSG.jpg</p>
       <div style="margin-bottom:16px;display:flex;gap:10px">
         <button onclick="copyMissingListAdmin()" class="admin-save-btn" style="padding:8px 20px;font-size:10px">Copy Full List (TSV)</button>
