@@ -820,7 +820,8 @@ async function loadStock(){
     const token=await getAccessToken();
     if(!token){setStatus('error','Authentication failed — check private key');return;}
     setStatus('loading','Finding stock file…');
-    const files=await driveList(STOCK_FOLDER_ID,'',`name contains 'GrouppedReport' and mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'`);
+    const allFiles=await driveList(STOCK_FOLDER_ID,'',`mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'`);
+    const files=allFiles.filter(f=>f.name.includes('ListedReport')||f.name.includes('GrouppedReport'));
     if(!files.length){setStatus('error','No stock file found in Drive folder');loadStaticFallback();return;}
     files.sort((a,b)=>new Date(b.modifiedTime)-new Date(a.modifiedTime));
     const stockFile=files[0];
@@ -858,10 +859,10 @@ function parseStockRows(rows){
         if(c==='CATEGORY')colMap.category=idx;
         if(c==='BLOCK')colMap.block=idx;
         if(c==='LOT #'||c==='LOT#'||c==='LOT')colMap.lot=idx;
-        if(c==='WIDTH')colMap.width=idx;
-        if(c==='HEIGHT')colMap.height=idx;
+        if(c==='WIDTH'||c==='SELL WIDTH')colMap.width=idx;
+        if(c==='HEIGHT'||c==='SELL HEIGHT')colMap.height=idx;
         if(c==='THICKNESS')colMap.thickness=idx;
-        if(c==='FINISHING')colMap.finishing=idx;
+        if(c==='FINISHING'||c==='FININSHING')colMap.finishing=idx;
         if(c==='SLABS QTY')colMap.qty=idx;
         if(c==='AVAILABLE')colMap.available=idx;
       });
