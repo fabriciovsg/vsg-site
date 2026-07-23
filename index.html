@@ -204,6 +204,40 @@ section{padding:100px 48px;}
 .modal-present-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:rgba(26,23,20,.7);border:1px solid rgba(184,150,60,.5);color:var(--gold-light);font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;transition:all .2s;}
 .modal-present-btn:hover{background:var(--gold);border-color:var(--gold);color:white;}
 .modal-present-btn:disabled{opacity:.35;cursor:default;}
+/* GALLERY PRESENTATION MODE */
+.gp-ov{display:none;position:fixed;inset:0;background:#000;z-index:1150;flex-direction:column;}
+.gp-ov.open{display:flex;}
+.gp-header{display:flex;align-items:center;gap:10px;padding:12px 20px;background:rgba(0,0,0,.85);flex-shrink:0;border-bottom:1px solid rgba(200,184,154,.12);flex-wrap:wrap;}
+.gp-logo{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);white-space:nowrap;margin-right:6px;}
+.gp-search{background:rgba(255,255,255,.07);border:1px solid rgba(200,184,154,.2);color:white;padding:8px 14px;font-size:12px;font-family:'Jost',sans-serif;outline:none;width:200px;transition:border-color .2s;}
+.gp-search::placeholder{color:rgba(255,255,255,.28);}
+.gp-search:focus{border-color:var(--gold);}
+.gp-filter-btn{background:transparent;border:1px solid rgba(200,184,154,.2);color:rgba(200,184,154,.6);padding:7px 13px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.gp-filter-btn.active{background:var(--gold);border-color:var(--gold);color:white;}
+.gp-filter-btn:hover{border-color:var(--gold-light);color:var(--gold-light);}
+.gp-close{margin-left:auto;background:rgba(255,255,255,.06);border:1px solid rgba(200,184,154,.15);color:rgba(255,255,255,.6);width:40px;height:40px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s;}
+.gp-close:hover{background:rgba(200,50,50,.6);}
+.gp-featured{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;min-height:0;}
+.gp-feat-img{max-width:100%;max-height:100%;object-fit:contain;display:block;transition:opacity .25s;}
+.gp-feat-info{position:absolute;bottom:0;left:0;right:0;padding:28px 40px 24px;background:linear-gradient(to top,rgba(0,0,0,.88) 0%,transparent 100%);}
+.gp-feat-name{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4vw,58px);font-weight:300;color:white;line-height:1.1;}
+.gp-feat-sub{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-light);margin-top:7px;opacity:.85;}
+.gp-scenes-btn{margin-top:14px;background:rgba(184,150,60,.15);border:1px solid rgba(184,150,60,.6);color:var(--gold-light);padding:10px 22px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;}
+.gp-scenes-btn:hover{background:var(--gold);border-color:var(--gold);color:white;}
+.gp-scenes-btn:disabled{opacity:.4;cursor:default;}
+.gp-nav-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.1);border:none;color:white;width:54px;height:54px;font-size:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;border-radius:2px;z-index:5;}
+.gp-nav-btn:hover{background:var(--gold);}
+.gp-prev{left:16px;}
+.gp-next{right:16px;}
+.gp-counter{position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:.1em;color:rgba(255,255,255,.38);}
+.gp-strip{height:106px;display:flex;gap:3px;padding:6px 10px;background:#080604;overflow-x:auto;flex-shrink:0;align-items:center;scrollbar-width:thin;scrollbar-color:rgba(200,184,154,.2) transparent;}
+.gp-strip-thumb{height:88px;width:117px;object-fit:cover;cursor:pointer;opacity:.38;transition:opacity .2s;border:2px solid transparent;flex-shrink:0;}
+.gp-strip-thumb.active{opacity:1;border-color:var(--gold);}
+.gp-strip-thumb:hover{opacity:.72;}
+.gp-empty{flex:1;display:flex;align-items:center;justify-content:center;color:rgba(200,184,154,.28);font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;}
+/* LAUNCH BUTTON IN SHOWROOM BAR */
+.gp-launch-btn{background:transparent;border:1px solid rgba(184,150,60,.4);color:var(--gold-light);padding:10px 15px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:7px;}
+.gp-launch-btn:hover{background:var(--gold);border-color:var(--gold);color:white;}
 /* WHY */
 #why{background:var(--cream);}
 .why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:48px;margin-top:64px;}
@@ -393,6 +427,7 @@ textarea.admin-input{resize:vertical;min-height:80px;line-height:1.6;}
       <option value="name">Sort: Name A&#8211;Z</option>
       <option value="category">Sort: Category</option>
     </select>
+    <button class="gp-launch-btn" onclick="openGalleryPresentation()">&#9654; Present Collection</button>
   </div>
   <div class="showroom-status">
     <div class="status-dot loading" id="statusDot"></div>
@@ -546,6 +581,33 @@ textarea.admin-input{resize:vertical;min-height:80px;line-height:1.6;}
     <a href="#" class="shortlist-email-btn" id="shortlistEmailBtn">&#9993; Email My Shortlist</a>
     <button class="shortlist-clear-btn" onclick="clearShortlist()">Clear All</button>
   </div>
+</div>
+<!-- GALLERY PRESENTATION MODE -->
+<div class="gp-ov" id="gpOverlay">
+  <div class="gp-header">
+    <span class="gp-logo">VSG · Collection</span>
+    <input class="gp-search" id="gpSearch" type="text" placeholder="Search stones&#8230;" oninput="gpFilter(this.value)">
+    <button class="gp-filter-btn active" onclick="gpCategory('All',this)">All</button>
+    <button class="gp-filter-btn" onclick="gpCategory('Marble',this)">Marble</button>
+    <button class="gp-filter-btn" onclick="gpCategory('Quartzite',this)">Quartzite</button>
+    <button class="gp-filter-btn" onclick="gpCategory('Granite',this)">Granite</button>
+    <button class="gp-filter-btn" onclick="gpCategory('Dolomite',this)">Dolomite</button>
+    <button class="gp-filter-btn" onclick="gpCategory('Travertine',this)">Travertine</button>
+    <button class="gp-filter-btn" onclick="gpCategory('Limestone',this)">Limestone</button>
+    <button class="gp-close" onclick="gpClose()">&#10005;</button>
+  </div>
+  <div class="gp-featured" id="gpFeatured">
+    <button class="gp-nav-btn gp-prev" onclick="gpNav(-1)">&#8249;</button>
+    <img class="gp-feat-img" id="gpFeatImg" src="" alt="">
+    <div class="gp-feat-info">
+      <div class="gp-feat-name" id="gpFeatName"></div>
+      <div class="gp-feat-sub" id="gpFeatSub"></div>
+      <button class="gp-scenes-btn" id="gpScenesBtn" onclick="gpOpenScenes()" style="display:none">&#9654; View Room Scenes</button>
+    </div>
+    <div class="gp-counter" id="gpCounter"></div>
+    <button class="gp-nav-btn gp-next" onclick="gpNav(1)">&#8250;</button>
+  </div>
+  <div class="gp-strip" id="gpStrip"></div>
 </div>
 <!-- SHOWROOM PRESENTATION OVERLAY -->
 <div class="sm-ov" id="smOverlay">
@@ -1162,6 +1224,134 @@ function smClose(){
     if(Math.abs(dx)>40)smNav(dx<0?1:-1);
   },{passive:true});
 })();
+
+// ── GALLERY PRESENTATION MODE ──────────────────────────────────
+let gpStones=[],gpIndex=0,gpSearchVal='',gpCat='All';
+
+function openGalleryPresentation(){
+  gpSearchVal='';
+  gpCat='All';
+  const srch=document.getElementById('gpSearch');
+  if(srch)srch.value='';
+  document.querySelectorAll('.gp-filter-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  gpBuild();
+  document.getElementById('gpOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function gpBuild(){
+  gpStones=allStones.filter(s=>{
+    if(!s.image||s.noImage)return false;
+    const cm=gpCat==='All'||(s.category||'').toLowerCase().includes(gpCat.toLowerCase());
+    const sm=!gpSearchVal||s.name.toLowerCase().includes(gpSearchVal)||(s.block||'').toLowerCase().includes(gpSearchVal)||(s.category||'').toLowerCase().includes(gpSearchVal);
+    return cm&&sm;
+  });
+  gpIndex=0;
+  gpRenderStrip();
+  if(gpStones.length)gpShow(0);
+  else{
+    document.getElementById('gpFeatImg').src='';
+    document.getElementById('gpFeatName').textContent='';
+    document.getElementById('gpFeatSub').textContent='';
+    document.getElementById('gpCounter').textContent='';
+    document.getElementById('gpScenesBtn').style.display='none';
+  }
+}
+
+function gpRenderStrip(){
+  const strip=document.getElementById('gpStrip');
+  strip.innerHTML='';
+  if(!gpStones.length){
+    strip.innerHTML='<div class="gp-empty">No stones match — try a different search or filter</div>';
+    return;
+  }
+  gpStones.forEach((s,i)=>{
+    const img=document.createElement('img');
+    img.className='gp-strip-thumb'+(i===0?' active':'');
+    img.src=s.image;img.alt=s.name;img.loading='lazy';
+    img.onclick=()=>gpShow(i);
+    strip.appendChild(img);
+  });
+}
+
+function gpShow(idx){
+  if(!gpStones.length)return;
+  gpIndex=(idx+gpStones.length)%gpStones.length;
+  const s=gpStones[gpIndex];
+  const imgEl=document.getElementById('gpFeatImg');
+  imgEl.style.opacity='0';
+  setTimeout(()=>{imgEl.src=s.image;imgEl.style.opacity='1';},120);
+  document.getElementById('gpFeatName').textContent=s.name;
+  const sub=[s.category,s.finishing,s.block?'Block #'+s.block:''].filter(Boolean).join(' · ');
+  document.getElementById('gpFeatSub').textContent=sub;
+  document.getElementById('gpCounter').textContent=(gpIndex+1)+' / '+gpStones.length;
+  const scenesBtn=document.getElementById('gpScenesBtn');
+  scenesBtn.style.display=(s.block&&!PRIVATE_KEY_PEM.includes('REPLACE_WITH_YOUR_PRIVATE_KEY_HERE'))?'inline-flex':'none';
+  scenesBtn.textContent='▶ View Room Scenes';
+  scenesBtn.disabled=false;
+  document.querySelectorAll('.gp-strip-thumb').forEach((t,i)=>t.classList.toggle('active',i===gpIndex));
+  const active=document.querySelector('.gp-strip-thumb.active');
+  if(active)active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+
+function gpNav(dir){gpShow(gpIndex+dir);}
+
+function gpCategory(cat,btn){
+  gpCat=cat;
+  document.querySelectorAll('.gp-filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  gpBuild();
+}
+
+function gpFilter(val){
+  gpSearchVal=val.toLowerCase();
+  gpBuild();
+}
+
+async function gpOpenScenes(){
+  const s=gpStones[gpIndex];
+  if(!s||!s.block)return;
+  const btn=document.getElementById('gpScenesBtn');
+  btn.textContent='Loading…';
+  btn.disabled=true;
+  const imgs=await getProjectImages(s.block);
+  if(!imgs.length){
+    btn.textContent='▶ View Room Scenes';
+    btn.disabled=false;
+    showToast('No room scenes found for this stone');
+    return;
+  }
+  smImages=imgs;
+  currentModalStone=s;
+  document.getElementById('smStoneName').textContent=s.name;
+  document.getElementById('smOverlay').classList.add('open');
+  const thumbs=document.getElementById('smThumbs');
+  thumbs.innerHTML='';
+  smImages.forEach((img,i)=>{
+    const t=document.createElement('img');
+    t.className='sm-thumb'+(i===0?' active':'');
+    t.src=img.url;
+    t.onclick=()=>smGo(i);
+    thumbs.appendChild(t);
+  });
+  smGo(0);
+}
+
+function gpClose(){
+  document.getElementById('gpOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// Touch swipe for gallery presentation
+(function(){
+  let tx=0;
+  const ov=document.getElementById('gpOverlay');
+  ov.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;},{passive:true});
+  ov.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-tx;
+    if(Math.abs(dx)>40){if(!document.getElementById('smOverlay').classList.contains('open'))gpNav(dx<0?1:-1);}
+  },{passive:true});
+})();
 // ── SHORTLIST ─────────────────────────────────────────────────
 let shortlist=[];
 function toggleShortlistCard(btn,name,block){
@@ -1448,6 +1638,12 @@ document.addEventListener('keydown',e=>{
     if(e.key==='Escape')smClose();
     if(e.key==='ArrowLeft')smNav(-1);
     if(e.key==='ArrowRight')smNav(1);
+    return;
+  }
+  if(document.getElementById('gpOverlay').classList.contains('open')){
+    if(e.key==='Escape')gpClose();
+    if(e.key==='ArrowLeft')gpNav(-1);
+    if(e.key==='ArrowRight')gpNav(1);
     return;
   }
   if(e.key==='Escape'){closeModalBtn();closeShortlist();closeLightbox();}
