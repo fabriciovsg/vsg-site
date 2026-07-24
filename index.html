@@ -1771,8 +1771,12 @@ async function getProjectImages(blockNumber,name){
     await loadManifest();
     if(_manifest){
       const entry=_manifest[blockNumber];
-      if(entry&&entry.projectsFull&&entry.projectsFull.length)return entry.projectsFull;
-      if(entry&&entry.projects&&entry.projects.length)return entry.projects;
+      if(entry&&entry.projects&&entry.projects.length){
+        // Handle both old format (URL strings) and new v3 format ({url,full,id,name} objects)
+        const first=entry.projects[0];
+        if(typeof first==='string') return entry.projectsFull||entry.projects;
+        return entry.projects.map(p=>p.full||p.url);
+      }
       return[];
     }
     if(!projectSubfolders)projectSubfolders=(await driveList(PROJECT_IMAGES_FOLDER_ID,'','')).filter(f=>f.name.includes('-'));
