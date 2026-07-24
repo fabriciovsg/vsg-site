@@ -3606,19 +3606,47 @@ async function getProjectImagesForStone(stone){
   if(!stone||!stone.block)return[];
   try{
     // Try manifest first (fast CDN path)
-    await ensureManifest();
+    await loadManifest();
     if(_manifest){
       const entry=_manifest[String(stone.block).trim()];
       if(entry&&entry.projects&&entry.projects.length){
-        return entry.projects.map(p=>({url:p.url||`https://drive.google.com/thumbnail?id=${p.id}&sz=w800`,label:extractSceneLabel(p.name||'')}));
+        const first=entry.projects[0];
+        if(typeof first==='string'){
+          // v2 format: array of local WebP path strings (from build pipeline)
+          // Path names are lot-based (e.g. /img/projects/LOT_p1-800.webp), not scene-named
+          const urls=entry.projectsFull||entry.projects;
+          return urls.map((u,i)=>({url:u,label:extractSceneLabel(u)||`Scene ${i+1}`}));
+        }
+        // v3 format: array of {url,full,id,name} objects
+        return entry.projects.map(p=>({url:p.full||p.url||`https://drive.google.com/thumbnail?id=${p.id}&sz=w800`,label:extractSceneLabel(p.name||'')}));
       }
+      return[];
     }
-    // Fallback: live Drive query
-    const PROJECT_IMAGES_FOLDER_ID='13meCoYDTCLZ9_CuHO2JjgxoTAlg_ElEv';
-    const all=await driveList(PROJECT_IMAGES_FOLDER_ID,'','');
-    const folders=all.filter(f=>f.name.includes('-'));
+    // Fallback: live Drive query (full sophistication — handles '/' in block numbers, name disambiguation)
+    if(!projectSubfolders)projectSubfolders=(await driveList(PROJECT_IMAGES_FOLDER_ID,'','')).filter(f=>f.name.includes('-'));
     const bn=String(stone.block).trim().toLowerCase();
-    const folder=folders.find(f=>{const segs=f.name.toLowerCase().split('-');return segs.includes(bn);});
+    const bnColon=bn.replace(/\//g,':');
+    const bnJoined=bn.replace(/\//g,'-');
+    const bnUnderscore=bn.replace(/\//g,'_');
+    const exact=projectSubfolders.filter(f=>{
+      const n=f.name.toLowerCase();
+      const segs=n.split('-');
+      if(segs.includes(bn))return true;
+      if(bn.includes('/')){
+        if(n.indexOf('-'+bnColon+'-')>=0||n.endsWith('-'+bnColon))return true;
+        if(n.indexOf('-'+bnJoined+'-')>=0||n.endsWith('-'+bnJoined))return true;
+        if(segs.includes(bnUnderscore))return true;
+      }
+      return false;
+    });
+    let folder;
+    if(exact.length<=1){folder=exact[0];}
+    else{
+      const toks=nameTokens(stone.name);
+      if(!toks.length){folder=exact[0];}
+      else{let best=null,bs=-1;for(const fo of exact){const fn=fo.name.toLowerCase();const sc=toks.filter(t=>fn.includes(t)).length;if(sc>bs){bs=sc;best=fo;}}folder=bs>0?best:null;}
+    }
+    if(folder&&stone.name){const toks=nameTokens(stone.name),fn=folder.name.toLowerCase();if(toks.length&&!toks.some(t=>fn.includes(t)))folder=null;}
     if(!folder)return[];
     const files=await driveList(folder.id,'',`mimeType contains 'image/'`);
     const pf=files.filter(f=>f.name.toLowerCase().startsWith('project'));
