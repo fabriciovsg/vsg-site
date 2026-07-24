@@ -515,6 +515,7 @@ textarea.admin-input{resize:vertical;min-height:80px;line-height:1.6;}
 .sm-info{position:absolute;bottom:0;left:0;right:0;padding:24px 32px;background:linear-gradient(to top,rgba(0,0,0,.85),transparent);pointer-events:none;}
 .sm-stone-name{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4vw,52px);font-weight:300;color:white;line-height:1.1;}
 .sm-scene{font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-light);margin-top:6px;}
+.sm-stone-meta{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:rgba(200,184,154,.45);margin-top:8px;}
 .sm-thumbs{display:flex;gap:4px;padding:8px 12px;background:#111;overflow-x:auto;max-width:100%;flex-shrink:0;}
 .sm-thumb{width:80px;height:60px;object-fit:cover;cursor:pointer;opacity:.45;transition:opacity .2s;border:2px solid transparent;flex-shrink:0;}
 .sm-thumb.active{opacity:1;border-color:var(--gold);}
@@ -542,6 +543,7 @@ textarea.admin-input{resize:vertical;min-height:80px;line-height:1.6;}
 .gp-feat-info{position:absolute;bottom:0;left:0;right:0;padding:28px 40px 24px;background:linear-gradient(to top,rgba(0,0,0,.88) 0%,transparent 100%);pointer-events:none;}
 .gp-feat-name{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4vw,58px);font-weight:300;color:white;line-height:1.1;}
 .gp-feat-sub{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-light);margin-top:7px;}
+.gp-stone-meta{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:rgba(200,184,154,.45);margin-top:10px;}
 .gp-scenes-btn{pointer-events:all;margin-top:14px;background:rgba(184,150,60,.15);border:1px solid rgba(184,150,60,.6);color:var(--gold-light);padding:10px 22px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;}
 .gp-scenes-btn:hover:not(:disabled){background:rgba(184,150,60,.35);border-color:var(--gold);}
 .gp-scenes-btn:disabled{opacity:.45;cursor:default;}
@@ -1542,7 +1544,7 @@ function parseStockRows(rows,enabledLocations){
   allStones=stones;
   calcPriceThresholds();
   saveStockSnapshot(_rawStockRows); // fire-and-forget — powers the fallback if a future load fails
-  setStatus('live',stones.length+' lots in stock \u00b7 Over 4,000 slabs \u00b7 Live inventory');
+  setStatus('live',stones.length+' lots in stock \u00b7 Live inventory');
   const pendingFilter=sessionStorage.getItem('vsg-pending-filter');
   if(pendingFilter){
     sessionStorage.removeItem('vsg-pending-filter');
@@ -2247,7 +2249,7 @@ function applyFilter(search=''){
   const totalLots=allStones.length;
   const liveLots=allStones.filter(s=>!isLotHidden(s)&&!isTransitNotVisible(s)).length;
   const totalSlabs=allStones.reduce((acc,s)=>acc+parseInt(s.qty||0),0);
-  document.getElementById('statusText').textContent=liveLots+' lots live \u00b7 '+totalLots+' lots in stock \u00b7 Over 4,000 slabs';
+  document.getElementById('statusText').textContent=liveLots+' lots live \u00b7 '+totalLots+' lots in stock';
   if(slabAllFiles)loadSlabImages(filteredStones.slice(0,PAGE_SIZE)).then(()=>stampBadgesOnCards());
   else stampBadgesOnCards();
 }
@@ -2467,8 +2469,15 @@ function navStone(dir){
 }
 // ── QR DEEP-LINK (warehouse sign scans) ───────────────────────
 // Sign QR format: /?block={lot}&name={StoneName}  (+ optional &add=1 to auto-shortlist)
+// Showroom URL:   /?showroom  — auto-opens the full gallery presentation (iPad kiosk mode)
 function openFromQueryParams(){
   const p=new URLSearchParams(window.location.search);
+  if(p.has('showroom')){
+    history.replaceState(null,'',window.location.pathname);
+    // Small delay to let the grid render first
+    setTimeout(()=>openGalleryPresentation(),400);
+    return;
+  }
   const lot=(p.get('block')||p.get('lot')||'').trim();
   if(!lot)return;
   const nameHint=(p.get('name')||'').trim();
@@ -3669,6 +3678,7 @@ async function openStonePresentation(){
   currentPresentStone=s;
   smImages=imgs;
   document.getElementById('smStoneName').textContent=s.name;
+  const smMeta1=[];if(s.width&&s.height)smMeta1.push(s.width+' \xd7 '+s.height+' mm');smMeta1.push(imgs.length+' '+(imgs.length===1?'scene':'scenes'));document.getElementById('smStoneMeta').textContent=smMeta1.join(' \xb7 ');
   const thumbs=document.getElementById('smThumbs');
   thumbs.innerHTML='';
   smImages.forEach((img,i)=>{
@@ -3762,6 +3772,12 @@ function gpShow(idx){
   const scenesBtn=document.getElementById('gpScenesBtn');
   scenesBtn.style.display=s.block?'inline-flex':'none';
   scenesBtn.textContent='▶ View Room Scenes'; scenesBtn.disabled=false;
+  // Discreet meta: slab size + inspiration image count
+  const metaParts=[];
+  if(s.width&&s.height)metaParts.push(s.width+' × '+s.height+' mm');
+  const sceneCount=(_manifest&&s.block&&_manifest[String(s.block).trim()]?.projectCount)||0;
+  if(sceneCount>0)metaParts.push(sceneCount+' inspiration '+(sceneCount===1?'image':'images'));
+  document.getElementById('gpStoneMeta').textContent=metaParts.join(' · ');
   document.querySelectorAll('.gp-strip-thumb').forEach((t,i)=>t.classList.toggle('active',i===gpIndex));
   const active=document.querySelector('.gp-strip-thumb.active');
   if(active)active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
@@ -3785,6 +3801,7 @@ async function gpOpenScenes(){
   currentPresentStone=s;
   smImages=imgs;
   document.getElementById('smStoneName').textContent=s.name;
+  const smMeta2=[];if(s.width&&s.height)smMeta2.push(s.width+' \xd7 '+s.height+' mm');smMeta2.push(imgs.length+' '+(imgs.length===1?'scene':'scenes'));document.getElementById('smStoneMeta').textContent=smMeta2.join(' \xb7 ');
   const thumbs=document.getElementById('smThumbs');
   thumbs.innerHTML='';
   smImages.forEach((img,i)=>{
@@ -3898,6 +3915,7 @@ loadClientsData().then(()=>updateClientUI());
       <div class="gp-feat-name" id="gpFeatName"></div>
       <div class="gp-feat-sub" id="gpFeatSub"></div>
       <button class="gp-scenes-btn" id="gpScenesBtn" onclick="gpOpenScenes()" style="display:none">&#9654; View Room Scenes</button>
+      <div class="gp-stone-meta" id="gpStoneMeta"></div>
     </div>
     <div class="gp-counter" id="gpCounter"></div>
     <button class="gp-nav-btn gp-next" onclick="gpNav(1)">&#8250;</button>
@@ -3916,6 +3934,7 @@ loadClientsData().then(()=>updateClientUI());
     <div class="sm-info">
       <div class="sm-stone-name" id="smStoneName"></div>
       <div class="sm-scene" id="smScene"></div>
+      <div class="sm-stone-meta" id="smStoneMeta"></div>
     </div>
   </div>
   <div class="sm-thumbs" id="smThumbs"></div>
