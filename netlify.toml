@@ -3,9 +3,19 @@
   publish = "."
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION      = "20"
   BUILD_TIMEOUT_MIN = "24"
 
+# ── Persist img/ between builds (fixes SIGBUS crash) ──────────
+# Without this Netlify starts fresh each build, re-downloads all
+# 3,462 images, runs out of memory. With it, subsequent builds
+# skip unchanged images and complete in under a minute.
+[[plugins]]
+  package = "netlify-plugin-cache"
+  [plugins.inputs]
+    paths = ["img", ".image-cache.json"]
+
+# ── Headers ────────────────────────────────────────────────────
 [[headers]]
   for = "/img/*"
   [headers.values]
@@ -15,3 +25,8 @@
   for = "/image-manifest-cdn.json"
   [headers.values]
     Cache-Control = "public, max-age=900"
+
+# ── Branch: develop = staging ──────────────────────────────────
+[context.develop]
+  command = "npm install && node build-images.js"
+  publish = "."
