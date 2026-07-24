@@ -1632,8 +1632,7 @@ async function buildSlabIndex(){
   // Used only by admin Missing Images tab (when manifest is absent).
   if(slabAllFiles!==null)return;
   slabAllFiles=[];
-  const ACTIVE_SLAB_FOLDERS=['marble','quartzite','granite','dolomite','travertine','limestone'];
-  if(!slabSubfolders)slabSubfolders=(await driveList(SLAB_IMAGES_FOLDER_ID,'',`mimeType='application/vnd.google-apps.folder'`)).filter(f=>ACTIVE_SLAB_FOLDERS.includes(f.name.toLowerCase()));
+  if(!slabSubfolders)slabSubfolders=await driveList(SLAB_IMAGES_FOLDER_ID,'',`mimeType='application/vnd.google-apps.folder'`);
   const results=await Promise.all(slabSubfolders.map(sf=>driveList(sf.id,'',`mimeType contains 'image/'`)));
   results.forEach(files=>slabAllFiles.push(...files));
 }
@@ -1758,6 +1757,32 @@ async function loadSlabImages(stones){
         stone.noImage=true;
       }
     }
+  }
+  // Transit fallback: unlocked transit stones may have photos in the "In transit"
+  // Drive folder which isn't yet indexed in the CDN manifest.
+  const transitVisible=cms.visibleTransitLots||[];
+  const missingTransit=toLoad.filter(s=>s.status==='TRANSIT'&&s.noImage!==false&&transitVisible.includes((s.block||'').toString()));
+  if(missingTransit.length){
+    try{
+      if(!window._transitSlabFiles){
+        const allFolders=await driveList(SLAB_IMAGES_FOLDER_ID,'',`mimeType='application/vnd.google-apps.folder'`);
+        const tf=allFolders.find(f=>f.name.toLowerCase()==='in transit');
+        window._transitSlabFiles=tf?await driveList(tf.id,'',`mimeType contains 'image/'`):[];
+      }
+      // Merge transit folder files into the slab index so getSlabFileId can match them
+      if(!slabAllFiles)slabAllFiles=[];
+      const existingIds=new Set(slabAllFiles.map(f=>f.id));
+      (window._transitSlabFiles||[]).forEach(f=>{if(!existingIds.has(f.id))slabAllFiles.push(f);});
+      for(const stone of missingTransit){
+        delete slabFileIdCache[stone.block]; // clear any cached miss and retry
+        const fileId=getSlabFileId(stone.block,stone.finishing,stone.name);
+        if(fileId){
+          stone.image=`https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
+          stone.noImage=false;
+          refreshCardImage(stone);
+        }
+      }
+    }catch(e){console.error('Transit slab image fallback:',e);}
   }
   stones.forEach(s=>{ if(s.noImage===undefined) s.noImage=!s.image; });
   const missing=allStones.filter(s=>s.noImage===true).length;
@@ -2183,6 +2208,10 @@ function handleSearch(val){applyFilter(val.toLowerCase());}
 function isLotHidden(stone){
   const hidden=cms.hiddenLots||[];
   if(hidden.includes((stone.block||'').toString()))return true;
+  // Explicitly-unlocked transit lots bypass the no-photo filter —
+  // they're in transit so often have no slab photo yet, but admin
+  // has deliberately chosen to show them.
+  if(stone.status==='TRANSIT'&&(cms.visibleTransitLots||[]).includes((stone.block||'').toString()))return false;
   if(g('hideNoPhoto')&&stone.noImage===true)return true;
   return false;
 }
@@ -3069,7 +3098,7 @@ async function openCip(catIdx,mode='rotation'){
   document.getElementById('cipModalBackdrop').classList.add('open');
   document.body.style.overflow='hidden';
   try{
-    if(!slabSubfolders)slabSubfolders=(await driveList(SLAB_IMAGES_FOLDER_ID,'',`mimeType='application/vnd.google-apps.folder'`)).filter(f=>['marble','quartzite','granite','dolomite','travertine','limestone'].includes(f.name.toLowerCase()));
+    if(!slabSubfolders)slabSubfolders=await driveList(SLAB_IMAGES_FOLDER_ID,'',`mimeType='application/vnd.google-apps.folder'`);
     const folder=slabSubfolders.find(f=>f.name.toLowerCase()===cat.filter.toLowerCase());
     if(!folder){
       document.getElementById('cipModalGrid').innerHTML=`<div class="cip-modal-empty">No Drive folder found matching "${cat.filter}". Check the Filter Value matches a category folder name exactly.</div>`;
