@@ -1126,7 +1126,8 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
   <button class="admin-bar-btn" id="adminTabCoverage" onclick="openAdminTab('coverage')">Coverage</button>
   <button class="admin-bar-btn" id="adminTabClients" onclick="openAdminTab('clients')">Clients</button>
   <button class="admin-bar-btn" id="adminTabFabricators" onclick="openAdminTab('fabricators')">Fabricators</button>
-  <button class="admin-bar-btn danger" onclick="adminLogout()" style="margin-left:auto">Sign Out</button>
+  <button class="admin-bar-btn" onclick="browseStock()" style="margin-left:auto;border-color:rgba(200,184,154,.35)">&#8595; Browse Stock</button>
+  <button class="admin-bar-btn danger" onclick="adminLogout()">Sign Out</button>
 </div>
 <div class="admin-panel" id="adminPanel"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -2722,6 +2723,13 @@ function adminLogout(){
   currentAdminTab='';
 }
 
+function browseStock(){
+  const panel=document.getElementById('adminPanel');
+  panel.classList.remove('open');
+  currentAdminTab='';
+  document.querySelectorAll('.admin-bar-btn').forEach(b=>b.classList.remove('active-tab'));
+  document.getElementById('gallery').scrollIntoView({behavior:'smooth'});
+}
 function openAdminTab(tab){
   document.querySelectorAll('.admin-bar-btn').forEach(b=>b.classList.remove('active-tab'));
   const btn=document.getElementById('adminTab'+tab.charAt(0).toUpperCase()+tab.slice(1));
