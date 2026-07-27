@@ -218,6 +218,9 @@ section{padding:72px 48px;}
 .colour-filter-row.style-names .colour-pill{width:auto;height:auto;border-radius:3px;padding:7px 13px;background:transparent!important;border:1px solid rgba(200,184,154,.25);color:var(--surface-dark-text-secondary);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-family:'Jost',sans-serif;white-space:nowrap;}
 .colour-filter-row.style-names .colour-pill:hover{border-color:rgba(200,184,154,.5);}
 .colour-filter-row.style-names .colour-pill.active{background:var(--gold)!important;border-color:var(--gold);color:white;}
+/* FINISHING FILTER */
+.finish-pill{background:transparent;border:1px solid rgba(200,184,154,.25);color:var(--surface-dark-text-secondary);padding:6px 13px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.finish-pill:hover,.finish-pill.active{background:var(--gold);border-color:var(--gold);color:white;}
 /* MIN SLABS FILTER */
 .min-slabs-wrap{display:flex;align-items:center;gap:7px;margin-left:auto;}
 .min-slabs-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--surface-dark-text-muted);white-space:nowrap;}
@@ -829,13 +832,16 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
     <div class="colour-pill" data-colour="Green" title="Green" style="background:#5a7a5a" onclick="filterColour('Green',this)"></div>
     <div class="colour-pill" data-colour="Gold" title="Gold/Yellow" style="background:#c8a84b" onclick="filterColour('Gold',this)"></div>
     <div class="colour-pill" data-colour="Brown" title="Brown" style="background:#8b6347" onclick="filterColour('Brown',this)"></div>
-    <div class="colour-pill" data-colour="Pink" title="Pink / Red" style="background:linear-gradient(135deg,#c4857a,#a83232)" onclick="filterColour('Pink',this)"></div>
+    <div class="colour-pill" data-colour="Pink" title="Pink" style="background:#c4857a" onclick="filterColour('Pink',this)"></div>
     <div class="colour-pill" data-colour="Red" title="Red" style="background:#8b2020" onclick="filterColour('Red',this)"></div>
     <div class="colour-pill" data-colour="Blue" title="Blue" style="background:#6b8cad" onclick="filterColour('Blue',this)"></div>
     <div class="min-slabs-wrap" id="minSlabsFilter">
       <span class="min-slabs-label">Min slabs</span>
       <input class="min-slabs-input" type="number" id="minSlabsInput" min="1" max="99" value="1" oninput="applyFilter(document.getElementById('stoneSearch').value.toLowerCase())">
     </div>
+  </div>
+  <div class="colour-filter-row" id="finishingFilterRow" style="margin-top:8px;display:none">
+    <span class="colour-pill-label">Finish</span>
   </div>
   <div class="colour-filter-row" id="priceFilterRow" style="margin-top:8px">
     <span class="colour-pill-label">Price</span>
@@ -1543,6 +1549,7 @@ function parseStockRows(rows,enabledLocations){
   const totalSlabs=stones.reduce((s,st)=>s+parseInt(st.qty||0),0);
   allStones=stones;
   calcPriceThresholds();
+  buildFinishingFilter();
   saveStockSnapshot(_rawStockRows); // fire-and-forget — powers the fallback if a future load fails
   setStatus('live',stones.length+' lots in stock \u00b7 Live inventory');
   const pendingFilter=sessionStorage.getItem('vsg-pending-filter');
@@ -1632,8 +1639,7 @@ async function buildSlabIndex(){
   // Used only by admin Missing Images tab (when manifest is absent).
   if(slabAllFiles!==null)return;
   slabAllFiles=[];
-  const ACTIVE_SLAB_FOLDERS=['marble','quartzite','granite','dolomite','travertine','limestone'];
-  if(!slabSubfolders)slabSubfolders=(await driveList(SLAB_IMAGES_FOLDER_ID,'',`mimeType='application/vnd.google-apps.folder'`)).filter(f=>ACTIVE_SLAB_FOLDERS.includes(f.name.toLowerCase()));
+  if(!slabSubfolders)slabSubfolders=await driveList(SLAB_IMAGES_FOLDER_ID,'',`mimeType='application/vnd.google-apps.folder'`);
   const results=await Promise.all(slabSubfolders.map(sf=>driveList(sf.id,'',`mimeType contains 'image/'`)));
   results.forEach(files=>slabAllFiles.push(...files));
 }
@@ -1758,6 +1764,32 @@ async function loadSlabImages(stones){
         stone.noImage=true;
       }
     }
+  }
+  // Transit fallback: unlocked transit stones may have photos in the "In transit"
+  // Drive folder which isn't yet indexed in the CDN manifest.
+  const transitVisible=cms.visibleTransitLots||[];
+  const missingTransit=toLoad.filter(s=>s.status==='TRANSIT'&&s.noImage!==false&&transitVisible.includes((s.block||'').toString()));
+  if(missingTransit.length){
+    try{
+      if(!window._transitSlabFiles){
+        const allFolders=await driveList(SLAB_IMAGES_FOLDER_ID,'',`mimeType='application/vnd.google-apps.folder'`);
+        const tf=allFolders.find(f=>f.name.toLowerCase()==='in transit');
+        window._transitSlabFiles=tf?await driveList(tf.id,'',`mimeType contains 'image/'`):[];
+      }
+      // Merge transit folder files into the slab index so getSlabFileId can match them
+      if(!slabAllFiles)slabAllFiles=[];
+      const existingIds=new Set(slabAllFiles.map(f=>f.id));
+      (window._transitSlabFiles||[]).forEach(f=>{if(!existingIds.has(f.id))slabAllFiles.push(f);});
+      for(const stone of missingTransit){
+        delete slabFileIdCache[stone.block]; // clear any cached miss and retry
+        const fileId=getSlabFileId(stone.block,stone.finishing,stone.name);
+        if(fileId){
+          stone.image=`https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
+          stone.noImage=false;
+          refreshCardImage(stone);
+        }
+      }
+    }catch(e){console.error('Transit slab image fallback:',e);}
   }
   stones.forEach(s=>{ if(s.noImage===undefined) s.noImage=!s.image; });
   const missing=allStones.filter(s=>s.noImage===true).length;
@@ -1926,14 +1958,15 @@ function stampBadgesOnCards(){
 
 // ── COLOUR DETECTION (Drive cache + keyword fallback) ────────
 const COLOUR_KEYWORDS={
-  White:['calacatta','statuario','bianco','white','carrara','arabescato','super white','ariel','volakas','afyon'],
-  Grey:['grigio','grey','gray','silver','cemento','bardiglio','pietra','blue grey','cloud'],
-  Beige:['beige','cream','crema','sand','sahara','botticino','daino','bursa','lima','fossil'],
-  Black:['nero','black','dark','ebony','marquina','absolute black','jet'],
+  White:['calacatta','statuario','bianco','white','carrara','arabescato','super white','ariel','volakas','afyon','thassos'],
+  Grey:['grigio','grey','gray','silver','cemento','bardiglio','pietra','blue grey','cloud','fossil'],
+  Beige:['beige','cream','crema','sand','sahara','botticino','daino','bursa','lima'],
+  Black:['nero','black','marquina','absolute black','jet','ebony','portoro','cosmic black','galaxy black'],
   Green:['verde','green','jungle','emerald','forest','ming','amazon','ubatuba'],
-  Gold:['gold','oro','dorado','yellow','giallo','imperial','autumn','honey','onyx'],
-  Brown:['brown','marrone','walnut','chocolate','rosewood','wenge','mocha','teak'],
-  Pink:['rosa','pink','rosso','red','rouge','bordeaux','breccia','rose','ruby','coral','rubino','rojo'],
+  Gold:['gold','oro','dorado','yellow','giallo','imperial','autumn','honey'],
+  Brown:['brown','marrone','walnut','chocolate','rosewood','wenge','mocha','teak','noce'],
+  Pink:['rosa','pink','flamingo','rose','salmon'],
+  Red:['rosso','red','rouge','bordeaux','breccia','ruby','coral','rubino','rojo'],
   Blue:['azul','blue','blu','aqua','ocean','sky','atlantic','bahia']
 };
 let stoneColourCache={};
@@ -1990,7 +2023,7 @@ function renderColourOverride(stone){
     </div>
     <div id="colourOverrideStatus" style="font-size:11px;color:rgba(200,184,154,.5);margin-top:6px"></div>`;
 }
-const VALID_COLOUR_FAMILIES_JS=['White','Grey','Beige','Black','Green','Gold','Brown','Pink','Blue'];
+const VALID_COLOUR_FAMILIES_JS=['White','Grey','Beige','Black','Green','Gold','Brown','Pink','Red','Blue'];
 
 async function saveColourOverride(block){
   const sel=document.getElementById('colourOverrideSelect');
@@ -2150,12 +2183,34 @@ function updateClientUI(){
 
 // ── COLOUR FILTER STATE ───────────────────────────────────────
 let activeColour='All';
+let activeFinishing='All';
 let activePriceTier=0; // 0=all, 1-4=tier
 function filterColour(colour,el){
   activeColour=colour;
   document.querySelectorAll('.colour-pill').forEach(p=>p.classList.remove('active'));
   if(el)el.classList.add('active');
   applyFilter(document.getElementById('stoneSearch').value.toLowerCase());
+}
+function filterFinishing(finish,el){
+  activeFinishing=finish;
+  document.querySelectorAll('.finish-pill').forEach(b=>b.classList.remove('active'));
+  if(el)el.classList.add('active');
+  applyFilter(document.getElementById('stoneSearch').value.toLowerCase());
+}
+function buildFinishingFilter(){
+  const row=document.getElementById('finishingFilterRow');
+  if(!row)return;
+  const finishes=[...new Set(
+    allStones
+      .filter(s=>!isLotHidden(s)&&!isTransitNotVisible(s))
+      .map(s=>(s.finishing||'').trim())
+      .filter(Boolean)
+  )].sort();
+  if(!finishes.length){row.style.display='none';return;}
+  row.style.display='flex';
+  row.innerHTML=`<span class="colour-pill-label">Finish</span>`
+    +`<button class="finish-pill active" onclick="filterFinishing('All',this)">All</button>`
+    +finishes.map(f=>`<button class="finish-pill" onclick="filterFinishing(${JSON.stringify(f)},this)">${f}</button>`).join('');
 }
 function filterPriceTier(tier,el){
   activePriceTier=tier;
@@ -2183,6 +2238,10 @@ function handleSearch(val){applyFilter(val.toLowerCase());}
 function isLotHidden(stone){
   const hidden=cms.hiddenLots||[];
   if(hidden.includes((stone.block||'').toString()))return true;
+  // Explicitly-unlocked transit lots bypass the no-photo filter —
+  // they're in transit so often have no slab photo yet, but admin
+  // has deliberately chosen to show them.
+  if(stone.status==='TRANSIT'&&(cms.visibleTransitLots||[]).includes((stone.block||'').toString()))return false;
   if(g('hideNoPhoto')&&stone.noImage===true)return true;
   return false;
 }
@@ -2240,7 +2299,12 @@ function applyFilter(search=''){
       const colour=getStoneColour(s);
       colm=colour===activeColour;
     }
-    return cm&&sm&&qm&&pm&&colm;
+    // Finishing filter
+    let fm=true;
+    if(activeFinishing&&activeFinishing!=='All'){
+      fm=(s.finishing||'').toLowerCase()===activeFinishing.toLowerCase();
+    }
+    return cm&&sm&&qm&&pm&&colm&&fm;
   });
   filteredStones=sortStones(filtered);
   displayedCount=0;
@@ -3069,7 +3133,7 @@ async function openCip(catIdx,mode='rotation'){
   document.getElementById('cipModalBackdrop').classList.add('open');
   document.body.style.overflow='hidden';
   try{
-    if(!slabSubfolders)slabSubfolders=(await driveList(SLAB_IMAGES_FOLDER_ID,'',`mimeType='application/vnd.google-apps.folder'`)).filter(f=>['marble','quartzite','granite','dolomite','travertine','limestone'].includes(f.name.toLowerCase()));
+    if(!slabSubfolders)slabSubfolders=await driveList(SLAB_IMAGES_FOLDER_ID,'',`mimeType='application/vnd.google-apps.folder'`);
     const folder=slabSubfolders.find(f=>f.name.toLowerCase()===cat.filter.toLowerCase());
     if(!folder){
       document.getElementById('cipModalGrid').innerHTML=`<div class="cip-modal-empty">No Drive folder found matching "${cat.filter}". Check the Filter Value matches a category folder name exactly.</div>`;
