@@ -88,9 +88,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{--cream:#F5F0E8;--warm-white:#FAF8F4;--stone:#C8B89A;--stone-dark:#A09070;--charcoal:#2A2620;--mid:#6B6358;--gold:#B8963C;--gold-light:#D4AF6A;--black:#1A1714;
-  --surface-dark:#1A1714;--surface-dark-alt:#13110d;--surface-dark-alt2:#0f0d0b;--surface-nav:rgba(15,13,11,.95);--surface-dark-text:#F5F0E8;--surface-card-dark:#111111;--surface-card-img-dark:#141210;--surface-card-dark-hover:#161310;--surface-dark-text-secondary:rgba(200,184,154,.7);--surface-dark-text-muted:rgba(200,184,154,.5);--surface-dark-text-faint:rgba(200,184,154,.35);}
+  --surface-dark:#1A1714;--surface-dark-alt:#13110d;--surface-dark-alt2:#0f0d0b;--surface-nav:rgba(15,13,11,.95);--surface-dark-text:#F5F0E8;--surface-card-dark:#111111;--surface-card-img-dark:#141210;--surface-card-dark-hover:#161310;--surface-dark-text-secondary:rgba(200,184,154,.82);--surface-dark-text-muted:rgba(200,184,154,.65);--surface-dark-text-faint:rgba(200,184,154,.5);}
 /* Site Theme preview (admin-only) — flips the dark-brand sections to a lighter palette for comparison */
-body[data-theme="light"]{--surface-dark:#FAF8F4;--surface-dark-alt:#F5F0E8;--surface-dark-alt2:#F0EBE3;--surface-nav:rgba(250,248,244,.95);--surface-dark-text:#2A2620;--surface-card-dark:#FFFFFF;--surface-card-img-dark:#F0EBE3;--surface-card-dark-hover:#F5F0E8;--surface-dark-text-secondary:rgba(42,38,32,.72);--surface-dark-text-muted:rgba(42,38,32,.55);--surface-dark-text-faint:rgba(42,38,32,.4);}
+body[data-theme="light"]{--surface-dark:#FAF8F4;--surface-dark-alt:#F5F0E8;--surface-dark-alt2:#F0EBE3;--surface-nav:rgba(250,248,244,.95);--surface-dark-text:#2A2620;--surface-card-dark:#FFFFFF;--surface-card-img-dark:#F0EBE3;--surface-card-dark-hover:#F5F0E8;--surface-dark-text-secondary:rgba(42,38,32,.85);--surface-dark-text-muted:rgba(42,38,32,.70);--surface-dark-text-faint:rgba(42,38,32,.55);}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{font-family:'Jost',sans-serif;background:var(--warm-white);color:var(--charcoal);font-weight:300;overflow-x:hidden;}
@@ -175,7 +175,7 @@ section{padding:72px 48px;}
 .filter-btn{background:transparent;border:1px solid rgba(200,184,154,.25);color:var(--surface-dark-text-secondary);padding:10px 16px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;transition:all .2s;white-space:nowrap;}
 .filter-btn:hover,.filter-btn.active{background:var(--gold);border-color:var(--gold);color:white;}
 .sort-select{background:transparent;border:1px solid rgba(200,184,154,.25);color:var(--surface-dark-text-secondary);padding:10px 32px 10px 14px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23A09070'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;margin-left:auto;}
-.showroom-status{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--surface-dark-text-muted);margin-bottom:32px;display:flex;align-items:center;gap:10px;}
+.showroom-status{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--surface-dark-text-muted);margin-bottom:32px;display:flex;align-items:center;gap:10px;}
 .status-dot{width:7px;height:7px;border-radius:50%;background:#4caf7d;animation:pulse 2s infinite;}
 .status-dot.loading{background:var(--gold);}
 .status-dot.error{background:#e05252;animation:none;}
@@ -196,24 +196,24 @@ section{padding:72px 48px;}
 .stone-card:hover .stone-renders-badge{opacity:1;}
 .stone-renders-badge.always-show{opacity:.75;}
 .stone-card-body{padding:16px 18px 18px;}
-.stone-card-category{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:5px;}
+.stone-card-category{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:5px;}
 .stone-card-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:400;color:var(--surface-dark-text);line-height:1.2;margin-bottom:6px;}
 .stone-card-name-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
 .stone-card-name-row .stone-card-name{margin-bottom:0;}
-.stone-card-specs{font-size:11px;color:var(--surface-dark-text-muted);line-height:1.7;}
+.stone-card-specs{font-size:12px;color:var(--surface-dark-text-muted);line-height:1.7;}
 .stone-card-specs span{display:block;}
 .stone-card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
 /* SLAB COUNT BAR */
 .slab-bar-wrap{display:flex;align-items:center;gap:6px;margin-top:6px;}
 .slab-bar-track{flex:1;height:3px;background:rgba(200,184,154,.12);border-radius:2px;overflow:hidden;}
 .slab-bar-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .4s;}
-.slab-bar-label{font-size:9px;letter-spacing:.06em;color:var(--surface-dark-text-muted);white-space:nowrap;}
+.slab-bar-label{font-size:10px;letter-spacing:.05em;color:var(--surface-dark-text-muted);white-space:nowrap;}
 /* COLOUR FILTER PILLS */
 .colour-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center;}
 .colour-pill{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:border-color .15s,transform .15s;flex-shrink:0;position:relative;}
 .colour-pill:hover{transform:scale(1.15);}
 .colour-pill.active{border-color:var(--gold);}
-.colour-pill-label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--surface-dark-text-muted);}
+.colour-pill-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--surface-dark-text-muted);}
 /* Colour filter — name-label variant (admin toggle) */
 .colour-filter-row.style-names .colour-pill{width:auto;height:auto;border-radius:3px;padding:7px 13px;background:transparent!important;border:1px solid rgba(200,184,154,.25);color:var(--surface-dark-text-secondary);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-family:'Jost',sans-serif;white-space:nowrap;}
 .colour-filter-row.style-names .colour-pill:hover{border-color:rgba(200,184,154,.5);}
@@ -223,14 +223,14 @@ section{padding:72px 48px;}
 .finish-pill:hover,.finish-pill.active{background:var(--gold);border-color:var(--gold);color:white;}
 /* MIN SLABS FILTER */
 .min-slabs-wrap{display:flex;align-items:center;gap:7px;margin-left:auto;}
-.min-slabs-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--surface-dark-text-muted);white-space:nowrap;}
+.min-slabs-label{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--surface-dark-text-muted);white-space:nowrap;}
 .min-slabs-input{width:48px;background:transparent;border:1px solid rgba(200,184,154,.25);color:var(--surface-dark-text-secondary);padding:6px 8px;font-size:11px;font-family:'Jost',sans-serif;text-align:center;outline:none;}
 .min-slabs-input:focus{border-color:var(--gold);}
 /* MISSING SLABS SORT */
 .admin-sort-row{display:flex;gap:8px;margin-bottom:16px;align-items:center;}
 .admin-sort-btn{background:transparent;border:1px solid rgba(200,184,154,.2);color:rgba(200,184,154,.5);padding:5px 12px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
 .admin-sort-btn.active{background:rgba(200,184,154,.12);color:var(--gold);border-color:var(--gold);}
-.stone-card-tag{display:inline-block;padding:3px 9px;background:rgba(200,184,154,.1);color:var(--surface-dark-text-muted);font-size:10px;letter-spacing:.1em;text-transform:uppercase;}
+.stone-card-tag{display:inline-block;padding:4px 10px;background:rgba(200,184,154,.12);color:var(--surface-dark-text-muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase;}
 .card-shortlist-btn{background:transparent;border:none;cursor:pointer;color:var(--surface-dark-text-faint);font-size:18px;padding:2px 4px;line-height:1;transition:color .2s,transform .2s;}
 .card-shortlist-btn:hover{color:var(--gold-light);transform:scale(1.2);}
 .card-shortlist-btn.active{color:var(--gold);}
@@ -239,7 +239,7 @@ section{padding:72px 48px;}
 .price-range-btn{background:transparent;border:1px solid rgba(200,184,154,.2);color:var(--surface-dark-text-secondary);padding:5px 12px;font-size:12px;font-family:'Jost',sans-serif;cursor:pointer;transition:all .2s;letter-spacing:.04em;}
 .price-range-btn:hover{border-color:var(--gold);color:var(--gold);}
 .price-range-btn.active{background:rgba(200,184,154,.1);border-color:var(--gold);}
-.showroom-note{margin-top:24px;font-size:11px;color:var(--surface-dark-text-faint);letter-spacing:.06em;line-height:1.7;}
+.showroom-note{margin-top:24px;font-size:12px;color:var(--surface-dark-text-muted);letter-spacing:.04em;line-height:1.75;}
 .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.07) 50%,rgba(255,255,255,.04) 75%);background-size:200% 100%;animation:shimmer 1.6s infinite;}
 @keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
 /* PRODUCT MODAL */
@@ -505,6 +505,9 @@ textarea.admin-input{resize:vertical;min-height:80px;line-height:1.6;}
   .footer-top{grid-template-columns:1fr;}
   .hero h1{font-size:42px;}
   .modal-specs{grid-template-columns:1fr;}
+  .stone-grid{grid-template-columns:1fr;gap:3px;}
+  .stone-card-img{aspect-ratio:16/9;}
+  .stone-card-body{padding:14px 16px 16px;}
 }
 
 /* ── SHOWROOM PRESENTATION MODE (per-stone) ─────────────────── */
@@ -1162,6 +1165,7 @@ const CMS_DEFAULTS={
   priceFilterVisible:true, // show price range filter pills on public showroom
   priceBracketVisible:true, // show $$$$ bracket tag on individual stone cards
   minSlabsFilterVisible:true, // show min slabs quantity filter
+  finishingFilterVisible:true, // show finishing filter row on public gallery
   arrivingSoonVisible:false, // show Arriving Soon section (enable when folder has content)
   fabricatorsVisible:true, // show Recommended Fabricators section
   siteTheme:'dark', // 'dark' (current brand look) or 'light' (admin preview only — no visitor-facing switch)
@@ -2200,6 +2204,8 @@ function filterFinishing(finish,el){
 function buildFinishingFilter(){
   const row=document.getElementById('finishingFilterRow');
   if(!row)return;
+  // Respect admin visibility toggle
+  if(g('finishingFilterVisible')===false){row.style.display='none';return;}
   const finishes=[...new Set(
     allStones
       .filter(s=>!isLotHidden(s)&&!isTransitNotVisible(s))
@@ -2803,6 +2809,13 @@ function renderAdminContent(){
           </select>
         </div>
         <div class="admin-field">
+          <div class="admin-label">Finishing Filter</div>
+          <select class="admin-input" id="af-finishingFilterVisible" style="padding:9px 12px">
+            <option value="true" ${g('finishingFilterVisible')!==false?'selected':''}>Visible to public</option>
+            <option value="false" ${g('finishingFilterVisible')===false?'selected':''}>Hidden</option>
+          </select>
+        </div>
+        <div class="admin-field">
           <div class="admin-label">Price Filter Visibility</div>
           <select class="admin-input" id="af-priceFilterVisible" style="padding:9px 12px">
             <option value="true" ${g('priceFilterVisible')!==false?'selected':''}>Visible to public</option>
@@ -2872,6 +2885,8 @@ async function saveAdminContent(){
   if(pbEl)cms.priceBracketVisible=pbEl.value==='true';
   const msfEl=document.getElementById('af-minSlabsFilterVisible');
   if(msfEl)cms.minSlabsFilterVisible=msfEl.value==='true';
+  const ffEl=document.getElementById('af-finishingFilterVisible');
+  if(ffEl){cms.finishingFilterVisible=ffEl.value==='true';buildFinishingFilter();}
   const fabVisEl=document.getElementById('af-fabricatorsVisible');
   if(fabVisEl)cms.fabricatorsVisible=fabVisEl.value==='true';
   const themeEl=document.getElementById('af-siteTheme');
