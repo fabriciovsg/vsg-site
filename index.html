@@ -88,7 +88,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{--cream:#F5F0E8;--warm-white:#FAF8F4;--stone:#C8B89A;--stone-dark:#A09070;--charcoal:#2A2620;--mid:#6B6358;--gold:#B8963C;--gold-light:#D4AF6A;--black:#1A1714;
-  --surface-dark:#1A1714;--surface-dark-alt:#13110d;--surface-dark-alt2:#0f0d0b;--surface-nav:rgba(15,13,11,.95);--surface-dark-text:#F5F0E8;--surface-card-dark:#111111;--surface-card-img-dark:#141210;--surface-card-dark-hover:#161310;--surface-dark-text-secondary:rgba(200,184,154,.82);--surface-dark-text-muted:rgba(200,184,154,.65);--surface-dark-text-faint:rgba(200,184,154,.5);}
+  --surface-dark:#1A1714;--surface-dark-alt:#13110d;--surface-dark-alt2:#0f0d0b;--surface-nav:rgba(15,13,11,.95);--surface-dark-text:#F5F0E8;--surface-card-dark:#111111;--surface-card-img-dark:#141210;--surface-card-dark-hover:#161310;--surface-dark-text-secondary:rgba(200,184,154,.82);--surface-dark-text-muted:rgba(200,184,154,.80);--surface-dark-text-faint:rgba(200,184,154,.5);}
 /* Site Theme preview (admin-only) — flips the dark-brand sections to a lighter palette for comparison */
 body[data-theme="light"]{--surface-dark:#F5F0E8;--surface-dark-alt:#EDE8DF;--surface-dark-alt2:#E8E2D8;--surface-nav:rgba(250,248,244,.95);--surface-dark-text:#2A2620;--surface-card-dark:#FAF8F4;--surface-card-img-dark:#EDE8DF;--surface-card-dark-hover:#F0EBE3;--surface-dark-text-secondary:rgba(42,38,32,.85);--surface-dark-text-muted:rgba(42,38,32,.70);--surface-dark-text-faint:rgba(42,38,32,.55);}
 /* Light theme: gallery grid — warm gap + lifted cards */
@@ -115,7 +115,7 @@ body[data-theme="dark-light-gallery"] #gallery{
   --surface-card-dark-hover:#F0EBE3;
   background:#F5F0E8;
 }
-body[data-theme="dark-light-gallery"] .stone-grid{gap:8px;}
+body[data-theme="dark-light-gallery"] .stone-grid{gap:2px;}
 body[data-theme="dark-light-gallery"] .stone-card{box-shadow:0 2px 8px rgba(42,38,32,.07);}
 body[data-theme="dark-light-gallery"] .search-box input{background:rgba(255,255,255,.7);border-color:rgba(42,38,32,.18);}
 body[data-theme="dark-light-gallery"] .filter-btn:not(.active){border-color:rgba(42,38,32,.18);}
@@ -236,7 +236,7 @@ section{padding:72px 48px;}
 .stone-card-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:400;color:var(--surface-dark-text);line-height:1.2;margin-bottom:6px;}
 .stone-card-name-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
 .stone-card-name-row .stone-card-name{margin-bottom:0;}
-.stone-card-specs{font-size:12px;color:var(--surface-dark-text-muted);line-height:1.7;}
+.stone-card-specs{font-size:13px;color:var(--surface-dark-text-muted);line-height:1.7;}
 .stone-card-specs span{display:block;}
 .stone-card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
 /* SLAB COUNT BAR */
@@ -2337,7 +2337,7 @@ function formatEtaDisplay(raw){
 function applyFilter(search=''){
   const minSlabs=parseInt(document.getElementById('minSlabsInput')?.value||'1')||1;
   const filtered=allStones.filter(s=>{
-    if(isLotHidden(s))return false;
+    if(isLotHidden(s)&&!adminUnlocked)return false;
     if(isTransitNotVisible(s))return false;
     const cm=activeCategory==='All'||(s.category||'').toLowerCase().includes(activeCategory.toLowerCase());
     const sm=!search||s.name.toLowerCase().includes(search)||(s.block||'').toLowerCase().includes(search)||(s.category||'').toLowerCase().includes(search);
@@ -2400,7 +2400,9 @@ function renderGrid(reset=false){
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           <span>View in our gallery</span>
         </div>`;
-    const imgHTML=`<div class="stone-card-img-wrap">${imgInner}</div>`;
+    const isHidden=isLotHidden(stone);
+    const hiddenBadge=isHidden?`<div style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:2;pointer-events:none;display:flex;align-items:flex-start;justify-content:flex-start"><div style="background:rgba(180,40,30,.85);color:#fff;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:0 0 6px 0">Hidden</div></div>`:'';
+    const imgHTML=`<div class="stone-card-img-wrap" style="${isHidden?'position:relative;opacity:.55;':''}">${imgInner}${hiddenBadge}</div>`;
     const inList=isShortlisted(stone);
     const isTransit=stone.status==='TRANSIT';
     const qty=parseInt(stone.qty||'0');
