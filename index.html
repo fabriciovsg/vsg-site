@@ -2055,12 +2055,13 @@ function getStoneColour(stone){
 }
 function cacheAllColours(){} // no-op — colours come from Drive cache now
 
-// ── ADMIN: MANUAL COLOUR OVERRIDE ────────────────────────────
+// ── ADMIN: MANUAL COLOUR OVERRIDE + HIDE LOT ─────────────────
 function renderColourOverride(stone){
   const wrap=document.getElementById('modalColourOverride');
   if(!wrap)return;
   if(!adminUnlocked||!stone.block){wrap.style.display='none';wrap.innerHTML='';return;}
   const current=getStoneColour(stone)||'';
+  const hidden=isLotHidden(stone);
   wrap.style.display='block';
   wrap.innerHTML=`
     <div style="font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Admin — Colour Tag</div>
@@ -2071,7 +2072,19 @@ function renderColourOverride(stone){
       </select>
       <button class="admin-save-btn" style="padding:8px 14px;font-size:11px" onclick="saveColourOverride('${stone.block}')">Save</button>
     </div>
-    <div id="colourOverrideStatus" style="font-size:11px;color:rgba(200,184,154,.5);margin-top:6px"></div>`;
+    <div id="colourOverrideStatus" style="font-size:11px;color:rgba(200,184,154,.5);margin-top:6px"></div>
+    <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(200,184,154,.12)">
+      <div style="font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Admin — Visibility</div>
+      <button id="modalHideBtn" class="admin-save-btn" style="padding:8px 14px;font-size:11px;width:100%;${hidden?'background:rgba(192,57,43,.25);border-color:rgba(192,57,43,.5);color:#e88;':''}" onclick="toggleHiddenLotModal('${stone.block}')">${hidden?'⊘ Hidden from site — click to unhide':'Hide lot from website'}</button>
+    </div>`;
+}
+async function toggleHiddenLotModal(block){
+  const btn=document.getElementById('modalHideBtn');
+  if(btn)btn.textContent='Saving…';
+  await toggleHiddenLot(block,null);
+  // Re-render the admin section with the updated state
+  const stone=allStones.find(s=>s.block===block)||{block};
+  renderColourOverride(stone);
 }
 const VALID_COLOUR_FAMILIES_JS=['White','Grey','Beige','Black','Green','Gold','Brown','Pink','Red','Blue'];
 
