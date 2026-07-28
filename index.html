@@ -88,9 +88,45 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{--cream:#F5F0E8;--warm-white:#FAF8F4;--stone:#C8B89A;--stone-dark:#A09070;--charcoal:#2A2620;--mid:#6B6358;--gold:#B8963C;--gold-light:#D4AF6A;--black:#1A1714;
-  --surface-dark:#1A1714;--surface-dark-alt:#13110d;--surface-dark-alt2:#0f0d0b;--surface-nav:rgba(15,13,11,.95);--surface-dark-text:#F5F0E8;--surface-card-dark:#111111;--surface-card-img-dark:#141210;--surface-card-dark-hover:#161310;--surface-dark-text-secondary:rgba(200,184,154,.7);--surface-dark-text-muted:rgba(200,184,154,.5);--surface-dark-text-faint:rgba(200,184,154,.35);}
+  --surface-dark:#1A1714;--surface-dark-alt:#13110d;--surface-dark-alt2:#0f0d0b;--surface-nav:rgba(15,13,11,.95);--surface-dark-text:#F5F0E8;--surface-card-dark:#111111;--surface-card-img-dark:#141210;--surface-card-dark-hover:#161310;--surface-dark-text-secondary:rgba(200,184,154,.82);--surface-dark-text-muted:rgba(200,184,154,.65);--surface-dark-text-faint:rgba(200,184,154,.5);}
 /* Site Theme preview (admin-only) — flips the dark-brand sections to a lighter palette for comparison */
-body[data-theme="light"]{--surface-dark:#FAF8F4;--surface-dark-alt:#F5F0E8;--surface-dark-alt2:#F0EBE3;--surface-nav:rgba(250,248,244,.95);--surface-dark-text:#2A2620;--surface-card-dark:#FFFFFF;--surface-card-img-dark:#F0EBE3;--surface-card-dark-hover:#F5F0E8;--surface-dark-text-secondary:rgba(42,38,32,.72);--surface-dark-text-muted:rgba(42,38,32,.55);--surface-dark-text-faint:rgba(42,38,32,.4);}
+body[data-theme="light"]{--surface-dark:#F5F0E8;--surface-dark-alt:#EDE8DF;--surface-dark-alt2:#E8E2D8;--surface-nav:rgba(250,248,244,.95);--surface-dark-text:#2A2620;--surface-card-dark:#FAF8F4;--surface-card-img-dark:#EDE8DF;--surface-card-dark-hover:#F0EBE3;--surface-dark-text-secondary:rgba(42,38,32,.85);--surface-dark-text-muted:rgba(42,38,32,.70);--surface-dark-text-faint:rgba(42,38,32,.55);}
+/* Light theme: gallery grid — warm gap + lifted cards */
+body[data-theme="light"] .stone-grid{gap:8px;}
+body[data-theme="light"] .stone-card{box-shadow:0 2px 8px rgba(42,38,32,.07);}
+/* Light theme: restore contrast break after gallery — about/why step up to near-white */
+body[data-theme="light"] #about{background:#FAF8F4;}
+body[data-theme="light"] .about-img-accent{border-color:#FAF8F4;}
+body[data-theme="light"] #why{background:#FAF8F4;}
+/* Light theme: keep nav dark, logo and links light */
+body[data-theme="light"] nav{background:rgba(15,13,11,.95)!important;border-bottom-color:rgba(200,184,154,.12)!important;}
+body[data-theme="light"] .vsg-logo-svg.nav-logo-svg{color:#F5F0E8!important;}
+body[data-theme="light"] .nav-links a{color:rgba(200,184,154,.82)!important;}
+body[data-theme="light"] .nav-links a:hover{color:#D4AF6A!important;}
+body[data-theme="light"] .nav-hamburger span{background:#F5F0E8!important;}
+/* Dark + Light Gallery theme — dark site, warm cream gallery section */
+body[data-theme="dark-light-gallery"] #gallery{
+  --surface-dark-text:#2A2620;
+  --surface-dark-text-secondary:rgba(42,38,32,.85);
+  --surface-dark-text-muted:rgba(42,38,32,.70);
+  --surface-dark-text-faint:rgba(42,38,32,.55);
+  --surface-card-dark:#FAF8F4;
+  --surface-card-img-dark:#EDE8DF;
+  --surface-card-dark-hover:#F0EBE3;
+  background:#F5F0E8;
+}
+body[data-theme="dark-light-gallery"] .stone-grid{gap:8px;}
+body[data-theme="dark-light-gallery"] .stone-card{box-shadow:0 2px 8px rgba(42,38,32,.07);}
+body[data-theme="dark-light-gallery"] .search-box input{background:rgba(255,255,255,.7);border-color:rgba(42,38,32,.18);}
+body[data-theme="dark-light-gallery"] .filter-btn:not(.active){border-color:rgba(42,38,32,.18);}
+body[data-theme="dark-light-gallery"] .sort-select{border-color:rgba(42,38,32,.18);}
+body[data-theme="dark-light-gallery"] .min-slabs-input{border-color:rgba(42,38,32,.18);}
+body[data-theme="dark-light-gallery"] .finish-pill:not(.active){border-color:rgba(42,38,32,.18);}
+body[data-theme="dark-light-gallery"] .colour-filter-row.style-names .colour-pill:not(.active){border-color:rgba(42,38,32,.18);}
+/* Dark+light-gallery: restore contrast break — about/why step up to near-white */
+body[data-theme="dark-light-gallery"] #about{background:#FAF8F4;}
+body[data-theme="dark-light-gallery"] .about-img-accent{border-color:#FAF8F4;}
+body[data-theme="dark-light-gallery"] #why{background:#FAF8F4;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{font-family:'Jost',sans-serif;background:var(--warm-white);color:var(--charcoal);font-weight:300;overflow-x:hidden;}
@@ -125,11 +161,11 @@ nav.scrolled{box-shadow:0 4px 32px rgba(0,0,0,.4);}
 .hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(26,23,20,.85) 0%,rgba(26,23,20,.2) 55%,transparent 100%);}
 .hero-content{position:relative;z-index:2;padding:64px 48px 56px;max-width:820px;animation:heroFade 1.2s ease-out .3s both;}
 @keyframes heroFade{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:none;}}
-.hero-eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-light);margin-bottom:18px;display:flex;align-items:center;gap:14px;}
+.hero-eyebrow{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-light);margin-bottom:18px;display:flex;align-items:center;gap:14px;}
 .hero-eyebrow::before{content:'';display:block;width:40px;height:1px;background:var(--gold);}
 .hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,5.5vw,72px);font-weight:300;line-height:1.05;color:white;margin-bottom:20px;}
 .hero h1 em{font-style:italic;color:var(--stone);}
-.hero-sub{color:rgba(245,240,232,.75);font-size:16px;line-height:1.7;max-width:520px;margin-bottom:32px;}
+.hero-sub{color:rgba(245,240,232,.92);font-size:16px;line-height:1.7;max-width:520px;margin-bottom:32px;}
 .hero-actions{display:flex;gap:16px;flex-wrap:wrap;}
 /* BUTTONS */
 .btn-primary{background:var(--gold);color:white;text-decoration:none;padding:16px 36px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-family:'Jost',sans-serif;transition:background .2s,transform .2s;display:inline-block;border:none;cursor:pointer;}
@@ -175,7 +211,7 @@ section{padding:72px 48px;}
 .filter-btn{background:transparent;border:1px solid rgba(200,184,154,.25);color:var(--surface-dark-text-secondary);padding:10px 16px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;transition:all .2s;white-space:nowrap;}
 .filter-btn:hover,.filter-btn.active{background:var(--gold);border-color:var(--gold);color:white;}
 .sort-select{background:transparent;border:1px solid rgba(200,184,154,.25);color:var(--surface-dark-text-secondary);padding:10px 32px 10px 14px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23A09070'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;margin-left:auto;}
-.showroom-status{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--surface-dark-text-muted);margin-bottom:32px;display:flex;align-items:center;gap:10px;}
+.showroom-status{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--surface-dark-text-muted);margin-bottom:32px;display:flex;align-items:center;gap:10px;}
 .status-dot{width:7px;height:7px;border-radius:50%;background:#4caf7d;animation:pulse 2s infinite;}
 .status-dot.loading{background:var(--gold);}
 .status-dot.error{background:#e05252;animation:none;}
@@ -196,38 +232,41 @@ section{padding:72px 48px;}
 .stone-card:hover .stone-renders-badge{opacity:1;}
 .stone-renders-badge.always-show{opacity:.75;}
 .stone-card-body{padding:16px 18px 18px;}
-.stone-card-category{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:5px;}
+.stone-card-category{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:5px;}
 .stone-card-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:400;color:var(--surface-dark-text);line-height:1.2;margin-bottom:6px;}
 .stone-card-name-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
 .stone-card-name-row .stone-card-name{margin-bottom:0;}
-.stone-card-specs{font-size:11px;color:var(--surface-dark-text-muted);line-height:1.7;}
+.stone-card-specs{font-size:12px;color:var(--surface-dark-text-muted);line-height:1.7;}
 .stone-card-specs span{display:block;}
 .stone-card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
 /* SLAB COUNT BAR */
 .slab-bar-wrap{display:flex;align-items:center;gap:6px;margin-top:6px;}
 .slab-bar-track{flex:1;height:3px;background:rgba(200,184,154,.12);border-radius:2px;overflow:hidden;}
 .slab-bar-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .4s;}
-.slab-bar-label{font-size:9px;letter-spacing:.06em;color:var(--surface-dark-text-muted);white-space:nowrap;}
+.slab-bar-label{font-size:10px;letter-spacing:.05em;color:var(--surface-dark-text-muted);white-space:nowrap;}
 /* COLOUR FILTER PILLS */
 .colour-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center;}
 .colour-pill{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:border-color .15s,transform .15s;flex-shrink:0;position:relative;}
 .colour-pill:hover{transform:scale(1.15);}
 .colour-pill.active{border-color:var(--gold);}
-.colour-pill-label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--surface-dark-text-muted);}
+.colour-pill-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--surface-dark-text-muted);}
 /* Colour filter — name-label variant (admin toggle) */
 .colour-filter-row.style-names .colour-pill{width:auto;height:auto;border-radius:3px;padding:7px 13px;background:transparent!important;border:1px solid rgba(200,184,154,.25);color:var(--surface-dark-text-secondary);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-family:'Jost',sans-serif;white-space:nowrap;}
 .colour-filter-row.style-names .colour-pill:hover{border-color:rgba(200,184,154,.5);}
 .colour-filter-row.style-names .colour-pill.active{background:var(--gold)!important;border-color:var(--gold);color:white;}
+/* FINISHING FILTER */
+.finish-pill{background:transparent;border:1px solid rgba(200,184,154,.25);color:var(--surface-dark-text-secondary);padding:6px 13px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.finish-pill:hover,.finish-pill.active{background:var(--gold);border-color:var(--gold);color:white;}
 /* MIN SLABS FILTER */
 .min-slabs-wrap{display:flex;align-items:center;gap:7px;margin-left:auto;}
-.min-slabs-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--surface-dark-text-muted);white-space:nowrap;}
+.min-slabs-label{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--surface-dark-text-muted);white-space:nowrap;}
 .min-slabs-input{width:48px;background:transparent;border:1px solid rgba(200,184,154,.25);color:var(--surface-dark-text-secondary);padding:6px 8px;font-size:11px;font-family:'Jost',sans-serif;text-align:center;outline:none;}
 .min-slabs-input:focus{border-color:var(--gold);}
 /* MISSING SLABS SORT */
 .admin-sort-row{display:flex;gap:8px;margin-bottom:16px;align-items:center;}
 .admin-sort-btn{background:transparent;border:1px solid rgba(200,184,154,.2);color:rgba(200,184,154,.5);padding:5px 12px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
 .admin-sort-btn.active{background:rgba(200,184,154,.12);color:var(--gold);border-color:var(--gold);}
-.stone-card-tag{display:inline-block;padding:3px 9px;background:rgba(200,184,154,.1);color:var(--surface-dark-text-muted);font-size:10px;letter-spacing:.1em;text-transform:uppercase;}
+.stone-card-tag{display:inline-block;padding:4px 10px;background:rgba(200,184,154,.12);color:var(--surface-dark-text-muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase;}
 .card-shortlist-btn{background:transparent;border:none;cursor:pointer;color:var(--surface-dark-text-faint);font-size:18px;padding:2px 4px;line-height:1;transition:color .2s,transform .2s;}
 .card-shortlist-btn:hover{color:var(--gold-light);transform:scale(1.2);}
 .card-shortlist-btn.active{color:var(--gold);}
@@ -236,20 +275,20 @@ section{padding:72px 48px;}
 .price-range-btn{background:transparent;border:1px solid rgba(200,184,154,.2);color:var(--surface-dark-text-secondary);padding:5px 12px;font-size:12px;font-family:'Jost',sans-serif;cursor:pointer;transition:all .2s;letter-spacing:.04em;}
 .price-range-btn:hover{border-color:var(--gold);color:var(--gold);}
 .price-range-btn.active{background:rgba(200,184,154,.1);border-color:var(--gold);}
-.showroom-note{margin-top:24px;font-size:11px;color:var(--surface-dark-text-faint);letter-spacing:.06em;line-height:1.7;}
+.showroom-note{margin-top:24px;font-size:12px;color:var(--surface-dark-text-muted);letter-spacing:.04em;line-height:1.75;}
 .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.07) 50%,rgba(255,255,255,.04) 75%);background-size:200% 100%;animation:shimmer 1.6s infinite;}
 @keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
 /* PRODUCT MODAL */
-.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(10,8,6,.92);z-index:900;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;}
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(10,8,6,.92);z-index:900;align-items:flex-start;justify-content:center;padding:12px;overflow-y:auto;}
 .modal-backdrop.open{display:flex;}
-.modal{background:#18160f;max-width:1100px;width:100%;margin:auto;display:grid;grid-template-columns:1.2fr 0.8fr;animation:modalIn .3s ease;position:relative;}
+.modal{background:#18160f;max-width:1400px;width:100%;margin:auto;display:grid;grid-template-columns:1.7fr 0.7fr;animation:modalIn .3s ease;position:relative;}
 @keyframes modalIn{from{opacity:0;transform:scale(.96);}to{opacity:1;transform:none;}}
 .modal-gallery{position:relative;background:#0e0c09;display:flex;flex-direction:column;}
 .modal-gallery-main{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;cursor:zoom-in;}
 .modal-gallery-main.portrait{aspect-ratio:3/4;}
 .ai-render-note{position:absolute;left:0;right:0;bottom:0;background:rgba(10,8,6,.68);backdrop-filter:blur(3px);color:rgba(245,240,232,.85);font-size:10px;letter-spacing:.04em;text-align:center;padding:7px 12px;pointer-events:none;}
 .modal-gallery-thumbs{display:flex;gap:3px;padding:3px;background:#0e0c09;flex-wrap:wrap;}
-.modal-thumb{width:70px;height:52px;object-fit:cover;cursor:pointer;opacity:.5;transition:opacity .2s;border:2px solid transparent;flex-shrink:0;}
+.modal-thumb{width:58px;height:42px;object-fit:cover;cursor:pointer;opacity:.5;transition:opacity .2s;border:2px solid transparent;flex-shrink:0;}
 .modal-thumb.active{opacity:1;border-color:var(--gold);}
 .modal-thumb:hover{opacity:.85;}
 .modal-gallery-nav{position:absolute;top:calc(50% - 30px);transform:translateY(-50%);background:rgba(0,0,0,.55);border:none;color:white;width:38px;height:38px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5;transition:background .2s;}
@@ -266,14 +305,14 @@ section{padding:72px 48px;}
 .modal-backdrop.open .stone-position{display:block;}
 @media(max-width:768px){.stone-nav{width:42px;height:42px;font-size:24px;}.stone-nav-prev{left:8px;}.stone-nav-next{right:8px;}}
 .modal-close{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.6);border:none;color:white;width:36px;height:36px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;}
-.modal-body{padding:36px 32px;overflow-y:auto;display:flex;flex-direction:column;max-height:85vh;}
-.modal-category{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
-.modal-name{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:300;color:var(--cream);line-height:1.15;margin-bottom:6px;}
-.modal-block{font-size:12px;color:var(--stone-dark);letter-spacing:.1em;margin-bottom:24px;}
-.modal-specs{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin-bottom:24px;}
-.modal-spec-label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--stone-dark);margin-bottom:3px;}
+.modal-body{padding:28px 26px;overflow-y:auto;display:flex;flex-direction:column;max-height:92vh;}
+.modal-category{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+.modal-name{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:300;color:var(--cream);line-height:1.15;margin-bottom:4px;}
+.modal-block{font-size:12px;color:var(--stone-dark);letter-spacing:.1em;margin-bottom:18px;}
+.modal-specs{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-bottom:18px;}
+.modal-spec-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone-dark);margin-bottom:3px;}
 .modal-spec-val{font-size:14px;color:var(--cream);font-weight:300;}
-.modal-divider{height:1px;background:rgba(200,184,154,.15);margin:18px 0;}
+.modal-divider{height:1px;background:rgba(200,184,154,.15);margin:14px 0;}
 .modal-actions{display:flex;flex-direction:column;gap:10px;}
 .modal-enquire{display:block;width:100%;padding:14px;background:var(--gold);border:none;color:white;font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;transition:background .2s;text-align:center;text-decoration:none;}
 .modal-enquire:hover{background:var(--gold-light);}
@@ -282,7 +321,7 @@ section{padding:72px 48px;}
 .modal-note{font-size:11px;color:rgba(200,184,154,.3);margin-top:12px;line-height:1.6;}
 /* SIMILAR STONES */
 .similar-section{margin-top:24px;}
-.similar-label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--stone-dark);margin-bottom:12px;}
+.similar-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--stone-dark);margin-bottom:12px;}
 .similar-grid{display:flex;gap:6px;flex-wrap:wrap;}
 .similar-card{width:72px;cursor:pointer;flex-shrink:0;border:2px solid transparent;transition:border-color .2s;}
 .similar-card:hover{border-color:var(--gold);}
@@ -363,6 +402,11 @@ section{padding:72px 48px;}
 /* EVENTS */
 /* FABRICATORS */
 #fabricators{background:var(--surface-dark-alt);padding:80px 48px;}
+#fabricators .section-label{color:var(--gold-light);}
+#fabricators .section-label::after{background:var(--gold-light);}
+#fabricators .section-title{color:var(--surface-dark-text);}
+#fabricators .section-title em{color:var(--stone);}
+#fabricators .section-body{color:var(--surface-dark-text-secondary);}
 #fabricators .fab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1px;background:rgba(200,184,154,.08);margin-top:40px;}
 #fabricators .fab-card{background:var(--surface-card-dark);padding:24px 28px;transition:background .2s;}
 #fabricators .fab-card:hover{background:var(--surface-card-dark-hover);}
@@ -377,6 +421,10 @@ section{padding:72px 48px;}
 /* ARRIVING SOON */
 #arriving{background:var(--surface-dark-alt2);padding:80px 48px;}
 #arriving .section-label{color:var(--gold-light);}
+#arriving .section-label::after{background:var(--gold-light);}
+#arriving .section-title{color:var(--surface-dark-text);}
+#arriving .section-title em{color:var(--stone);}
+#arriving .section-body{color:var(--surface-dark-text-secondary);}
 #arriving .arriving-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px;margin-top:40px;}
 #arriving .arriving-card{background:var(--surface-card-img-dark);overflow:hidden;position:relative;}
 #arriving .arriving-card-img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;filter:brightness(.85);}
@@ -502,10 +550,13 @@ textarea.admin-input{resize:vertical;min-height:80px;line-height:1.6;}
   .footer-top{grid-template-columns:1fr;}
   .hero h1{font-size:42px;}
   .modal-specs{grid-template-columns:1fr;}
+  .stone-grid{grid-template-columns:1fr;gap:3px;}
+  .stone-card-img{aspect-ratio:16/9;}
+  .stone-card-body{padding:14px 16px 16px;}
 }
 
 /* ── SHOWROOM PRESENTATION MODE (per-stone) ─────────────────── */
-.sm-ov{display:none;position:fixed;inset:0;background:#000;z-index:1200;flex-direction:column;align-items:center;justify-content:center;}
+.sm-ov{display:none;position:fixed;top:0;left:0;width:100%;height:100vh;height:100dvh;background:#000;z-index:1200;flex-direction:column;align-items:center;justify-content:center;}
 .sm-ov.open{display:flex;}
 .sm-main{position:relative;flex:1;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .sm-img{max-width:100%;max-height:100%;object-fit:contain;display:block;}
@@ -515,7 +566,7 @@ textarea.admin-input{resize:vertical;min-height:80px;line-height:1.6;}
 .sm-info{position:absolute;bottom:0;left:0;right:0;padding:24px 32px;background:linear-gradient(to top,rgba(0,0,0,.85),transparent);pointer-events:none;}
 .sm-stone-name{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4vw,52px);font-weight:300;color:white;line-height:1.1;}
 .sm-scene{font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-light);margin-top:6px;}
-.sm-stone-meta{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:rgba(200,184,154,.45);margin-top:8px;}
+.sm-stone-meta{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(200,184,154,.6);margin-top:8px;}
 .sm-thumbs{display:flex;gap:4px;padding:8px 12px;background:#111;overflow-x:auto;max-width:100%;flex-shrink:0;}
 .sm-thumb{width:80px;height:60px;object-fit:cover;cursor:pointer;opacity:.45;transition:opacity .2s;border:2px solid transparent;flex-shrink:0;}
 .sm-thumb.active{opacity:1;border-color:var(--gold);}
@@ -527,7 +578,7 @@ textarea.admin-input{resize:vertical;min-height:80px;line-height:1.6;}
 .modal-present-btn:disabled{opacity:.35;cursor:default;}
 
 /* ── GALLERY PRESENTATION MODE (collection-wide) ────────────── */
-.gp-ov{display:none;position:fixed;inset:0;background:#000;z-index:1150;flex-direction:column;}
+.gp-ov{display:none;position:fixed;top:0;left:0;width:100%;height:100vh;height:100dvh;background:#000;z-index:1150;flex-direction:column;}
 .gp-ov.open{display:flex;}
 .gp-header{display:flex;align-items:center;gap:10px;padding:12px 20px;background:rgba(0,0,0,.85);flex-shrink:0;border-bottom:1px solid rgba(200,184,154,.12);flex-wrap:wrap;}
 .gp-logo{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;color:rgba(200,184,154,.7);letter-spacing:.12em;margin-right:6px;white-space:nowrap;}
@@ -543,7 +594,7 @@ textarea.admin-input{resize:vertical;min-height:80px;line-height:1.6;}
 .gp-feat-info{position:absolute;bottom:0;left:0;right:0;padding:28px 40px 24px;background:linear-gradient(to top,rgba(0,0,0,.88) 0%,transparent 100%);pointer-events:none;}
 .gp-feat-name{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4vw,58px);font-weight:300;color:white;line-height:1.1;}
 .gp-feat-sub{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-light);margin-top:7px;}
-.gp-stone-meta{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:rgba(200,184,154,.45);margin-top:10px;}
+.gp-stone-meta{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(200,184,154,.6);margin-top:10px;}
 .gp-scenes-btn{pointer-events:all;margin-top:14px;background:rgba(184,150,60,.15);border:1px solid rgba(184,150,60,.6);color:var(--gold-light);padding:10px 22px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;}
 .gp-scenes-btn:hover:not(:disabled){background:rgba(184,150,60,.35);border-color:var(--gold);}
 .gp-scenes-btn:disabled{opacity:.45;cursor:default;}
@@ -829,13 +880,16 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
     <div class="colour-pill" data-colour="Green" title="Green" style="background:#5a7a5a" onclick="filterColour('Green',this)"></div>
     <div class="colour-pill" data-colour="Gold" title="Gold/Yellow" style="background:#c8a84b" onclick="filterColour('Gold',this)"></div>
     <div class="colour-pill" data-colour="Brown" title="Brown" style="background:#8b6347" onclick="filterColour('Brown',this)"></div>
-    <div class="colour-pill" data-colour="Pink" title="Pink / Red" style="background:linear-gradient(135deg,#c4857a,#a83232)" onclick="filterColour('Pink',this)"></div>
+    <div class="colour-pill" data-colour="Pink" title="Pink" style="background:#c4857a" onclick="filterColour('Pink',this)"></div>
     <div class="colour-pill" data-colour="Red" title="Red" style="background:#8b2020" onclick="filterColour('Red',this)"></div>
     <div class="colour-pill" data-colour="Blue" title="Blue" style="background:#6b8cad" onclick="filterColour('Blue',this)"></div>
     <div class="min-slabs-wrap" id="minSlabsFilter">
       <span class="min-slabs-label">Min slabs</span>
       <input class="min-slabs-input" type="number" id="minSlabsInput" min="1" max="99" value="1" oninput="applyFilter(document.getElementById('stoneSearch').value.toLowerCase())">
     </div>
+  </div>
+  <div class="colour-filter-row" id="finishingFilterRow" style="margin-top:8px;display:none">
+    <span class="colour-pill-label">Finish</span>
   </div>
   <div class="colour-filter-row" id="priceFilterRow" style="margin-top:8px">
     <span class="colour-pill-label">Price</span>
@@ -1080,7 +1134,8 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
   <button class="admin-bar-btn" id="adminTabCoverage" onclick="openAdminTab('coverage')">Coverage</button>
   <button class="admin-bar-btn" id="adminTabClients" onclick="openAdminTab('clients')">Clients</button>
   <button class="admin-bar-btn" id="adminTabFabricators" onclick="openAdminTab('fabricators')">Fabricators</button>
-  <button class="admin-bar-btn danger" onclick="adminLogout()" style="margin-left:auto">Sign Out</button>
+  <button class="admin-bar-btn" onclick="browseStock()" style="margin-left:auto;border-color:rgba(200,184,154,.35)">&#8595; Browse Stock</button>
+  <button class="admin-bar-btn danger" onclick="adminLogout()">Sign Out</button>
 </div>
 <div class="admin-panel" id="adminPanel"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1156,9 +1211,10 @@ const CMS_DEFAULTS={
   priceFilterVisible:true, // show price range filter pills on public showroom
   priceBracketVisible:true, // show $$$$ bracket tag on individual stone cards
   minSlabsFilterVisible:true, // show min slabs quantity filter
+  finishingFilterVisible:true, // show finishing filter row on public gallery
   arrivingSoonVisible:false, // show Arriving Soon section (enable when folder has content)
   fabricatorsVisible:true, // show Recommended Fabricators section
-  siteTheme:'dark', // 'dark' (current brand look) or 'light' (admin preview only — no visitor-facing switch)
+  siteTheme:'dark', // 'dark' | 'dark-light-gallery' | 'light'
   colourFilterStyle:'pills', // 'pills' = coloured swatches, 'names' = text labels
   fabricators:[{"name": "Absolutely Marble-Us", "address": "22 Sinclair Drive, Wangaratta VIC 3677", "phone": "(03) 5721 8564", "url": "https://absolutelymarbleus.com.au/"}, {"name": "Benchtop Factory", "address": "35 Industrial Drive, Braeside VIC 3195", "phone": "(03) 9547 1717", "url": "https://www.thebenchtopfactory.com/"}, {"name": "Bluechip Marble & Granite", "address": "39 Malcolm Rd, Braeside VIC 3169", "phone": "(03) 9547 1717", "url": "https://bluechipmarble.com.au/"}, {"name": "Contemporary Stone", "address": "45 Babbage Drive, Dandenong South VIC 3175", "phone": "(03) 3791 3093", "url": "https://www.finechoicestone.com.au/"}, {"name": "Direct Stone", "address": "39 Weerong Road, Drouin VIC 3818", "phone": "(03) 5625 2680", "url": "http://directstone.com.au/"}, {"name": "Eaglestone", "address": "3-4/26 Kyabram St, Coolaroo VIC 3048", "phone": "0432 625 403", "url": "https://eaglestone.com.au/"}, {"name": "Established Stone", "address": "3 Park Drive, Dandenong South VIC 3175", "phone": "(03) 9706 5061", "url": "https://www.establishedstone.com.au/"}, {"name": "G&G Stoneworks", "address": "Factory 4/18-20 Rhur Street, Dandenong South VIC 3175", "phone": "(03) 9794 9062", "url": "https://ggstoneworks.com.au/"}, {"name": "Henderson's Marble & Granite", "address": "1/3 Alick Road, Tottenham VIC 3012", "phone": "(03) 9314 0422", "url": ""}, {"name": "Imperial Stone Industries", "address": "3A 34-36 McIntyre Rd, Sunshine North VIC 3020", "phone": "0423 786 418", "url": ""}, {"name": "Linkstone", "address": "42-44 Jessica Way, Truganina VIC 3029", "phone": "1300 546 578", "url": "https://www.linkstone.com.au/"}, {"name": "Nepean Stone", "address": "1/104 Watt Road, Mornington VIC 3931", "phone": "(03) 5973 4344", "url": "http://nepeanstone.com.au/"}, {"name": "Nexus Stone", "address": "6 Lisa Place, Coolaroo VIC 3048", "phone": "(03) 9939 0203", "url": "https://www.nexusstone.com.au/"}, {"name": "Parthenon Marble", "address": "8 McKay Crescent, Alphington VIC 3078", "phone": "(03) 9499 8833", "url": "https://www.parthenonmarble.com.au/"}, {"name": "Regal Stone", "address": "2 Hall Street, Braeside VIC 3195", "phone": "(03) 9580 8990", "url": "https://www.regalstonemason.com.au/"}, {"name": "Simple Benchtops", "address": "55-57 Williams Road, Dandenong South VIC 3175", "phone": "1300 886 858", "url": "https://simplebenchtops.com.au/"}, {"name": "Stone Direct Solutions", "address": "11 Colbert Road, Campbellfield VIC 3061", "phone": "(03) 9357 9111", "url": "https://stonedirectsolutions.com.au/"}, {"name": "Stonelux", "address": "5/7 Lakewood Boulevard, Carrum Downs VIC 3201", "phone": "(03) 9775 1533", "url": "https://www.stonelux.com.au/"}, {"name": "Tru Stone", "address": "105-109 Moore Street, Moe VIC 3825", "phone": "(03) 5126 2420", "url": "http://www.trustone.com.au/"}, {"name": "V Stone", "address": "104 Beischer Street, Bendigo East VIC 3550", "phone": "(03) 4436 1020", "url": "https://www.vstone.com.au/"}], // list of recommended stonemasons/fabricators
   priceDisplayMode:'symbols', // 'symbols' = $/$$/$$$/$$$$, 'ranges' = actual dollar ranges
@@ -1543,6 +1599,7 @@ function parseStockRows(rows,enabledLocations){
   const totalSlabs=stones.reduce((s,st)=>s+parseInt(st.qty||0),0);
   allStones=stones;
   calcPriceThresholds();
+  buildFinishingFilter();
   saveStockSnapshot(_rawStockRows); // fire-and-forget — powers the fallback if a future load fails
   setStatus('live',stones.length+' lots in stock \u00b7 Live inventory');
   const pendingFilter=sessionStorage.getItem('vsg-pending-filter');
@@ -1951,14 +2008,15 @@ function stampBadgesOnCards(){
 
 // ── COLOUR DETECTION (Drive cache + keyword fallback) ────────
 const COLOUR_KEYWORDS={
-  White:['calacatta','statuario','bianco','white','carrara','arabescato','super white','ariel','volakas','afyon'],
-  Grey:['grigio','grey','gray','silver','cemento','bardiglio','pietra','blue grey','cloud'],
-  Beige:['beige','cream','crema','sand','sahara','botticino','daino','bursa','lima','fossil'],
-  Black:['nero','black','dark','ebony','marquina','absolute black','jet'],
+  White:['calacatta','statuario','bianco','white','carrara','arabescato','super white','ariel','volakas','afyon','thassos'],
+  Grey:['grigio','grey','gray','silver','cemento','bardiglio','pietra','blue grey','cloud','fossil'],
+  Beige:['beige','cream','crema','sand','sahara','botticino','daino','bursa','lima'],
+  Black:['nero','black','marquina','absolute black','jet','ebony','portoro','cosmic black','galaxy black'],
   Green:['verde','green','jungle','emerald','forest','ming','amazon','ubatuba'],
-  Gold:['gold','oro','dorado','yellow','giallo','imperial','autumn','honey','onyx'],
-  Brown:['brown','marrone','walnut','chocolate','rosewood','wenge','mocha','teak'],
-  Pink:['rosa','pink','rosso','red','rouge','bordeaux','breccia','rose','ruby','coral','rubino','rojo'],
+  Gold:['gold','oro','dorado','yellow','giallo','imperial','autumn','honey'],
+  Brown:['brown','marrone','walnut','chocolate','rosewood','wenge','mocha','teak','noce'],
+  Pink:['rosa','pink','flamingo','rose','salmon'],
+  Red:['rosso','red','rouge','bordeaux','breccia','ruby','coral','rubino','rojo'],
   Blue:['azul','blue','blu','aqua','ocean','sky','atlantic','bahia']
 };
 let stoneColourCache={};
@@ -1997,12 +2055,13 @@ function getStoneColour(stone){
 }
 function cacheAllColours(){} // no-op — colours come from Drive cache now
 
-// ── ADMIN: MANUAL COLOUR OVERRIDE ────────────────────────────
+// ── ADMIN: MANUAL COLOUR OVERRIDE + HIDE LOT ─────────────────
 function renderColourOverride(stone){
   const wrap=document.getElementById('modalColourOverride');
   if(!wrap)return;
   if(!adminUnlocked||!stone.block){wrap.style.display='none';wrap.innerHTML='';return;}
   const current=getStoneColour(stone)||'';
+  const hidden=isLotHidden(stone);
   wrap.style.display='block';
   wrap.innerHTML=`
     <div style="font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Admin — Colour Tag</div>
@@ -2013,9 +2072,21 @@ function renderColourOverride(stone){
       </select>
       <button class="admin-save-btn" style="padding:8px 14px;font-size:11px" onclick="saveColourOverride('${stone.block}')">Save</button>
     </div>
-    <div id="colourOverrideStatus" style="font-size:11px;color:rgba(200,184,154,.5);margin-top:6px"></div>`;
+    <div id="colourOverrideStatus" style="font-size:11px;color:rgba(200,184,154,.5);margin-top:6px"></div>
+    <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(200,184,154,.12)">
+      <div style="font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Admin — Visibility</div>
+      <button id="modalHideBtn" class="admin-save-btn" style="padding:8px 14px;font-size:11px;width:100%;${hidden?'background:rgba(192,57,43,.25);border-color:rgba(192,57,43,.5);color:#e88;':''}" onclick="toggleHiddenLotModal('${stone.block}')">${hidden?'⊘ Hidden from site — click to unhide':'Hide lot from website'}</button>
+    </div>`;
 }
-const VALID_COLOUR_FAMILIES_JS=['White','Grey','Beige','Black','Green','Gold','Brown','Pink','Blue'];
+async function toggleHiddenLotModal(block){
+  const btn=document.getElementById('modalHideBtn');
+  if(btn)btn.textContent='Saving…';
+  await toggleHiddenLot(block,null);
+  // Re-render the admin section with the updated state
+  const stone=allStones.find(s=>s.block===block)||{block};
+  renderColourOverride(stone);
+}
+const VALID_COLOUR_FAMILIES_JS=['White','Grey','Beige','Black','Green','Gold','Brown','Pink','Red','Blue'];
 
 async function saveColourOverride(block){
   const sel=document.getElementById('colourOverrideSelect');
@@ -2175,12 +2246,36 @@ function updateClientUI(){
 
 // ── COLOUR FILTER STATE ───────────────────────────────────────
 let activeColour='All';
+let activeFinishing='All';
 let activePriceTier=0; // 0=all, 1-4=tier
 function filterColour(colour,el){
   activeColour=colour;
   document.querySelectorAll('.colour-pill').forEach(p=>p.classList.remove('active'));
   if(el)el.classList.add('active');
   applyFilter(document.getElementById('stoneSearch').value.toLowerCase());
+}
+function filterFinishing(finish,el){
+  activeFinishing=finish;
+  document.querySelectorAll('.finish-pill').forEach(b=>b.classList.remove('active'));
+  if(el)el.classList.add('active');
+  applyFilter(document.getElementById('stoneSearch').value.toLowerCase());
+}
+function buildFinishingFilter(){
+  const row=document.getElementById('finishingFilterRow');
+  if(!row)return;
+  // Respect admin visibility toggle
+  if(g('finishingFilterVisible')===false){row.style.display='none';return;}
+  const finishes=[...new Set(
+    allStones
+      .filter(s=>!isLotHidden(s)&&!isTransitNotVisible(s))
+      .map(s=>(s.finishing||'').trim())
+      .filter(Boolean)
+  )].sort();
+  if(!finishes.length){row.style.display='none';return;}
+  row.style.display='flex';
+  row.innerHTML=`<span class="colour-pill-label">Finish</span>`
+    +`<button class="finish-pill active" onclick="filterFinishing('All',this)">All</button>`
+    +finishes.map(f=>`<button class="finish-pill" onclick="filterFinishing(${JSON.stringify(f)},this)">${f}</button>`).join('');
 }
 function filterPriceTier(tier,el){
   activePriceTier=tier;
@@ -2269,7 +2364,12 @@ function applyFilter(search=''){
       const colour=getStoneColour(s);
       colm=colour===activeColour;
     }
-    return cm&&sm&&qm&&pm&&colm;
+    // Finishing filter
+    let fm=true;
+    if(activeFinishing&&activeFinishing!=='All'){
+      fm=(s.finishing||'').toLowerCase()===activeFinishing.toLowerCase();
+    }
+    return cm&&sm&&qm&&pm&&colm&&fm;
   });
   filteredStones=sortStones(filtered);
   displayedCount=0;
@@ -2644,6 +2744,13 @@ function adminLogout(){
   currentAdminTab='';
 }
 
+function browseStock(){
+  const panel=document.getElementById('adminPanel');
+  panel.classList.remove('open');
+  currentAdminTab='';
+  document.querySelectorAll('.admin-bar-btn').forEach(b=>b.classList.remove('active-tab'));
+  document.getElementById('gallery').scrollIntoView({behavior:'smooth'});
+}
 function openAdminTab(tab){
   document.querySelectorAll('.admin-bar-btn').forEach(b=>b.classList.remove('active-tab'));
   const btn=document.getElementById('adminTab'+tab.charAt(0).toUpperCase()+tab.slice(1));
@@ -2735,8 +2842,9 @@ function renderAdminContent(){
           <div class="admin-label">Site Theme (preview)</div>
           <div style="font-size:12px;color:rgba(200,184,154,.55);margin-bottom:8px">Flips the dark brand sections (nav, gallery, fabricators, arriving, events, footer) to a lighter palette so you can compare. Applies site-wide for all visitors until switched back — not a per-visitor toggle.</div>
           <select class="admin-input" id="af-siteTheme" style="padding:9px 12px">
-            <option value="dark" ${(g('siteTheme')||'dark')==='dark'?'selected':''}>Dark (current)</option>
-            <option value="light" ${g('siteTheme')==='light'?'selected':''}>Light (preview)</option>
+            <option value="dark" ${(g('siteTheme')||'dark')==='dark'?'selected':''}>Dark</option>
+            <option value="dark-light-gallery" ${g('siteTheme')==='dark-light-gallery'?'selected':''}>Dark + Light Gallery</option>
+            <option value="light" ${g('siteTheme')==='light'?'selected':''}>Light</option>
           </select>
         </div>
         <div class="admin-field">
@@ -2765,6 +2873,13 @@ function renderAdminContent(){
           <select class="admin-input" id="af-minSlabsFilterVisible" style="padding:9px 12px">
             <option value="true" ${g('minSlabsFilterVisible')!==false?'selected':''}>Visible to public</option>
             <option value="false" ${g('minSlabsFilterVisible')===false?'selected':''}>Hidden</option>
+          </select>
+        </div>
+        <div class="admin-field">
+          <div class="admin-label">Finishing Filter</div>
+          <select class="admin-input" id="af-finishingFilterVisible" style="padding:9px 12px">
+            <option value="true" ${g('finishingFilterVisible')!==false?'selected':''}>Visible to public</option>
+            <option value="false" ${g('finishingFilterVisible')===false?'selected':''}>Hidden</option>
           </select>
         </div>
         <div class="admin-field">
@@ -2837,6 +2952,8 @@ async function saveAdminContent(){
   if(pbEl)cms.priceBracketVisible=pbEl.value==='true';
   const msfEl=document.getElementById('af-minSlabsFilterVisible');
   if(msfEl)cms.minSlabsFilterVisible=msfEl.value==='true';
+  const ffEl=document.getElementById('af-finishingFilterVisible');
+  if(ffEl){cms.finishingFilterVisible=ffEl.value==='true';buildFinishingFilter();}
   const fabVisEl=document.getElementById('af-fabricatorsVisible');
   if(fabVisEl)cms.fabricatorsVisible=fabVisEl.value==='true';
   const themeEl=document.getElementById('af-siteTheme');
@@ -3736,16 +3853,19 @@ function smGo(idx){
 function smNav(dir){smGo(smIndex+dir);}
 function smClose(){document.getElementById('smOverlay').classList.remove('open');document.body.style.overflow='';}
 
-// ── Touch swipe for smOverlay ─────────────────────────────────
+// ── Touch swipe for smOverlay (image area only, avoids thumb strip) ──
 (function(){
   let tx=0,ty=0;
-  const el=document.getElementById('smOverlay');
+  const el=document.querySelector('.sm-main');
   if(!el)return;
   el.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+  el.addEventListener('touchmove',e=>{
+    const dx=e.touches[0].clientX-tx,dy=e.touches[0].clientY-ty;
+    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>10)e.preventDefault();
+  },{passive:false});
   el.addEventListener('touchend',e=>{
-    const dx=e.changedTouches[0].clientX-tx;
-    const dy=e.changedTouches[0].clientY-ty;
-    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){smNav(dx<0?1:-1);}
+    const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40)smNav(dx<0?1:-1);
   });
 })();
 
@@ -3848,17 +3968,20 @@ async function gpOpenScenes(){
 
 function gpClose(){document.getElementById('gpOverlay').classList.remove('open');document.body.style.overflow='';}
 
-// ── Touch swipe for gpOverlay ─────────────────────────────────
+// ── Touch swipe for gpOverlay (featured image area only, avoids thumb strip) ──
 (function(){
   let tx=0,ty=0;
-  const el=document.getElementById('gpOverlay');
+  const el=document.getElementById('gpFeatured');
   if(!el)return;
   el.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+  el.addEventListener('touchmove',e=>{
+    const dx=e.touches[0].clientX-tx,dy=e.touches[0].clientY-ty;
+    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>10)e.preventDefault();
+  },{passive:false});
   el.addEventListener('touchend',e=>{
     if(document.getElementById('smOverlay').classList.contains('open'))return;
-    const dx=e.changedTouches[0].clientX-tx;
-    const dy=e.changedTouches[0].clientY-ty;
-    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){gpNav(dx<0?1:-1);}
+    const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40)gpNav(dx<0?1:-1);
   });
 })();
 // Mobile: swipe the image area left/right to move between stones (tap still opens lightbox)
