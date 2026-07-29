@@ -295,6 +295,11 @@ section{padding:72px 48px;}
 .modal-gallery-nav:hover{background:var(--gold);}
 .modal-gallery-nav.prev{left:10px;}
 .modal-gallery-nav.next{right:10px;}
+/* Lighting selector */
+.light-selector{position:absolute;top:8px;left:8px;z-index:6;display:flex;gap:1px;background:rgba(0,0,0,.55);padding:3px;border-radius:3px;backdrop-filter:blur(6px);}
+.light-btn{border:none;background:transparent;color:rgba(255,255,255,.48);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:5px 8px;cursor:pointer;border-radius:2px;transition:all .15s;white-space:nowrap;font-family:'Jost',sans-serif;line-height:1;}
+.light-btn:hover{color:rgba(255,255,255,.88);background:rgba(255,255,255,.1);}
+.light-btn.active{color:var(--gold-light);background:rgba(184,150,60,.18);}
 .stone-nav{position:fixed;top:16px;transform:none;z-index:950;background:rgba(20,17,13,.85);border:1px solid rgba(200,184,154,.25);color:var(--cream);width:52px;height:52px;border-radius:50%;font-size:30px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;transition:background .2s,opacity .2s,border-color .2s;}
 .modal-backdrop.open .stone-nav{display:flex;}
 .stone-nav:hover{background:rgba(200,184,154,.92);color:#18160f;border-color:transparent;}
@@ -1048,6 +1053,13 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
   <div class="modal" id="modal">
     <div class="modal-gallery" id="modalGallery">
       <img class="modal-gallery-main" id="modalMainImg" src="" alt="" onclick="openLightbox(this.src)">
+      <div class="light-selector" id="lightSelector">
+        <button class="light-btn active" data-light="Natural" onclick="setLightFilter('Natural')">Natural</button>
+        <button class="light-btn" data-light="Warm" onclick="setLightFilter('Warm')">Warm</button>
+        <button class="light-btn" data-light="Cool" onclick="setLightFilter('Cool')">Cool</button>
+        <button class="light-btn" data-light="Bright" onclick="setLightFilter('Bright')">Bright</button>
+        <button class="light-btn" data-light="Dim" onclick="setLightFilter('Dim')">Dim</button>
+      </div>
       <div class="ai-render-note" id="modalAiNote" style="display:none">AI-generated visualisation — for guidance only</div>
       <div class="modal-gallery-thumbs" id="modalThumbs" style="display:none"></div>
       <button class="modal-gallery-nav prev" id="modalPrev" onclick="galleryNav(-1)" style="display:none">&#8249;</button>
@@ -2475,6 +2487,28 @@ function setStatus(type,msg){
 // ── MODAL ─────────────────────────────────────────────────────
 let currentModalStone=null,currentGalleryImages=[],currentGalleryIndex=0,currentGalleryHasSlabFirst=true;
 
+const LIGHT_FILTERS={
+  'Natural':'',
+  'Warm':'brightness(1.04) sepia(0.18) saturate(1.25) hue-rotate(-8deg)',
+  'Cool':'brightness(1.08) saturate(0.82) hue-rotate(14deg) contrast(1.03)',
+  'Bright':'brightness(1.28) contrast(0.93) saturate(1.05)',
+  'Dim':'brightness(0.62) sepia(0.08) saturate(1.08) contrast(1.1)'
+};
+let currentLightFilter='';
+function setLightFilter(name){
+  currentLightFilter=LIGHT_FILTERS[name]??'';
+  const img=document.getElementById('modalMainImg');
+  if(img)img.style.filter=currentLightFilter;
+  const lbImg=document.getElementById('lightboxImg');
+  if(lbImg&&document.getElementById('lightbox').classList.contains('open'))lbImg.style.filter=currentLightFilter;
+  document.querySelectorAll('.light-btn').forEach(b=>b.classList.toggle('active',b.dataset.light===name));
+}
+function resetLightFilter(){
+  currentLightFilter='';
+  const img=document.getElementById('modalMainImg');
+  if(img)img.style.filter='';
+  document.querySelectorAll('.light-btn').forEach(b=>b.classList.toggle('active',b.dataset.light==='Natural'));
+}
 async function openModal(stone){
   currentModalStone=stone;
   const dims=(stone.width&&stone.height)?`Approx. ${stone.width} × ${stone.height} mm`:'Contact for details';
@@ -2513,6 +2547,7 @@ async function openModal(stone){
   document.getElementById('modalAiNote').style.display='none';
   const mi=document.getElementById('modalMainImg');
   mi.src=stone.imageFull||stone.image||'';mi.style.display=(stone.imageFull||stone.image)?'block':'none';
+  resetLightFilter();
   document.getElementById('modalThumbs').style.display='none';
   document.getElementById('modalPrev').style.display='none';
   document.getElementById('modalNext').style.display='none';
@@ -2575,13 +2610,15 @@ function renderSimilar(stone){
 function showGalleryImage(idx){
   if(!currentGalleryImages.length)return;
   currentGalleryIndex=(idx+currentGalleryImages.length)%currentGalleryImages.length;
-  document.getElementById('modalMainImg').src=currentGalleryImages[currentGalleryIndex];
+  const mimg=document.getElementById('modalMainImg');
+  mimg.src=currentGalleryImages[currentGalleryIndex];
+  mimg.style.filter=currentLightFilter;
   document.querySelectorAll('.modal-thumb').forEach((t,i)=>t.classList.toggle('active',i===currentGalleryIndex));
   const isRender=!(currentGalleryHasSlabFirst&&currentGalleryIndex===0);
   document.getElementById('modalAiNote').style.display=isRender?'block':'none';
 }
 function galleryNav(dir){showGalleryImage(currentGalleryIndex+dir);}
-function openLightbox(src){document.getElementById('lightboxImg').src=src;document.getElementById('lightbox').classList.add('open');document.body.style.overflow='hidden';}
+function openLightbox(src){const lb=document.getElementById('lightboxImg');lb.src=src;lb.style.filter=currentLightFilter;document.getElementById('lightbox').classList.add('open');document.body.style.overflow='hidden';}
 function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
 function closeModal(e){if(e.target===document.getElementById('modalBackdrop'))closeModalBtn();}
 function closeModalBtn(){document.getElementById('modalBackdrop').classList.remove('open');document.body.style.overflow='';currentModalStone=null;}
