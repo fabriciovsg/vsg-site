@@ -172,7 +172,7 @@ nav.scrolled{box-shadow:0 4px 32px rgba(0,0,0,.4);}
 .hero-sub{color:rgba(245,240,232,.92);font-size:16px;line-height:1.7;max-width:520px;margin-bottom:22px;}
 .hero-actions{display:flex;gap:16px;flex-wrap:wrap;}
 /* Live inventory line in hero */
-.hero-inventory-line{display:flex;align-items:center;gap:10px;font-size:12.5px;letter-spacing:.06em;color:rgba(200,184,154,.72);margin-bottom:28px;}
+.hero-inventory-line{display:flex;align-items:center;gap:10px;font-size:15px;letter-spacing:.04em;color:rgba(200,184,154,.92);margin-bottom:28px;font-weight:500;}
 /* Pulsing live dot — shared by hero and gallery label */
 @keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(110,200,110,.5);}70%{box-shadow:0 0 0 6px rgba(110,200,110,0);}}
 .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#6ec86e;flex-shrink:0;animation:livePulse 2.2s ease-out infinite;}
@@ -853,7 +853,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
     <div class="hero-eyebrow" id="cms-hero-eyebrow">Melbourne's Finest Natural Stone</div>
     <h1 id="cms-hero-h1">The Gallery of<br><em>Extraordinary</em><br>Surfaces</h1>
     <p class="hero-sub" id="cms-hero-sub">Carrara marble, exotic quartzites, rare granites and dolomites — hand-selected from quarries around the world. Discover your perfect stone.</p>
-    <div class="hero-inventory-line"><span class="live-dot"></span>Complete live inventory — every slab we hold, visible online right now.</div>
+    <div class="hero-inventory-line"><span class="live-dot"></span>Live catalogue — every lot we carry, in stock or arriving soon. Nothing held back.</div>
     <div class="hero-actions">
       <a href="#gallery" class="btn-primary">Browse Current Stock</a>
       <a href="#about" class="btn-ghost">Our Story</a>
@@ -1879,7 +1879,8 @@ async function loadSlabImages(stones){
   }
   stones.forEach(s=>{ if(s.noImage===undefined) s.noImage=!s.image; });
   const missing=allStones.filter(s=>s.noImage===true).length;
-  document.getElementById('adminMissingCount').textContent=missing;
+  const retakeCount=(cms.retakePhotos||[]).length;
+  document.getElementById('adminMissingCount').textContent=retakeCount>0?missing+' + '+retakeCount+'↺':missing;
   const transitCount=allStones.filter(s=>s.status==='TRANSIT').length;
   const transitEl=document.getElementById('adminTransitCount');
   if(transitEl)transitEl.textContent=transitCount;
@@ -2098,6 +2099,7 @@ function renderColourOverride(stone){
   if(!adminUnlocked||!stone.block){wrap.style.display='none';wrap.innerHTML='';return;}
   const current=getStoneColour(stone)||'';
   const hidden=isLotHidden(stone);
+  const retake=isRetakePhoto(stone);
   wrap.style.display='block';
   wrap.innerHTML=`
     <div style="font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Admin — Colour Tag</div>
@@ -2112,6 +2114,10 @@ function renderColourOverride(stone){
     <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(200,184,154,.12)">
       <div style="font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Admin — Visibility</div>
       <button id="modalHideBtn" class="admin-save-btn" style="padding:8px 14px;font-size:11px;width:100%;${hidden?'background:rgba(192,57,43,.25);border-color:rgba(192,57,43,.5);color:#e88;':''}" onclick="toggleHiddenLotModal('${stone.block}')">${hidden?'⊘ Hidden from site — click to unhide':'Hide lot from website'}</button>
+    </div>
+    <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(200,184,154,.12)">
+      <div style="font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#c8943a;margin-bottom:6px">Admin — Photo</div>
+      <button id="modalRetakeBtn" class="admin-save-btn" style="padding:8px 14px;font-size:11px;width:100%;${retake?'background:rgba(160,95,0,.2);border-color:rgba(160,95,0,.5);color:#e8a82a;':''}" onclick="toggleRetakePhotoModal('${stone.block}')">${retake?'📷 Flagged for retake — click to clear':'Flag for photo retake'}</button>
     </div>`;
 }
 async function toggleHiddenLotModal(block){
@@ -2346,6 +2352,10 @@ function isLotHidden(stone){
   if(g('hideNoPhoto')&&stone.noImage===true)return true;
   return false;
 }
+function isRetakePhoto(stone){
+  const retake=cms.retakePhotos||[];
+  return retake.includes((stone.block||'').toString());
+}
 // In-transit lots are hidden from the public site by default — admin opts
 // specific lots into visibility one at a time via the "In Transit" tab.
 function isTransitNotVisible(stone){
@@ -2442,8 +2452,10 @@ function renderGrid(reset=false){
           <span>View in our gallery</span>
         </div>`;
     const isHidden=isLotHidden(stone);
+    const isRetake=adminUnlocked&&isRetakePhoto(stone);
     const hiddenBadge=isHidden?`<div style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:2;pointer-events:none;display:flex;align-items:flex-start;justify-content:flex-start"><div style="background:rgba(180,40,30,.85);color:#fff;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:0 0 6px 0">Hidden</div></div>`:'';
-    const imgHTML=`<div class="stone-card-img-wrap" style="${isHidden?'position:relative;opacity:.55;':''}">${imgInner}${hiddenBadge}</div>`;
+    const retakeBadge=isRetake?`<div style="position:absolute;bottom:0;right:0;z-index:2;pointer-events:none"><div style="background:rgba(160,95,0,.9);color:#ffe0a0;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:4px 0 0 0">&#128247; Retake</div></div>`:'';
+    const imgHTML=`<div class="stone-card-img-wrap" style="${isHidden?'opacity:.55;':''}">${imgInner}${hiddenBadge}${retakeBadge}</div>`;
     const inList=isShortlisted(stone);
     const isTransit=stone.status==='TRANSIT';
     const qty=parseInt(stone.qty||'0');
@@ -3403,7 +3415,25 @@ async function resetAdminContact(){['address','hours','contactBody'].forEach(k=>
 
 function renderAdminMissing(){
   const missing=allStones.filter(s=>s.noImage===true).sort((a,b)=>(parseInt(b.qty||0)-parseInt(a.qty||0))||(a.category||'').localeCompare(b.category||'')||a.name.localeCompare(b.name));
+  const retakeBlocks=cms.retakePhotos||[];
+  const retakeStones=allStones.filter(s=>retakeBlocks.includes((s.block||'').toString())).sort((a,b)=>a.name.localeCompare(b.name));
   document.getElementById('adminPanel').innerHTML=`
+    ${retakeStones.length?`<div class="admin-section">
+      <div class="admin-section-title" style="color:#c8943a">Needs Photo Retake <span style="font-size:14px;color:rgba(200,150,58,.6);font-family:'Jost',sans-serif;font-weight:300">(${retakeStones.length} lot${retakeStones.length!==1?'s':''} flagged)</span></div>
+      <p style="font-size:12px;color:rgba(200,184,154,.45);line-height:1.7;margin-bottom:20px">These lots have a photo but it's been flagged for replacement. Once the new photo is uploaded to Drive, clear the flag from each lot below or from the stone's modal.</p>
+      <div class="admin-missing-grid">
+        ${retakeStones.map(s=>{
+          const blockEsc=(s.block||'').toString().replace(/'/g,"\\'");
+          return `<div class="admin-missing-card" style="border-color:rgba(160,95,0,.45);background:rgba(160,95,0,.05)">
+            <div class="admin-missing-catbadge" style="color:#c8943a">${s.category||'—'}</div>
+            <div class="admin-missing-name">${s.name}</div>
+            <div class="admin-missing-sub">Block #${s.block}${s.finishing?' · '+s.finishing:''} · ${parseInt(s.qty||0)} slab${parseInt(s.qty||0)===1?'':'s'}</div>
+            ${s.image?`<div style="margin:8px 0;border-radius:2px;overflow:hidden;border:1px solid rgba(160,95,0,.3)"><img src="${s.image}" style="width:100%;height:72px;object-fit:cover;display:block;opacity:.75"></div>`:'<div style="font-size:11px;color:rgba(200,184,154,.35);margin-top:4px;margin-bottom:4px">No current photo on file</div>'}
+            <button onclick="toggleRetakePhoto('${blockEsc}',this)" class="admin-reset-btn" style="padding:4px 10px;font-size:9px;margin-top:4px;border-color:rgba(160,95,0,.6);color:#c8943a">Clear retake flag</button>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`:''}
     <div class="admin-section">
       <div class="admin-section-title">Missing Slab Images <span style="font-size:14px;color:var(--stone-dark);font-family:'Jost',sans-serif;font-weight:300">(${missing.length} stones hidden from public)</span></div>
       <p style="font-size:12px;color:rgba(200,184,154,.45);line-height:1.7;margin-bottom:20px">Add a photo to the Slab Images folder in Google Drive. The filename must match the format below. Each stone will appear in the gallery automatically on next page load.</p>
@@ -3636,6 +3666,36 @@ async function toggleHiddenLot(block,btnEl){
     if(idx>=0)cms.hiddenLots.push(block);else cms.hiddenLots.splice(cms.hiddenLots.indexOf(block),1);
     if(btnEl)btnEl.textContent='Hide from site';
   }
+}
+async function toggleRetakePhoto(block,btnEl){
+  if(!cms.retakePhotos)cms.retakePhotos=[];
+  const idx=cms.retakePhotos.indexOf(block);
+  if(idx>=0)cms.retakePhotos.splice(idx,1);
+  else cms.retakePhotos.push(block);
+  if(btnEl)btnEl.textContent='Saving…';
+  const ok=await saveCMS();
+  if(ok){
+    if(allStones.length)applyFilter(document.getElementById('stoneSearch')?.value.toLowerCase().trim()||'');
+    showToast(idx>=0?'Retake flag cleared':'Marked for photo retake');
+    updateAdminMissingCount();
+  }else{
+    if(idx>=0)cms.retakePhotos.push(block);else cms.retakePhotos.splice(cms.retakePhotos.indexOf(block),1);
+    if(btnEl)btnEl.textContent='Mark for photo retake';
+  }
+}
+async function toggleRetakePhotoModal(block){
+  const btn=document.getElementById('modalRetakeBtn');
+  if(btn)btn.textContent='Saving…';
+  await toggleRetakePhoto(block,null);
+  const stone=allStones.find(s=>s.block===block)||{block};
+  renderColourOverride(stone);
+}
+function updateAdminMissingCount(){
+  const el=document.getElementById('adminMissingCount');
+  if(!el)return;
+  const missing=allStones.filter(s=>s.noImage===true).length;
+  const retakeCount=(cms.retakePhotos||[]).length;
+  el.textContent=retakeCount>0?missing+' + '+retakeCount+'↺':missing;
 }
 
 // ── ADMIN: IN TRANSIT TAB ─────────────────────────────────────
