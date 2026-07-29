@@ -309,13 +309,21 @@ section{padding:72px 48px;}
 .modal-gallery-nav:hover{background:var(--gold);}
 .modal-gallery-nav.prev{left:10px;}
 .modal-gallery-nav.next{right:10px;}
-/* Lighting selector — in-flow bar between image and thumbs, no overlap with arrows */
-.light-selector{display:flex;gap:1px;align-items:center;background:rgba(10,8,6,.92);padding:4px 8px;border-top:1px solid rgba(200,184,154,.06);flex-shrink:0;}
+/* Lighting selector — right panel (modal-body), above the action buttons */
+.light-selector{display:flex;flex-direction:column;gap:5px;margin-bottom:4px;}
 .light-selector.ls-hidden{display:none;}
-.light-selector-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(200,184,154,.35);padding:0 6px 0 2px;white-space:nowrap;flex-shrink:0;}
-.light-btn{border:none;background:transparent;color:rgba(255,255,255,.44);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:5px 8px;cursor:pointer;border-radius:2px;transition:all .15s;white-space:nowrap;font-family:'Jost',sans-serif;line-height:1;}
-.light-btn:hover{color:rgba(255,255,255,.88);background:rgba(255,255,255,.08);}
-.light-btn.active{color:var(--gold-light);background:rgba(184,150,60,.18);}
+.light-selector-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(200,184,154,.3);}
+.light-btns-row{display:flex;flex-wrap:wrap;gap:3px;}
+.light-btn{border:1px solid rgba(200,184,154,.12);background:transparent;color:rgba(255,255,255,.4);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;cursor:pointer;border-radius:2px;transition:all .15s;white-space:nowrap;font-family:'Jost',sans-serif;line-height:1;}
+.light-btn:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.07);border-color:rgba(200,184,154,.25);}
+.light-btn.active{color:var(--gold-light);background:rgba(184,150,60,.15);border-color:rgba(184,150,60,.4);}
+/* Lighting selector — scene viewer overlay (right edge strip, no space taken from image) */
+.sm-light-selector{position:absolute;top:72px;right:0;z-index:6;display:flex;flex-direction:column;gap:0;align-items:flex-end;}
+.sm-light-selector.ls-hidden{display:none;}
+.sm-light-label{display:block;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:rgba(200,184,154,.25);text-align:right;padding:6px 12px 4px;background:rgba(10,8,6,.75);backdrop-filter:blur(6px);}
+.sm-light-btn{display:block;background:rgba(10,8,6,.75);backdrop-filter:blur(6px);border:none;border-left:2px solid transparent;color:rgba(255,255,255,.38);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:8px 12px;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:'Jost',sans-serif;line-height:1;text-align:right;width:100%;}
+.sm-light-btn:hover{color:rgba(255,255,255,.88);background:rgba(255,255,255,.1);}
+.sm-light-btn.active{color:var(--gold-light);border-left-color:var(--gold);background:rgba(184,150,60,.14);}
 .stone-nav{position:fixed;top:16px;transform:none;z-index:950;background:rgba(20,17,13,.85);border:1px solid rgba(200,184,154,.25);color:var(--cream);width:52px;height:52px;border-radius:50%;font-size:30px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;transition:background .2s,opacity .2s,border-color .2s;}
 .modal-backdrop.open .stone-nav{display:flex;}
 .stone-nav:hover{background:rgba(200,184,154,.92);color:#18160f;border-color:transparent;}
@@ -1075,14 +1083,6 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
   <div class="modal" id="modal">
     <div class="modal-gallery" id="modalGallery">
       <img class="modal-gallery-main" id="modalMainImg" src="" alt="" onclick="openLightbox(this.src)">
-      <div class="light-selector" id="lightSelector">
-        <span class="light-selector-label">Lighting</span>
-        <button class="light-btn active" data-light="Natural" onclick="setLightFilter('Natural')">Natural</button>
-        <button class="light-btn" data-light="Warm" onclick="setLightFilter('Warm')">Warm</button>
-        <button class="light-btn" data-light="Cool" onclick="setLightFilter('Cool')">Cool</button>
-        <button class="light-btn" data-light="Bright" onclick="setLightFilter('Bright')">Bright</button>
-        <button class="light-btn" data-light="Dim" onclick="setLightFilter('Dim')">Dim</button>
-      </div>
       <div class="ai-render-note" id="modalAiNote" style="display:none">AI-generated visualisation — for guidance only</div>
       <div class="modal-gallery-thumbs" id="modalThumbs" style="display:none"></div>
       <button class="modal-gallery-nav prev" id="modalPrev" onclick="galleryNav(-1)" style="display:none">&#8249;</button>
@@ -1095,6 +1095,17 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
       <div class="modal-block" id="modalBlock"></div>
       <div id="modalColourOverride" style="display:none;margin-bottom:16px"></div>
       <div class="modal-specs" id="modalSpecs"></div>
+      <div class="modal-divider"></div>
+      <div class="light-selector" id="lightSelector">
+        <span class="light-selector-label">Lighting</span>
+        <div class="light-btns-row">
+          <button class="light-btn active" data-light="Natural" onclick="setLightFilter('Natural')">Natural</button>
+          <button class="light-btn" data-light="Warm" onclick="setLightFilter('Warm')">Warm</button>
+          <button class="light-btn" data-light="Cool" onclick="setLightFilter('Cool')">Cool</button>
+          <button class="light-btn" data-light="Bright" onclick="setLightFilter('Bright')">Bright</button>
+          <button class="light-btn" data-light="Dim" onclick="setLightFilter('Dim')">Dim</button>
+        </div>
+      </div>
       <div class="modal-divider"></div>
       <div class="modal-actions">
         <button class="modal-present-btn" id="modalPresentBtn" onclick="openStonePresentation()" disabled>&#9654; View Room Scenes</button>
@@ -1355,7 +1366,9 @@ function applyCMS(){
     if(pfr)pfr.style.display=g('priceFilterVisible')===false?'none':'flex';
   const msfr=document.getElementById('minSlabsFilter');if(msfr)msfr.style.display=g('minSlabsFilterVisible')===false?'none':'flex';
   const asec=document.getElementById('arriving');if(asec)asec.style.display=g('arrivingSoonVisible')===false?'none':'block';
-  const lsel=document.getElementById('lightSelector');if(lsel)lsel.classList.toggle('ls-hidden',g('lightSelectorEnabled')===false);
+  const lsHide=g('lightSelectorEnabled')===false;
+  const lsel=document.getElementById('lightSelector');if(lsel)lsel.classList.toggle('ls-hidden',lsHide);
+  const smlsel=document.getElementById('smLightSelector');if(smlsel)smlsel.classList.toggle('ls-hidden',lsHide);
   const fsec=document.getElementById('fabricators');
   if(fsec){
     fsec.style.display=g('fabricatorsVisible')===false?'none':'block';
@@ -2542,13 +2555,17 @@ function setLightFilter(name){
   if(img)img.style.filter=currentLightFilter;
   const lbImg=document.getElementById('lightboxImg');
   if(lbImg&&document.getElementById('lightbox').classList.contains('open'))lbImg.style.filter=currentLightFilter;
-  document.querySelectorAll('.light-btn').forEach(b=>b.classList.toggle('active',b.dataset.light===name));
+  const smImg=document.getElementById('smImg');
+  if(smImg)smImg.style.filter=currentLightFilter;
+  document.querySelectorAll('.light-btn,.sm-light-btn').forEach(b=>b.classList.toggle('active',b.dataset.light===name));
 }
 function resetLightFilter(){
   currentLightFilter='';
   const img=document.getElementById('modalMainImg');
   if(img)img.style.filter='';
-  document.querySelectorAll('.light-btn').forEach(b=>b.classList.toggle('active',b.dataset.light==='Natural'));
+  const smImg=document.getElementById('smImg');
+  if(smImg)smImg.style.filter='';
+  document.querySelectorAll('.light-btn,.sm-light-btn').forEach(b=>b.classList.toggle('active',b.dataset.light==='Natural'));
 }
 async function openModal(stone){
   currentModalStone=stone;
@@ -4229,6 +4246,14 @@ loadClientsData().then(()=>updateClientUI());
       <div class="sm-stone-name" id="smStoneName"></div>
       <div class="sm-scene" id="smScene"></div>
       <div class="sm-stone-meta" id="smStoneMeta"></div>
+    </div>
+    <div class="sm-light-selector" id="smLightSelector">
+      <span class="sm-light-label">Lighting</span>
+      <button class="sm-light-btn active" data-light="Natural" onclick="setLightFilter('Natural')">Natural</button>
+      <button class="sm-light-btn" data-light="Warm" onclick="setLightFilter('Warm')">Warm</button>
+      <button class="sm-light-btn" data-light="Cool" onclick="setLightFilter('Cool')">Cool</button>
+      <button class="sm-light-btn" data-light="Bright" onclick="setLightFilter('Bright')">Bright</button>
+      <button class="sm-light-btn" data-light="Dim" onclick="setLightFilter('Dim')">Dim</button>
     </div>
   </div>
   <div class="sm-thumbs" id="smThumbs"></div>
