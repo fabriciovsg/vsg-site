@@ -104,8 +104,14 @@ body[data-theme="light"] .vsg-logo-svg.nav-logo-svg{color:#F5F0E8!important;}
 body[data-theme="light"] .nav-links a{color:rgba(200,184,154,.82)!important;}
 body[data-theme="light"] .nav-links a:hover{color:#D4AF6A!important;}
 body[data-theme="light"] .nav-hamburger span{background:#F5F0E8!important;}
-/* Dark + Light Gallery theme — dark site, warm cream gallery section */
-body[data-theme="dark-light-gallery"] #gallery{
+/* ── LIGHT GALLERY VARIANTS ───────────────────────────────────────────────────
+   Shared by "dark-light-gallery" and "navy-light-gallery": dark site, warm cream
+   gallery section. The [data-theme$="light-gallery"] ends-with selector matches
+   both, so these rules are written once. Does NOT match plain "light" — that
+   value doesn't end in "light-gallery". Same specificity as an exact = match,
+   so cascade behaviour is unchanged. Any future "<name>-light-gallery" theme
+   inherits this block automatically. */
+body[data-theme$="light-gallery"] #gallery{
   --surface-dark-text:#2A2620;
   --surface-dark-text-secondary:rgba(42,38,32,.85);
   --surface-dark-text-muted:rgba(42,38,32,.70);
@@ -115,27 +121,31 @@ body[data-theme="dark-light-gallery"] #gallery{
   --surface-card-dark-hover:#F0EBE3;
   background:#F5F0E8;
 }
-body[data-theme="dark-light-gallery"] .stone-grid{gap:2px;}
-body[data-theme="dark-light-gallery"] .stone-card{box-shadow:0 2px 8px rgba(42,38,32,.07);}
-body[data-theme="dark-light-gallery"] .search-box input{background:rgba(255,255,255,.7);border-color:rgba(42,38,32,.18);}
-body[data-theme="dark-light-gallery"] .filter-btn:not(.active){border-color:rgba(42,38,32,.18);}
-body[data-theme="dark-light-gallery"] .sort-select{border-color:rgba(42,38,32,.18);}
-body[data-theme="dark-light-gallery"] .min-slabs-input{border-color:rgba(42,38,32,.18);}
-body[data-theme="dark-light-gallery"] .finish-pill:not(.active){border-color:rgba(42,38,32,.18);}
-body[data-theme="dark-light-gallery"] .colour-filter-row.style-names .colour-pill:not(.active){border-color:rgba(42,38,32,.18);}
-/* Light/dark-light-gallery: live count badge adapts to cream background */
-body[data-theme="light"] .live-count-num,body[data-theme="dark-light-gallery"] .live-count-num{color:#3a7a3a;}
-body[data-theme="light"] .live-count-label,body[data-theme="dark-light-gallery"] .live-count-label{color:rgba(40,90,40,.7);}
-body[data-theme="light"] .live-count-badge,body[data-theme="dark-light-gallery"] .live-count-badge{background:rgba(60,130,60,.06);border-color:rgba(60,130,60,.2);}
-/* Dark+light-gallery: restore contrast break — about/why step up to near-white */
-body[data-theme="dark-light-gallery"] #about{background:#FAF8F4;}
-body[data-theme="dark-light-gallery"] .about-img-accent{border-color:#FAF8F4;}
-body[data-theme="dark-light-gallery"] #why{background:#FAF8F4;}
-/* Navy Accent — topbar + nav + footer in VSG brand navy; gallery & body sections stay charcoal */
+body[data-theme$="light-gallery"] .stone-grid{gap:2px;}
+body[data-theme$="light-gallery"] .stone-card{box-shadow:0 2px 8px rgba(42,38,32,.07);}
+body[data-theme$="light-gallery"] .search-box input{background:rgba(255,255,255,.7);border-color:rgba(42,38,32,.18);}
+body[data-theme$="light-gallery"] .filter-btn:not(.active){border-color:rgba(42,38,32,.18);}
+body[data-theme$="light-gallery"] .sort-select{border-color:rgba(42,38,32,.18);}
+body[data-theme$="light-gallery"] .min-slabs-input{border-color:rgba(42,38,32,.18);}
+body[data-theme$="light-gallery"] .finish-pill:not(.active){border-color:rgba(42,38,32,.18);}
+body[data-theme$="light-gallery"] .colour-filter-row.style-names .colour-pill:not(.active){border-color:rgba(42,38,32,.18);}
+/* Light/light-gallery: live count badge adapts to cream background */
+body[data-theme="light"] .live-count-num,body[data-theme$="light-gallery"] .live-count-num{color:#3a7a3a;}
+body[data-theme="light"] .live-count-label,body[data-theme$="light-gallery"] .live-count-label{color:rgba(40,90,40,.7);}
+body[data-theme="light"] .live-count-badge,body[data-theme$="light-gallery"] .live-count-badge{background:rgba(60,130,60,.06);border-color:rgba(60,130,60,.2);}
+/* Light-gallery: restore contrast break — about/why step up to near-white */
+body[data-theme$="light-gallery"] #about{background:#FAF8F4;}
+body[data-theme$="light-gallery"] .about-img-accent{border-color:#FAF8F4;}
+body[data-theme$="light-gallery"] #why{background:#FAF8F4;}
+/* ── NAVY THEMES ──────────────────────────────────────────────────────────────
+   Navy Accent — topbar + nav + footer in VSG brand navy; body sections stay charcoal */
 body[data-theme="navy-accent"]{--black:#0e1b2e;--surface-nav:rgba(11,21,36,.97);}
 body[data-theme="navy-accent"] footer{background:#0e1b2e;}
-/* Navy Full — all dark surfaces replaced with VSG brand navy */
-body[data-theme="navy-full"]{--black:#0e1b2e;--surface-dark:#1a2b45;--surface-dark-alt:#132138;--surface-dark-alt2:#0e1b2e;--surface-nav:rgba(11,21,36,.97);--surface-card-dark:#0f1e35;--surface-card-img-dark:#0b1828;--surface-card-dark-hover:#122035;}
+/* Navy Full — all dark surfaces navy. "navy-light-gallery" takes the same navy
+   base, then the light-gallery block above re-scopes #gallery to cream. Those
+   overrides are declared ON #gallery, so they beat these body-level values for
+   anything inside the gallery regardless of source order. */
+body[data-theme="navy-full"],body[data-theme="navy-light-gallery"]{--black:#0e1b2e;--surface-dark:#1a2b45;--surface-dark-alt:#132138;--surface-dark-alt2:#0e1b2e;--surface-nav:rgba(11,21,36,.97);--surface-card-dark:#0f1e35;--surface-card-img-dark:#0b1828;--surface-card-dark-hover:#122035;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{font-family:'Jost',sans-serif;background:var(--warm-white);color:var(--charcoal);font-weight:300;overflow-x:hidden;}
@@ -2942,11 +2952,12 @@ function renderAdminContent(){
         </div>
         <div class="admin-field">
           <div class="admin-label">Site Theme (preview)</div>
-          <div style="font-size:12px;color:rgba(200,184,154,.55);margin-bottom:8px">Controls the colour scheme site-wide for all visitors. Dark is the default charcoal theme. Navy options align with VSG's traditional brand identity — Accent applies navy only to the nav and footer; Full applies it across all dark surfaces. Applies immediately and persists until changed.</div>
+          <div style="font-size:12px;color:rgba(200,184,154,.55);margin-bottom:8px">Controls the colour scheme site-wide for all visitors. Dark is the default charcoal theme. Navy options align with VSG's traditional brand identity — Accent applies navy only to the nav and footer; Full applies it across all dark surfaces. The "+ Light Gallery" variants keep the site dark (charcoal or navy) but render the stone gallery section on warm cream, so slab photography reads against a neutral background. Applies immediately and persists until changed.</div>
           <select class="admin-input" id="af-siteTheme" style="padding:9px 12px">
             <option value="dark" ${(g('siteTheme')||'dark')==='dark'?'selected':''}>Dark (charcoal)</option>
             <option value="navy-accent" ${g('siteTheme')==='navy-accent'?'selected':''}>Navy — Accent (nav &amp; footer)</option>
             <option value="navy-full" ${g('siteTheme')==='navy-full'?'selected':''}>Navy — Full</option>
+            <option value="navy-light-gallery" ${g('siteTheme')==='navy-light-gallery'?'selected':''}>Navy + Light Gallery</option>
             <option value="dark-light-gallery" ${g('siteTheme')==='dark-light-gallery'?'selected':''}>Dark + Light Gallery</option>
             <option value="light" ${g('siteTheme')==='light'?'selected':''}>Light</option>
           </select>
