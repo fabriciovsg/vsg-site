@@ -4,7 +4,11 @@
 
 [build.environment]
   NODE_VERSION      = "20"
-  BUILD_TIMEOUT_MIN = "24"
+  # Netlify hard-kills the build at 18 min. Keep this BELOW that so the script's
+  # own graceful stop (BUILD_TIMEOUT_MIN minus 3 min buffer = 12 min) fires first
+  # and still writes .image-cache.json + image-manifest-cdn.json. If Netlify kills
+  # the process instead, the cache is never saved and the next build starts cold.
+  BUILD_TIMEOUT_MIN = "15"
 
 # ── Persist img/ between builds (fixes SIGBUS crash) ──────────
 # Without this Netlify starts fresh each build, re-downloads all

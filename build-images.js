@@ -74,9 +74,8 @@ async function main() {
         // Quick metadata check — skip if md5 unchanged
         const meta = await getDriveMeta(fileId, token);
         if (cache[cacheKey]?.md5 === meta.md5Checksum) {
-          // Verify output file still exists
-          const cachedPath = cache[cacheKey].path800;
-          if (cachedPath && fs.existsSync(cachedPath)) {
+          // Verify output files still exist on disk
+          if (cachedOutputsExist(cache[cacheKey])) {
             recordResult(results, item, cache[cacheKey]);
             skipped++; return;
           }
@@ -133,6 +132,20 @@ async function main() {
   const elapsed = ((Date.now()-startTime)/1000/60).toFixed(1);
   console.log(`\n✓ Done in ${elapsed}min — processed:${processed} skipped:${skipped} errors:${errors}`);
   console.log(`  CDN manifest: ${Object.keys(cdnManifest).length} lots`);
+}
+
+// Cached paths are stored as WEB paths ("/img/slabs/foo-800.webp") for the CDN
+// manifest. fs.existsSync() would resolve that against the filesystem root, which
+// never exists on the build machine — always resolve against cwd first.
+// Checks the LARGEST width, which generateWebP writes last, so a build that was
+// killed mid-encode is correctly treated as incomplete and gets redone.
+function cachedOutputsExist(entry) {
+  if (!entry) return false;
+  for (const w of [...WIDTHS].sort((a, b) => b - a)) {
+    const p = entry[`path${w}`];
+    if (p) return fs.existsSync(path.join(process.cwd(), p));
+  }
+  return false;
 }
 
 function recordResult(results, item, paths) {
