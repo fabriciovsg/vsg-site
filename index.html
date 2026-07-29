@@ -309,10 +309,12 @@ section{padding:72px 48px;}
 .modal-gallery-nav:hover{background:var(--gold);}
 .modal-gallery-nav.prev{left:10px;}
 .modal-gallery-nav.next{right:10px;}
-/* Lighting selector */
-.light-selector{position:absolute;top:8px;left:8px;z-index:6;display:flex;gap:1px;background:rgba(0,0,0,.55);padding:3px;border-radius:3px;backdrop-filter:blur(6px);}
-.light-btn{border:none;background:transparent;color:rgba(255,255,255,.48);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:5px 8px;cursor:pointer;border-radius:2px;transition:all .15s;white-space:nowrap;font-family:'Jost',sans-serif;line-height:1;}
-.light-btn:hover{color:rgba(255,255,255,.88);background:rgba(255,255,255,.1);}
+/* Lighting selector — in-flow bar between image and thumbs, no overlap with arrows */
+.light-selector{display:flex;gap:1px;align-items:center;background:rgba(10,8,6,.92);padding:4px 8px;border-top:1px solid rgba(200,184,154,.06);flex-shrink:0;}
+.light-selector.ls-hidden{display:none;}
+.light-selector-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(200,184,154,.35);padding:0 6px 0 2px;white-space:nowrap;flex-shrink:0;}
+.light-btn{border:none;background:transparent;color:rgba(255,255,255,.44);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:5px 8px;cursor:pointer;border-radius:2px;transition:all .15s;white-space:nowrap;font-family:'Jost',sans-serif;line-height:1;}
+.light-btn:hover{color:rgba(255,255,255,.88);background:rgba(255,255,255,.08);}
 .light-btn.active{color:var(--gold-light);background:rgba(184,150,60,.18);}
 .stone-nav{position:fixed;top:16px;transform:none;z-index:950;background:rgba(20,17,13,.85);border:1px solid rgba(200,184,154,.25);color:var(--cream);width:52px;height:52px;border-radius:50%;font-size:30px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;transition:background .2s,opacity .2s,border-color .2s;}
 .modal-backdrop.open .stone-nav{display:flex;}
@@ -1074,6 +1076,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
     <div class="modal-gallery" id="modalGallery">
       <img class="modal-gallery-main" id="modalMainImg" src="" alt="" onclick="openLightbox(this.src)">
       <div class="light-selector" id="lightSelector">
+        <span class="light-selector-label">Lighting</span>
         <button class="light-btn active" data-light="Natural" onclick="setLightFilter('Natural')">Natural</button>
         <button class="light-btn" data-light="Warm" onclick="setLightFilter('Warm')">Warm</button>
         <button class="light-btn" data-light="Cool" onclick="setLightFilter('Cool')">Cool</button>
@@ -1352,6 +1355,7 @@ function applyCMS(){
     if(pfr)pfr.style.display=g('priceFilterVisible')===false?'none':'flex';
   const msfr=document.getElementById('minSlabsFilter');if(msfr)msfr.style.display=g('minSlabsFilterVisible')===false?'none':'flex';
   const asec=document.getElementById('arriving');if(asec)asec.style.display=g('arrivingSoonVisible')===false?'none':'block';
+  const lsel=document.getElementById('lightSelector');if(lsel)lsel.classList.toggle('ls-hidden',g('lightSelectorEnabled')===false);
   const fsec=document.getElementById('fabricators');
   if(fsec){
     fsec.style.display=g('fabricatorsVisible')===false?'none':'block';
@@ -2912,6 +2916,14 @@ function renderAdminContent(){
           </select>
         </div>
         <div class="admin-field">
+          <div class="admin-label">Lighting Selector (stone modal)</div>
+          <div style="font-size:12px;color:rgba(200,184,154,.55);margin-bottom:8px">Shows a row of lighting presets (Natural / Warm / Cool / Bright / Dim) below the stone photo so customers can preview how the slab looks under different lighting conditions.</div>
+          <select class="admin-input" id="af-lightSelectorEnabled" style="padding:9px 12px">
+            <option value="true" ${g('lightSelectorEnabled')!==false?'selected':''}>Enabled — visible to customers</option>
+            <option value="false" ${g('lightSelectorEnabled')===false?'selected':''}>Disabled — hidden</option>
+          </select>
+        </div>
+        <div class="admin-field">
           <div class="admin-label">Colour Filter Style</div>
           <select class="admin-input" id="af-colourFilterStyle" style="padding:9px 12px">
             <option value="pills" ${(g('colourFilterStyle')||'pills')==='pills'?'selected':''}>Coloured pills</option>
@@ -3022,6 +3034,8 @@ async function saveAdminContent(){
   if(fabVisEl)cms.fabricatorsVisible=fabVisEl.value==='true';
   const themeEl=document.getElementById('af-siteTheme');
   if(themeEl)cms.siteTheme=themeEl.value;
+  const lsEnEl=document.getElementById('af-lightSelectorEnabled');
+  if(lsEnEl)cms.lightSelectorEnabled=lsEnEl.value==='true';
   const cfsEl=document.getElementById('af-colourFilterStyle');
   if(cfsEl){cms.colourFilterStyle=cfsEl.value;applyColourFilterStyle();}
     const asEl=document.getElementById('af-arrivingSoonVisible');
