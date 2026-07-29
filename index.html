@@ -131,6 +131,11 @@ body[data-theme="light"] .live-count-badge,body[data-theme="dark-light-gallery"]
 body[data-theme="dark-light-gallery"] #about{background:#FAF8F4;}
 body[data-theme="dark-light-gallery"] .about-img-accent{border-color:#FAF8F4;}
 body[data-theme="dark-light-gallery"] #why{background:#FAF8F4;}
+/* Navy Accent — topbar + nav + footer in VSG brand navy; gallery & body sections stay charcoal */
+body[data-theme="navy-accent"]{--black:#0e1b2e;--surface-nav:rgba(11,21,36,.97);}
+body[data-theme="navy-accent"] footer{background:#0e1b2e;}
+/* Navy Full — all dark surfaces replaced with VSG brand navy */
+body[data-theme="navy-full"]{--black:#0e1b2e;--surface-dark:#1a2b45;--surface-dark-alt:#132138;--surface-dark-alt2:#0e1b2e;--surface-nav:rgba(11,21,36,.97);--surface-card-dark:#0f1e35;--surface-card-img-dark:#0b1828;--surface-card-dark-hover:#122035;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{font-family:'Jost',sans-serif;background:var(--warm-white);color:var(--charcoal);font-weight:300;overflow-x:hidden;}
@@ -2937,9 +2942,11 @@ function renderAdminContent(){
         </div>
         <div class="admin-field">
           <div class="admin-label">Site Theme (preview)</div>
-          <div style="font-size:12px;color:rgba(200,184,154,.55);margin-bottom:8px">Flips the dark brand sections (nav, gallery, fabricators, arriving, events, footer) to a lighter palette so you can compare. Applies site-wide for all visitors until switched back — not a per-visitor toggle.</div>
+          <div style="font-size:12px;color:rgba(200,184,154,.55);margin-bottom:8px">Controls the colour scheme site-wide for all visitors. Dark is the default charcoal theme. Navy options align with VSG's traditional brand identity — Accent applies navy only to the nav and footer; Full applies it across all dark surfaces. Applies immediately and persists until changed.</div>
           <select class="admin-input" id="af-siteTheme" style="padding:9px 12px">
-            <option value="dark" ${(g('siteTheme')||'dark')==='dark'?'selected':''}>Dark</option>
+            <option value="dark" ${(g('siteTheme')||'dark')==='dark'?'selected':''}>Dark (charcoal)</option>
+            <option value="navy-accent" ${g('siteTheme')==='navy-accent'?'selected':''}>Navy — Accent (nav &amp; footer)</option>
+            <option value="navy-full" ${g('siteTheme')==='navy-full'?'selected':''}>Navy — Full</option>
             <option value="dark-light-gallery" ${g('siteTheme')==='dark-light-gallery'?'selected':''}>Dark + Light Gallery</option>
             <option value="light" ${g('siteTheme')==='light'?'selected':''}>Light</option>
           </select>
