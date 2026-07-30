@@ -18,10 +18,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 
+<!-- Shared theme layer: the palette and every body[data-theme="…"] block live in
+     /assets/vsg-theme.css, shared with / and /stones/. This page used to carry its
+     own copy, which had drifted from the main page (different text alphas, a different
+     light-theme block, and no navy or light-gallery blocks at all — which is why theme
+     changes appeared to do nothing here). Do not re-add a local :root palette. -->
+<link rel="stylesheet" href="/assets/vsg-theme.css">
+<script src="/assets/vsg-theme.js" defer></script>
+
 <style>
-:root{--cream:#F5F0E8;--warm-white:#FAF8F4;--stone:#C8B89A;--stone-dark:#A09070;--charcoal:#2A2620;--mid:#6B6358;--gold:#B8963C;--gold-light:#D4AF6A;--black:#1A1714;
-  --surface-dark:#1A1714;--surface-dark-alt:#13110d;--surface-dark-alt2:#0f0d0b;--surface-nav:rgba(15,13,11,.95);--surface-dark-text:#F5F0E8;--surface-card-dark:#111111;--surface-card-img-dark:#141210;--surface-card-dark-hover:#161310;--surface-dark-text-secondary:rgba(200,184,154,.7);--surface-dark-text-muted:rgba(200,184,154,.5);--surface-dark-text-faint:rgba(200,184,154,.35);}
-body[data-theme="light"]{--surface-dark:#FAF8F4;--surface-dark-alt:#F5F0E8;--surface-dark-alt2:#F0EBE3;--surface-nav:rgba(250,248,244,.95);--surface-dark-text:#2A2620;--surface-card-dark:#FFFFFF;--surface-card-img-dark:#F0EBE3;--surface-card-dark-hover:#F5F0E8;--surface-dark-text-secondary:rgba(42,38,32,.72);--surface-dark-text-muted:rgba(42,38,32,.55);--surface-dark-text-faint:rgba(42,38,32,.4);}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{font-family:'Jost',sans-serif;background:var(--warm-white);color:var(--charcoal);font-weight:300;overflow-x:hidden;line-height:1.6;}
@@ -46,7 +51,14 @@ nav.scrolled{box-shadow:0 4px 32px rgba(0,0,0,.4);}
 .nav-links a:hover,.nav-links a.current{color:var(--gold-light);}
 .nav-cta{background:var(--gold);color:white!important;padding:10px 22px;letter-spacing:.12em;font-size:11px;white-space:nowrap;transition:background .2s!important;}
 .nav-cta:hover{background:var(--gold-light)!important;}
-.nav-shortlist-btn{position:relative;background:transparent;border:1px solid rgba(184,150,60,.4);color:var(--gold);padding:8px 16px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;white-space:nowrap;text-decoration:none;}
+/* Selector doubled with .nav-links a… because that rule (0,1,1) outranks a bare
+   class (0,1,0) and would otherwise force this link to the stone nav-link colour
+   and 12px. The main site's version is a <button>, which .nav-links a never
+   matched, so this only bites where the control is a link. */
+.nav-shortlist-btn,.nav-links a.nav-shortlist-btn{position:relative;background:transparent;border:1px solid rgba(184,150,60,.4);color:var(--gold);padding:8px 16px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;white-space:nowrap;text-decoration:none;}
+/* This page had no hover state for the shortlist control at all — added for parity
+   with the main site and /stones/. */
+.nav-shortlist-btn:hover,.nav-links a.nav-shortlist-btn:hover{background:var(--gold);color:white;border-color:var(--gold);}
 
 @media(max-width:1024px){
   .nav-hamburger{display:flex;}
@@ -66,7 +78,7 @@ nav.scrolled{box-shadow:0 4px 32px rgba(0,0,0,.4);}
 
 .catalogue-wrap{max-width:1280px;margin:0 auto;padding:24px 48px 96px;}
 .cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:32px;}
-.cat-card{position:relative;overflow:hidden;aspect-ratio:4/3;cursor:pointer;background:#222;text-decoration:none;border:1px solid rgba(200,184,154,.12);}
+.cat-card{position:relative;overflow:hidden;aspect-ratio:4/3;cursor:pointer;background:var(--surface-overlay-alt,#222);text-decoration:none;border:1px solid rgba(200,184,154,.12);}
 .cat-card img{width:100%;height:100%;object-fit:cover;object-position:center center;transform:scale(1.15);transform-origin:center;transition:transform .8s ease,opacity .3s;}
 .cat-card:hover img{transform:scale(1.22);opacity:.85;}
 .cat-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(15,13,11,.88) 0%,rgba(15,13,11,.15) 45%,transparent 70%);display:flex;align-items:flex-end;padding:14px 16px;}
@@ -97,6 +109,10 @@ footer{background:var(--surface-dark);padding:64px 48px 32px;}
 </style>
 </head>
 <body>
+<!-- Theme boot: paints the cached theme before first render so navigating here from
+     the main page never flashes the default. Drive stays authoritative — applyCMS()
+     calls VSGTheme.set() with the real value and refreshes this cache. -->
+<script>try{document.body.setAttribute('data-theme',localStorage.getItem('vsg-site-theme')||'dark')}catch(e){}</script>
 
 <div class="topbar">
   <div id="cms-topbar-text">Melbourne Natural Stone Gallery — Direct from Quarry to Your Project</div>
@@ -408,7 +424,13 @@ function se(id,prop,val){const el=document.getElementById(id);if(el)el[prop]=val
 
 function applyCMS(){
   try{
-    document.body.setAttribute('data-theme',g('siteTheme')||'dark');
+    // Drive is authoritative; VSGTheme.set() also refreshes the localStorage cache the
+    // boot snippet reads. Guarded so a failed vsg-theme.js request can't break applyCMS().
+    // cms.siteTheme, not g('siteTheme'): g() falls back to CMS_DEFAULTS, so a failed
+    // Drive fetch would silently reset the theme to dark. setFromConfig() ignores a
+    // missing value and keeps whatever the boot snippet painted from cache.
+    if(window.VSGTheme)VSGTheme.setFromConfig(cms.siteTheme);
+    else if(cms.siteTheme)document.body.setAttribute('data-theme',cms.siteTheme);
     se('cms-topbar-text','textContent',g('topbarText'));
     const phoneEl=document.getElementById('cms-phone-link');
     if(phoneEl){phoneEl.textContent=g('phone');phoneEl.href='tel:'+g('phone').replace(/\s/g,'');}

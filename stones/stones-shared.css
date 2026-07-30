@@ -2,8 +2,21 @@
    VSG Stone Knowledge — shared stylesheet
    Design tokens match vsg-website (Cormorant Garamond + Jost,
    cream/gold/charcoal palette). Loaded by every /stones/*.html page.
+
+   THEMING
+   Pages that also link /assets/vsg-theme.css (AFTER this file) get the site
+   theme — navy, light, etc. That file re-declares the palette on
+   body[data-theme="…"], and <body> is a closer ancestor than :root, so its
+   values win here. Every surface colour below therefore goes through a var
+   with a hardcoded fallback, e.g. var(--surface-nav,rgba(15,13,11,.95)), so
+   any /stones/ page that has NOT yet been given the theme link still renders
+   exactly as before. Never write a bare hex for a surface colour in this file
+   — a literal hex cannot be themed.
    ============================================================ */
 
+/* Fallback palette. When /assets/vsg-theme.css is linked it declares these same
+   values on :root too and, being loaded second, takes over. Kept here so
+   /stones/ pages without the theme link are not left unstyled. */
 :root{
   --cream:#F5F0E8;--warm-white:#FAF8F4;--stone:#C8B89A;--stone-dark:#A09070;
   --charcoal:#2A2620;--mid:#6B6358;--gold:#B8963C;--gold-light:#D4AF6A;--black:#1A1714;
@@ -19,23 +32,41 @@ body{font-family:'Jost',sans-serif;background:var(--warm-white);color:var(--char
 .topbar-right{display:flex;gap:20px;align-items:center;}
 
 /* ---------- NAV ---------- */
-nav{position:sticky;top:0;z-index:200;background:rgba(15,13,11,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(200,184,154,.12);display:flex;align-items:center;justify-content:space-between;gap:32px;padding:0 48px;height:72px;transition:box-shadow .3s;}
-nav.scrolled{box-shadow:0 4px 32px rgba(26,23,20,.1);}
+nav{position:sticky;top:0;z-index:200;background:var(--surface-nav,rgba(15,13,11,.95));backdrop-filter:blur(12px);border-bottom:1px solid rgba(200,184,154,.12);display:flex;align-items:center;justify-content:space-between;gap:32px;padding:0 48px;height:72px;transition:box-shadow .3s;}
+nav.scrolled{box-shadow:0 4px 32px rgba(0,0,0,.4);} /* was rgba(26,23,20,.1) — invisible on a dark nav; matches the main site */
 .nav-logo{text-decoration:none;display:flex;align-items:center;}
 .vsg-logo-svg{display:block;width:auto;color:var(--cream);fill:currentColor;}
 .nav-logo-svg{height:30px;}
 .footer-logo-svg{height:34px;color:var(--cream);}
 .nav-links{display:flex;gap:28px;list-style:none;align-items:center;}
-.nav-links a{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:rgba(200,184,154,.7);text-decoration:none;transition:color .2s;font-weight:400;}
-.nav-links a:hover,.nav-links a.current{color:var(--charcoal);}
+.nav-links a{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--surface-dark-text-secondary,rgba(200,184,154,.82));text-decoration:none;transition:color .2s;font-weight:400;}
+/* Hover was var(--charcoal) — near-black text on a near-black nav, so links
+   vanished on hover. Now matches the main site. */
+.nav-links a:hover{color:var(--gold-light);}
 .nav-links a.current{color:var(--gold-light);}
 .nav-cta{background:var(--gold);color:white!important;padding:10px 22px;letter-spacing:.12em;font-size:11px;white-space:nowrap;transition:background .2s!important;}
 .nav-cta:hover{background:var(--gold-light)!important;color:white!important;}
+/* .nav-shortlist-btn had NO rule in this file at all, so the <button> in the
+   header fell back to the browser's default control — the white rounded pill
+   with dark text that looked nothing like the rest of the nav. Copied verbatim
+   from the main site so the two headers match. */
+/* Selector doubled with .nav-links a… because that rule (0,1,1) outranks a bare
+   class (0,1,0) and would otherwise force this link to the stone nav-link colour
+   and 12px. The main site's version is a <button>, which .nav-links a never
+   matched, so this only bites where the control is a link. */
+.nav-shortlist-btn,.nav-links a.nav-shortlist-btn{position:relative;background:transparent;border:1px solid rgba(184,150,60,.4);color:var(--gold);padding:8px 16px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;white-space:nowrap;text-decoration:none;}
+.nav-shortlist-btn:hover,.nav-links a.nav-shortlist-btn:hover{background:var(--gold);color:white;border-color:var(--gold);}
+
 .nav-burger{display:none;background:none;border:none;cursor:pointer;padding:8px;flex-direction:column;gap:5px;}
-.nav-burger span{display:block;width:22px;height:1.5px;background:var(--charcoal);}
-.nav-mobile-panel{display:none;position:fixed;top:60px;left:0;right:0;background:var(--warm-white);border-bottom:1px solid rgba(200,184,154,.3);z-index:199;padding:8px 20px 20px;flex-direction:column;}
+/* Bars were var(--charcoal) — #2A2620 on a #0f0d0b nav, effectively invisible.
+   The main site uses the light-on-dark text colour; so does this now. */
+.nav-burger span{display:block;width:22px;height:1.5px;background:var(--surface-dark-text,#F5F0E8);transition:all .3s;}
+/* Was warm-white with charcoal links — a light sheet dropping out of a dark nav.
+   Now uses the themed dark surface so it matches the nav it hangs from. */
+.nav-mobile-panel{display:none;position:fixed;top:60px;left:0;right:0;background:var(--surface-dark-alt,#13110d);border-bottom:1px solid rgba(200,184,154,.12);z-index:199;padding:8px 20px 20px;flex-direction:column;}
 .nav-mobile-panel.open{display:flex;}
-.nav-mobile-panel a{padding:14px 0;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--charcoal);text-decoration:none;border-bottom:1px solid rgba(200,184,154,.15);}
+.nav-mobile-panel a{padding:14px 0;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--surface-dark-text-secondary,rgba(200,184,154,.82));text-decoration:none;border-bottom:1px solid rgba(200,184,154,.15);}
+.nav-mobile-panel a:hover{color:var(--gold-light);}
 
 /* ---------- ARTICLE HERO ---------- */
 .article-hero{background:var(--black);padding:120px 48px 72px;position:relative;overflow:hidden;}
@@ -94,7 +125,7 @@ blockquote{border-left:2px solid var(--gold);padding:4px 0 4px 28px;margin:36px 
 .dos-donts ul li{padding-left:0;font-size:14px;}
 
 /* CTA block — sits inline within articles to drive to showroom/contact */
-.article-cta{background:linear-gradient(135deg,var(--black),#231f1a);padding:48px 40px;margin:48px 0;text-align:center;}
+.article-cta{background:linear-gradient(135deg,var(--black),var(--surface-dark-cta2,#231f1a));padding:48px 40px;margin:48px 0;text-align:center;}
 .article-cta .section-label{justify-content:center;color:var(--gold-light);}
 .article-cta .section-label::after{display:none;}
 .article-cta h3{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:white;margin:10px 0 20px;}
@@ -133,7 +164,11 @@ blockquote{border-left:2px solid var(--gold);padding:4px 0 4px 28px;margin:36px 
 .toc a:hover{color:var(--gold);}
 
 /* ---------- FOOTER (shared with main site) ---------- */
-footer{background:var(--black);padding:64px 48px 32px;}
+/* Was var(--black), which the light theme does not remap — so under Light this
+   footer stayed dark while the main site's went cream. --surface-dark is the var
+   the main site and /catalogue/ use for the footer; matching it keeps all three
+   footers in step across every theme. */
+footer{background:var(--surface-dark,#1A1714);padding:64px 48px 32px;}
 .footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:48px;border-bottom:1px solid rgba(200,184,154,.12);margin-bottom:32px;max-width:1280px;margin-left:auto;margin-right:auto;}
 .footer-tagline{font-size:13px;color:rgba(200,184,154,.5);line-height:1.7;max-width:280px;margin-top:16px;}
 .footer-col-title{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-light);margin-bottom:20px;}
@@ -147,6 +182,7 @@ footer{background:var(--black);padding:64px 48px 32px;}
 @media(max-width:1100px){
   .nav-links{display:none;}
   .nav-burger{display:flex;}
+  .nav-links a,.nav-links .nav-shortlist-btn{font-size:16px;letter-spacing:.14em;}
 }
 @media(max-width:900px){
   .topbar{display:none;}

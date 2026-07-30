@@ -86,66 +86,12 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon_180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<!-- Shared theme layer: palette + every body[data-theme="…"] block. Also linked by
+     /catalogue/index.html and /stones/index.html so all three pages theme together.
+     Add a new theme there + an <option> in the admin Site Theme select below. -->
+<link rel="stylesheet" href="/assets/vsg-theme.css">
+<script src="/assets/vsg-theme.js" defer></script>
 <style>
-:root{--cream:#F5F0E8;--warm-white:#FAF8F4;--stone:#C8B89A;--stone-dark:#A09070;--charcoal:#2A2620;--mid:#6B6358;--gold:#B8963C;--gold-light:#D4AF6A;--black:#1A1714;
-  --surface-dark:#1A1714;--surface-dark-alt:#13110d;--surface-dark-alt2:#0f0d0b;--surface-nav:rgba(15,13,11,.95);--surface-dark-text:#F5F0E8;--surface-card-dark:#111111;--surface-card-img-dark:#141210;--surface-card-dark-hover:#161310;--surface-dark-text-secondary:rgba(200,184,154,.82);--surface-dark-text-muted:rgba(200,184,154,.80);--surface-dark-text-faint:rgba(200,184,154,.5);}
-/* Site Theme preview (admin-only) — flips the dark-brand sections to a lighter palette for comparison */
-body[data-theme="light"]{--surface-dark:#F5F0E8;--surface-dark-alt:#EDE8DF;--surface-dark-alt2:#E8E2D8;--surface-nav:rgba(250,248,244,.95);--surface-dark-text:#2A2620;--surface-card-dark:#FAF8F4;--surface-card-img-dark:#EDE8DF;--surface-card-dark-hover:#F0EBE3;--surface-dark-text-secondary:rgba(42,38,32,.85);--surface-dark-text-muted:rgba(42,38,32,.70);--surface-dark-text-faint:rgba(42,38,32,.55);}
-/* Light theme: gallery grid — warm gap + lifted cards */
-body[data-theme="light"] .stone-grid{gap:8px;}
-body[data-theme="light"] .stone-card{box-shadow:0 2px 8px rgba(42,38,32,.07);}
-/* Light theme: restore contrast break after gallery — about/why step up to near-white */
-body[data-theme="light"] #about{background:#FAF8F4;}
-body[data-theme="light"] .about-img-accent{border-color:#FAF8F4;}
-body[data-theme="light"] #why{background:#FAF8F4;}
-/* Light theme: keep nav dark, logo and links light */
-body[data-theme="light"] nav{background:rgba(15,13,11,.95)!important;border-bottom-color:rgba(200,184,154,.12)!important;}
-body[data-theme="light"] .vsg-logo-svg.nav-logo-svg{color:#F5F0E8!important;}
-body[data-theme="light"] .nav-links a{color:rgba(200,184,154,.82)!important;}
-body[data-theme="light"] .nav-links a:hover{color:#D4AF6A!important;}
-body[data-theme="light"] .nav-hamburger span{background:#F5F0E8!important;}
-/* ── LIGHT GALLERY VARIANTS ───────────────────────────────────────────────────
-   Shared by "dark-light-gallery" and "navy-light-gallery": dark site, warm cream
-   gallery section. The [data-theme$="light-gallery"] ends-with selector matches
-   both, so these rules are written once. Does NOT match plain "light" — that
-   value doesn't end in "light-gallery". Same specificity as an exact = match,
-   so cascade behaviour is unchanged. Any future "<name>-light-gallery" theme
-   inherits this block automatically. */
-body[data-theme$="light-gallery"] #gallery{
-  --surface-dark-text:#2A2620;
-  --surface-dark-text-secondary:rgba(42,38,32,.85);
-  --surface-dark-text-muted:rgba(42,38,32,.70);
-  --surface-dark-text-faint:rgba(42,38,32,.55);
-  --surface-card-dark:#FAF8F4;
-  --surface-card-img-dark:#EDE8DF;
-  --surface-card-dark-hover:#F0EBE3;
-  background:#F5F0E8;
-}
-body[data-theme$="light-gallery"] .stone-grid{gap:2px;}
-body[data-theme$="light-gallery"] .stone-card{box-shadow:0 2px 8px rgba(42,38,32,.07);}
-body[data-theme$="light-gallery"] .search-box input{background:rgba(255,255,255,.7);border-color:rgba(42,38,32,.18);}
-body[data-theme$="light-gallery"] .filter-btn:not(.active){border-color:rgba(42,38,32,.18);}
-body[data-theme$="light-gallery"] .sort-select{border-color:rgba(42,38,32,.18);}
-body[data-theme$="light-gallery"] .min-slabs-input{border-color:rgba(42,38,32,.18);}
-body[data-theme$="light-gallery"] .finish-pill:not(.active){border-color:rgba(42,38,32,.18);}
-body[data-theme$="light-gallery"] .colour-filter-row.style-names .colour-pill:not(.active){border-color:rgba(42,38,32,.18);}
-/* Light/light-gallery: live count badge adapts to cream background */
-body[data-theme="light"] .live-count-num,body[data-theme$="light-gallery"] .live-count-num{color:#3a7a3a;}
-body[data-theme="light"] .live-count-label,body[data-theme$="light-gallery"] .live-count-label{color:rgba(40,90,40,.7);}
-body[data-theme="light"] .live-count-badge,body[data-theme$="light-gallery"] .live-count-badge{background:rgba(60,130,60,.06);border-color:rgba(60,130,60,.2);}
-/* Light-gallery: restore contrast break — about/why step up to near-white */
-body[data-theme$="light-gallery"] #about{background:#FAF8F4;}
-body[data-theme$="light-gallery"] .about-img-accent{border-color:#FAF8F4;}
-body[data-theme$="light-gallery"] #why{background:#FAF8F4;}
-/* ── NAVY THEMES ──────────────────────────────────────────────────────────────
-   Navy Accent — topbar + nav + footer in VSG brand navy; body sections stay charcoal */
-body[data-theme="navy-accent"]{--black:#0e1b2e;--surface-nav:rgba(11,21,36,.97);}
-body[data-theme="navy-accent"] footer{background:#0e1b2e;}
-/* Navy Full — all dark surfaces navy. "navy-light-gallery" takes the same navy
-   base, then the light-gallery block above re-scopes #gallery to cream. Those
-   overrides are declared ON #gallery, so they beat these body-level values for
-   anything inside the gallery regardless of source order. */
-body[data-theme="navy-full"],body[data-theme="navy-light-gallery"]{--black:#0e1b2e;--surface-dark:#1a2b45;--surface-dark-alt:#132138;--surface-dark-alt2:#0e1b2e;--surface-nav:rgba(11,21,36,.97);--surface-card-dark:#0f1e35;--surface-card-img-dark:#0b1828;--surface-card-dark-hover:#122035;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{font-family:'Jost',sans-serif;background:var(--warm-white);color:var(--charcoal);font-weight:300;overflow-x:hidden;}
@@ -219,7 +165,7 @@ section{padding:72px 48px;}
 /* CATALOGUE */
 #catalogue{background:var(--warm-white);padding-top:64px;}
 .cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px;}
-.cat-card{position:relative;overflow:hidden;aspect-ratio:4/3;cursor:pointer;background:#222;text-decoration:none;border:1px solid rgba(200,184,154,.12);}
+.cat-card{position:relative;overflow:hidden;aspect-ratio:4/3;cursor:pointer;background:var(--surface-overlay-alt,#222);text-decoration:none;border:1px solid rgba(200,184,154,.12);}
 .cat-card img{width:100%;height:100%;object-fit:cover;object-position:center center;transform:scale(1.15);transform-origin:center;transition:transform .8s ease,opacity .3s;}
 .cat-card:hover img{transform:scale(1.22);opacity:.85;}
 .cat-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(15,13,11,.88) 0%,rgba(15,13,11,.15) 45%,transparent 70%);display:flex;align-items:flex-end;padding:14px 16px;}
@@ -310,13 +256,13 @@ section{padding:72px 48px;}
 /* PRODUCT MODAL */
 .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(10,8,6,.92);z-index:900;align-items:flex-start;justify-content:center;padding:12px;overflow-y:auto;}
 .modal-backdrop.open{display:flex;}
-.modal{background:#18160f;max-width:1400px;width:100%;margin:auto;display:grid;grid-template-columns:1.7fr 0.7fr;animation:modalIn .3s ease;position:relative;}
+.modal{background:var(--surface-overlay,#18160f);max-width:1400px;width:100%;margin:auto;display:grid;grid-template-columns:1.7fr 0.7fr;animation:modalIn .3s ease;position:relative;}
 @keyframes modalIn{from{opacity:0;transform:scale(.96);}to{opacity:1;transform:none;}}
-.modal-gallery{position:relative;background:#0e0c09;display:flex;flex-direction:column;}
+.modal-gallery{position:relative;background:var(--surface-overlay-deep,#0e0c09);display:flex;flex-direction:column;}
 .modal-gallery-main{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;cursor:zoom-in;}
 .modal-gallery-main.portrait{aspect-ratio:3/4;}
 .ai-render-note{position:absolute;left:0;right:0;bottom:0;background:rgba(10,8,6,.68);backdrop-filter:blur(3px);color:rgba(245,240,232,.85);font-size:10px;letter-spacing:.04em;text-align:center;padding:7px 12px;pointer-events:none;}
-.modal-gallery-thumbs{display:flex;gap:3px;padding:3px;background:#0e0c09;flex-wrap:wrap;position:relative;z-index:2;}
+.modal-gallery-thumbs{display:flex;gap:3px;padding:3px;background:var(--surface-overlay-deep,#0e0c09);flex-wrap:wrap;position:relative;z-index:2;}
 .modal-thumb{width:58px;height:42px;object-fit:cover;cursor:pointer;opacity:.5;transition:opacity .2s;border:2px solid transparent;flex-shrink:0;}
 .modal-thumb.active{opacity:1;border-color:var(--gold);}
 .modal-thumb:hover{opacity:.85;}
@@ -377,7 +323,7 @@ section{padding:72px 48px;}
 .lightbox img{max-width:95vw;max-height:95vh;object-fit:contain;}
 .lightbox-close{position:absolute;top:20px;right:20px;background:none;border:none;color:white;font-size:28px;cursor:pointer;}
 /* SHORTLIST DRAWER */
-.shortlist-drawer{position:fixed;right:0;top:0;bottom:0;width:400px;background:#18160f;z-index:950;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;border-left:1px solid rgba(200,184,154,.12);}
+.shortlist-drawer{position:fixed;right:0;top:0;bottom:0;width:400px;background:var(--surface-overlay,#18160f);z-index:950;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;border-left:1px solid rgba(200,184,154,.12);}
 .shortlist-drawer.open{transform:translateX(0);}
 .shortlist-drawer-header{padding:28px 28px 20px;border-bottom:1px solid rgba(200,184,154,.12);display:flex;align-items:center;justify-content:space-between;}
 .shortlist-drawer-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;color:var(--cream);}
@@ -388,7 +334,7 @@ section{padding:72px 48px;}
 .shortlist-empty-text{font-family:'Cormorant Garamond',serif;font-size:20px;color:rgba(200,184,154,.45);}
 .shortlist-item{display:flex;gap:14px;align-items:center;background:rgba(255,255,255,.03);padding:12px;border:1px solid rgba(200,184,154,.08);}
 .shortlist-item-img{width:64px;height:64px;object-fit:cover;flex-shrink:0;}
-.shortlist-item-img-placeholder{width:64px;height:64px;background:#252018;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:20px;color:rgba(200,184,154,.2);}
+.shortlist-item-img-placeholder{width:64px;height:64px;background:var(--surface-overlay-alt,#252018);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:20px;color:rgba(200,184,154,.2);}
 .shortlist-item-info{flex:1;min-width:0;}
 .shortlist-item-name{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--cream);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .shortlist-item-sub{font-size:11px;color:rgba(200,184,154,.45);margin-top:3px;}
@@ -537,8 +483,8 @@ footer{background:var(--surface-dark);padding:64px 48px 32px;}
 .cip-browse-btn:hover{background:rgba(200,184,154,.12);}
 .cip-modal-backdrop{position:fixed;inset:0;background:rgba(10,8,6,.8);z-index:700;display:none;align-items:center;justify-content:center;padding:30px;}
 .cip-modal-backdrop.open{display:flex;}
-.cip-modal{background:#1f1c18;border:1px solid rgba(200,184,154,.2);max-width:760px;width:100%;max-height:84vh;overflow-y:auto;}
-.cip-modal-head{position:sticky;top:0;background:#1f1c18;padding:20px 24px;border-bottom:1px solid rgba(200,184,154,.15);display:flex;justify-content:space-between;align-items:center;}
+.cip-modal{background:var(--surface-overlay-alt,#1f1c18);border:1px solid rgba(200,184,154,.2);max-width:760px;width:100%;max-height:84vh;overflow-y:auto;}
+.cip-modal-head{position:sticky;top:0;background:var(--surface-overlay-alt,#1f1c18);padding:20px 24px;border-bottom:1px solid rgba(200,184,154,.15);display:flex;justify-content:space-between;align-items:center;}
 .cip-modal-title{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--cream);}
 .cip-modal-close{background:none;border:none;color:rgba(200,184,154,.6);font-size:20px;cursor:pointer;}
 .cip-modal-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:20px 24px;}
@@ -656,6 +602,12 @@ textarea.admin-input{resize:vertical;min-height:80px;line-height:1.6;}
 </style>
 </head>
 <body>
+<!-- Theme boot: paints the cached theme before first render so a returning visitor
+     never sees the default flash while the Drive config loads. Deliberately inline
+     and first-in-body — document.body already exists here, and an external script
+     would need a blocking request to beat paint. Drive stays authoritative: applyCMS()
+     calls VSGTheme.set() with the real value and rewrites this cache. -->
+<script>try{document.body.setAttribute('data-theme',localStorage.getItem('vsg-site-theme')||'dark')}catch(e){}</script>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="vsgLogo" viewBox="0 0 2880 528"><g transform="translate(0.000000,528.000000) scale(0.100000,-0.100000)"
 fill="currentColor" stroke="none">
 <path d="M67 5254 c-3 -3 16 -43 43 -87 26 -45 57 -98 68 -117 11 -19 60 -105
@@ -1275,7 +1227,10 @@ const CMS_DEFAULTS={
   finishingFilterVisible:true, // show finishing filter row on public gallery
   arrivingSoonVisible:false, // show Arriving Soon section (enable when folder has content)
   fabricatorsVisible:true, // show Recommended Fabricators section
-  siteTheme:'dark', // 'dark' | 'dark-light-gallery' | 'light'
+  // Site-wide, applies to /, /catalogue/ and /stones/. Every value here must have a
+  // matching body[data-theme="…"] block in /assets/vsg-theme.css and an <option> in
+  // the admin Site Theme select.
+  siteTheme:'dark', // 'dark' | 'navy-accent' | 'navy-full' | 'navy-light-gallery' | 'dark-light-gallery' | 'light'
   colourFilterStyle:'pills', // 'pills' = coloured swatches, 'names' = text labels
   fabricators:[{"name": "Absolutely Marble-Us", "address": "22 Sinclair Drive, Wangaratta VIC 3677", "phone": "(03) 5721 8564", "url": "https://absolutelymarbleus.com.au/"}, {"name": "Benchtop Factory", "address": "35 Industrial Drive, Braeside VIC 3195", "phone": "(03) 9547 1717", "url": "https://www.thebenchtopfactory.com/"}, {"name": "Bluechip Marble & Granite", "address": "39 Malcolm Rd, Braeside VIC 3169", "phone": "(03) 9547 1717", "url": "https://bluechipmarble.com.au/"}, {"name": "Contemporary Stone", "address": "45 Babbage Drive, Dandenong South VIC 3175", "phone": "(03) 3791 3093", "url": "https://www.finechoicestone.com.au/"}, {"name": "Direct Stone", "address": "39 Weerong Road, Drouin VIC 3818", "phone": "(03) 5625 2680", "url": "http://directstone.com.au/"}, {"name": "Eaglestone", "address": "3-4/26 Kyabram St, Coolaroo VIC 3048", "phone": "0432 625 403", "url": "https://eaglestone.com.au/"}, {"name": "Established Stone", "address": "3 Park Drive, Dandenong South VIC 3175", "phone": "(03) 9706 5061", "url": "https://www.establishedstone.com.au/"}, {"name": "G&G Stoneworks", "address": "Factory 4/18-20 Rhur Street, Dandenong South VIC 3175", "phone": "(03) 9794 9062", "url": "https://ggstoneworks.com.au/"}, {"name": "Henderson's Marble & Granite", "address": "1/3 Alick Road, Tottenham VIC 3012", "phone": "(03) 9314 0422", "url": ""}, {"name": "Imperial Stone Industries", "address": "3A 34-36 McIntyre Rd, Sunshine North VIC 3020", "phone": "0423 786 418", "url": ""}, {"name": "Linkstone", "address": "42-44 Jessica Way, Truganina VIC 3029", "phone": "1300 546 578", "url": "https://www.linkstone.com.au/"}, {"name": "Nepean Stone", "address": "1/104 Watt Road, Mornington VIC 3931", "phone": "(03) 5973 4344", "url": "http://nepeanstone.com.au/"}, {"name": "Nexus Stone", "address": "6 Lisa Place, Coolaroo VIC 3048", "phone": "(03) 9939 0203", "url": "https://www.nexusstone.com.au/"}, {"name": "Parthenon Marble", "address": "8 McKay Crescent, Alphington VIC 3078", "phone": "(03) 9499 8833", "url": "https://www.parthenonmarble.com.au/"}, {"name": "Regal Stone", "address": "2 Hall Street, Braeside VIC 3195", "phone": "(03) 9580 8990", "url": "https://www.regalstonemason.com.au/"}, {"name": "Simple Benchtops", "address": "55-57 Williams Road, Dandenong South VIC 3175", "phone": "1300 886 858", "url": "https://simplebenchtops.com.au/"}, {"name": "Stone Direct Solutions", "address": "11 Colbert Road, Campbellfield VIC 3061", "phone": "(03) 9357 9111", "url": "https://stonedirectsolutions.com.au/"}, {"name": "Stonelux", "address": "5/7 Lakewood Boulevard, Carrum Downs VIC 3201", "phone": "(03) 9775 1533", "url": "https://www.stonelux.com.au/"}, {"name": "Tru Stone", "address": "105-109 Moore Street, Moe VIC 3825", "phone": "(03) 5126 2420", "url": "http://www.trustone.com.au/"}, {"name": "V Stone", "address": "104 Beischer Street, Bendigo East VIC 3550", "phone": "(03) 4436 1020", "url": "https://www.vstone.com.au/"}], // list of recommended stonemasons/fabricators
   priceDisplayMode:'symbols', // 'symbols' = $/$$/$$$/$$$$, 'ranges' = actual dollar ranges
@@ -1342,7 +1297,14 @@ function g(k){return cms[k]!==undefined?cms[k]:CMS_DEFAULTS[k];}
 function se(id,prop,val){const el=document.getElementById(id);if(el)el[prop]=val;}
 function applyCMS(){
   try{
-    document.body.setAttribute('data-theme',g('siteTheme')||'dark');
+    // Drive is authoritative. VSGTheme.set() paints it and refreshes the localStorage
+    // cache the inline boot snippet reads on the next page load / navigation. Guarded
+    // so a failed /assets/vsg-theme.js request can't take applyCMS() down with it.
+    // cms.siteTheme, not g('siteTheme'): g() falls back to CMS_DEFAULTS, so a failed
+    // Drive fetch would silently reset the theme to dark. setFromConfig() ignores a
+    // missing value and keeps whatever the boot snippet painted from cache.
+    if(window.VSGTheme)VSGTheme.setFromConfig(cms.siteTheme);
+    else if(cms.siteTheme)document.body.setAttribute('data-theme',cms.siteTheme);
     se('cms-topbar-text','textContent',g('topbarText'));
     const phoneEl=document.getElementById('cms-phone-link');
     if(phoneEl){phoneEl.textContent=g('phone');phoneEl.href='tel:'+g('phone').replace(/\s/g,'');}
