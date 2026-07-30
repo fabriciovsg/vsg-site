@@ -17,6 +17,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/stones/stones-shared.css">
+<!-- Shared theme layer — MUST stay after stones-shared.css. The palette lives on
+     :root in that file; every theme here is a body[data-theme="…"] block, and <body>
+     is a closer ancestor than :root, so these values win for anything inside the body
+     regardless of load order. Load order still matters for the plain-selector rules
+     (nav, burger) further down that file, which is why this link goes second.
+     Caveat: any colour hardcoded as a literal hex in stones-shared.css cannot be
+     themed — route it through a var if a section refuses to change. -->
+<link rel="stylesheet" href="/assets/vsg-theme.css">
+<script src="/assets/vsg-theme.js" defer></script>
 <style>
 .hub-hero{background:var(--black);padding:120px 48px 90px;position:relative;overflow:hidden;text-align:center;}
 .hub-hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top,rgba(184,150,60,.14),transparent 60%);pointer-events:none;}
@@ -63,6 +72,10 @@
 </script>
 </head>
 <body>
+<!-- Theme boot: this page had no theming at all — it never set data-theme, so it stayed
+     charcoal whatever theme was selected. This paints the cached theme before first
+     render; the config read at the bottom of the page then confirms it from Drive. -->
+<script>try{document.body.setAttribute('data-theme',localStorage.getItem('vsg-site-theme')||'dark')}catch(e){}</script>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="vsgLogo" viewBox="0 0 2880 528"><g transform="translate(0.000000,528.000000) scale(0.100000,-0.100000)"
 fill="currentColor" stroke="none">
 <path d="M67 5254 c-3 -3 16 -43 43 -87 26 -45 57 -98 68 -117 11 -19 60 -105
@@ -271,7 +284,11 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
     <li><a href="/#why">Why VSG</a></li>
     <li><a href="/stones/" class="current">Stone Knowledge</a></li>
     <li><a href="/#fabricators">Fabricators</a></li>
-    <li><button class="nav-shortlist-btn" onclick="openShortlist()">♡ My Shortlist</button></li>
+    <!-- Was <button onclick="openShortlist()">. openShortlist() only exists on the
+         main page (it opens the shortlist drawer), so on this page the click threw a
+         ReferenceError and nothing happened. Now a link to the gallery, matching
+         /catalogue/. If the shortlist drawer is ever made shared, revert to a button. -->
+    <li><a href="/#gallery" class="nav-shortlist-btn">&#9825; My Shortlist</a></li>
     <li><a href="/#contact" class="nav-cta">Contact Us</a></li>
   </ul>
   <button class="nav-burger" id="navBurger" aria-label="Menu"><span></span><span></span><span></span></button>
@@ -466,6 +483,14 @@ function _hRender(cats){
     const text=await _hReadFile('1-CM8zoEfnObuVY53OW5chE_3jTJTQE1-');
     if(text){
       const cms=JSON.parse(text);
+      // Same response the categories come from, so theming costs no extra Drive call.
+      // Must run BEFORE the early return below.
+      // vsg-theme.js is deferred, so it has run by the time this await resolves — but
+      // fall back to a direct setAttribute rather than depend on that ordering.
+      if(cms&&cms.siteTheme){
+        if(window.VSGTheme)VSGTheme.setFromConfig(cms.siteTheme);
+        else{document.body.setAttribute('data-theme',cms.siteTheme);try{localStorage.setItem('vsg-site-theme',cms.siteTheme)}catch(e){}}
+      }
       if(cms&&cms.categories){_hRender(cms.categories);return;}
     }
   }catch(e){console.error('Hub CMS error:',e);}
