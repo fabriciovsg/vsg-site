@@ -481,7 +481,7 @@ footer{background:var(--surface-dark);padding:64px 48px 32px;}
 .cip-current-empty{width:84px;height:84px;border:1px dashed rgba(200,184,154,.3);display:flex;align-items:center;justify-content:center;color:rgba(200,184,154,.35);font-size:10px;text-align:center;padding:4px;}
 .cip-browse-btn{background:transparent;border:1px solid rgba(200,184,154,.3);color:rgba(200,184,154,.8);padding:7px 14px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
 .cip-browse-btn:hover{background:rgba(200,184,154,.12);}
-.cip-modal-backdrop{position:fixed;inset:0;background:rgba(10,8,6,.8);z-index:700;display:none;align-items:center;justify-content:center;padding:30px;}
+.cip-modal-backdrop{position:fixed;inset:0;background:rgba(10,8,6,.8);z-index:850;display:none;align-items:center;justify-content:center;padding:30px;}
 .cip-modal-backdrop.open{display:flex;}
 .cip-modal{background:var(--surface-overlay-alt,#1f1c18);border:1px solid rgba(200,184,154,.2);max-width:760px;width:100%;max-height:84vh;overflow-y:auto;}
 .cip-modal-head{position:sticky;top:0;background:var(--surface-overlay-alt,#1f1c18);padding:20px 24px;border-bottom:1px solid rgba(200,184,154,.15);display:flex;justify-content:space-between;align-items:center;}
@@ -1157,6 +1157,11 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
 const SERVICE_ACCOUNT_EMAIL='vsg-email-builder@vsg-email-builder.iam.gserviceaccount.com';
 const STOCK_FOLDER_ID='1BtszKasn-t-haVTX7JzUWTPhuriZsCCq';
 const SLAB_IMAGES_FOLDER_ID='1e2uzwpG0iOzg7O79F-aqMXeUsUIVF-AA';
+// Category tile close-ups live at the VSG root, alongside Slab Images / Project Images.
+// Leave CLOSEUP_FOLDER_ID blank to resolve it by name from Slab Images' parent; paste the
+// folder ID here to skip the lookup (two fewer Drive calls on first open).
+const CLOSEUP_FOLDER_NAME='Category Close-Ups';
+const CLOSEUP_FOLDER_ID='';
 const PROJECT_IMAGES_FOLDER_ID='13meCoYDTCLZ9_CuHO2JjgxoTAlg_ElEv';
 const SITE_CONFIG_FILENAME='vsg-site-config.json';
 const DRIVE_API='https://www.googleapis.com/drive/v3';
@@ -1425,6 +1430,13 @@ async function driveList(folderId,resourceKey,extraQuery=''){
   const resp=await fetch(url,{headers});
   if(!resp.ok)return[];
   return(await resp.json()).files||[];
+}
+async function driveGetParent(fileId){
+  const token=await getAccessToken();
+  const resp=await fetch(`${DRIVE_API}/files/${fileId}?fields=parents`,{headers:{'Authorization':`Bearer ${token}`}});
+  if(!resp.ok)return null;
+  const parents=(await resp.json()).parents||[];
+  return parents[0]||null;
 }
 async function driveFindFile(folderId,filename){
   const token=await getAccessToken();
@@ -3139,7 +3151,7 @@ function renderAdminCategories(){
           <button class="cip-browse-btn" onclick="openCip(${i})">${imgs.length?'Change Photos':'Choose Photos'}</button>
           <div style="margin-top:20px;padding-top:18px;border-top:1px solid rgba(200,184,154,.12)">
             <div class="admin-label" style="margin-bottom:4px">Dedicated Close-Up Photo (optional)</div>
-            <p style="font-size:11px;color:rgba(200,184,154,.4);margin-bottom:10px;line-height:1.5">When set, this replaces the rotation photos above for this tile — use once a proper close-up shot exists for this category. Currently pulls from the same Drive folder; swap in a dedicated close-up photo here whenever one's been shot.</p>
+            <p style="font-size:11px;color:rgba(200,184,154,.4);margin-bottom:10px;line-height:1.5">When set, this replaces the rotation photos above for this tile. Photos come from the <strong>${CLOSEUP_FOLDER_NAME}</strong> folder in Drive (alongside Slab Images) — name a file after the category (e.g. &ldquo;Quartzite.jpg&rdquo;) and it will sort to the front of the picker.</p>
             <div class="cip-current-row">
               ${c.closeup&&c.closeup.url?renderCipCurrentItem(i,'closeup',c.closeup):'<div class="cip-current-empty">Empty</div>'}
             </div>
@@ -3291,7 +3303,8 @@ async function saveFabricators(){
 async function resetAdminCategories(){delete cms.categories;const ok=await saveCMS();applyCMS();renderAdminCategories();if(ok)showToast('Categories reset');}
 
 // ── CATEGORY IMAGE PICKER (browses Slab Images Drive folders) ──
-let cipCurrentCatIdx=null,cipFolderFiles=null,cipMode='rotation';
+let cipCurrentCatIdx=null,cipFolderFiles=null,cipMode='rotation',cipDirty=false;
+let closeupFolderFiles=null,closeupFolderId=null;
 async function openCip(catIdx,mode='rotation'){
   cipCurrentCatIdx=catIdx;
   cipMode=mode;
@@ -3302,18 +3315,55 @@ async function openCip(catIdx,mode='rotation'){
   document.getElementById('cipModalBackdrop').classList.add('open');
   document.body.style.overflow='hidden';
   try{
-    if(!slabSubfolders)slabSubfolders=await driveList(SLAB_IMAGES_FOLDER_ID,'',`mimeType='application/vnd.google-apps.folder'`);
-    const folder=slabSubfolders.find(f=>f.name.toLowerCase()===cat.filter.toLowerCase());
-    if(!folder){
-      document.getElementById('cipModalGrid').innerHTML=`<div class="cip-modal-empty">No Drive folder found matching "${cat.filter}". Check the Filter Value matches a category folder name exactly.</div>`;
-      return;
-    }
-    cipFolderFiles=await driveList(folder.id,'',`mimeType contains 'image/'`);
+    const files=mode==='closeup'?await cipLoadCloseupFiles(cat):await cipLoadCategoryFiles(cat);
+    if(files===null)return; // loader already rendered an explanatory message
+    cipFolderFiles=files;
     renderCipGrid();
   }catch(e){
     console.error('Category image picker error:',e);
     document.getElementById('cipModalGrid').innerHTML='<div class="cip-modal-empty">Could not load photos — check connection and try again.</div>';
   }
+}
+// Rotation photos — the category's own Slab Images subfolder (Marble, Quartzite, …)
+async function cipLoadCategoryFiles(cat){
+  if(!slabSubfolders)slabSubfolders=await driveList(SLAB_IMAGES_FOLDER_ID,'',`mimeType='application/vnd.google-apps.folder'`);
+  const folder=slabSubfolders.find(f=>f.name.toLowerCase()===cat.filter.toLowerCase());
+  if(!folder){
+    document.getElementById('cipModalGrid').innerHTML=`<div class="cip-modal-empty">No Drive folder found matching "${cat.filter}". Check the Filter Value matches a category folder name exactly.</div>`;
+    return null;
+  }
+  return await driveList(folder.id,'',`mimeType contains 'image/'`);
+}
+// Close-up photos — dedicated folder at the VSG root: Victoria Stone Gallery / Category Close-Ups
+async function cipResolveCloseupFolderId(){
+  if(closeupFolderId!==null)return closeupFolderId;
+  if(CLOSEUP_FOLDER_ID){closeupFolderId=CLOSEUP_FOLDER_ID;return closeupFolderId;}
+  // Slab Images is a sibling — walk up to the VSG root, then match by name within it.
+  const rootId=await driveGetParent(SLAB_IMAGES_FOLDER_ID);
+  if(!rootId){closeupFolderId=false;return false;}
+  const siblings=await driveList(rootId,'',`mimeType='application/vnd.google-apps.folder'`);
+  const hit=siblings.find(f=>f.name.trim().toLowerCase()===CLOSEUP_FOLDER_NAME.toLowerCase());
+  closeupFolderId=hit?hit.id:false;
+  return closeupFolderId;
+}
+async function cipLoadCloseupFiles(cat){
+  const folderId=await cipResolveCloseupFolderId();
+  if(!folderId){
+    document.getElementById('cipModalGrid').innerHTML=`<div class="cip-modal-empty">No folder named &ldquo;${CLOSEUP_FOLDER_NAME}&rdquo; found at the Victoria Stone Gallery root.<br><br>Check the name matches exactly, then reload this page.</div>`;
+    return null;
+  }
+  if(closeupFolderFiles===null)closeupFolderFiles=await driveList(folderId,'',`mimeType contains 'image/'`);
+  if(!closeupFolderFiles.length){
+    document.getElementById('cipModalGrid').innerHTML=`<div class="cip-modal-empty">&ldquo;${CLOSEUP_FOLDER_NAME}&rdquo; is empty. Add close-up photos in Drive, then reload this page.</div>`;
+    return null;
+  }
+  // Files named after this category float to the front; everything else stays browsable.
+  const key=(cat.filter||cat.name||'').toLowerCase();
+  return [...closeupFolderFiles].sort((a,b)=>{
+    const am=a.name.toLowerCase().includes(key)?0:1;
+    const bm=b.name.toLowerCase().includes(key)?0:1;
+    return am-bm||a.name.localeCompare(b.name);
+  });
 }
 function renderCipGrid(){
   if(!cipFolderFiles||!cipFolderFiles.length){
@@ -3334,6 +3384,7 @@ function renderCipGrid(){
 }
 function toggleCipImage(url,el){
   const cats=[...g('categories')];
+  cipDirty=true;
   if(cipMode==='closeup'){
     const already=cats[cipCurrentCatIdx].closeup&&cats[cipCurrentCatIdx].closeup.url===url;
     cats[cipCurrentCatIdx]={...cats[cipCurrentCatIdx],closeup:already?null:{url,position:'50% 50%'}};
@@ -3359,6 +3410,7 @@ function closeCip(){
   document.getElementById('cipModalBackdrop').classList.remove('open');
   document.body.style.overflow='';
   renderAdminCategories();
+  if(cipDirty){cipDirty=false;showToast('Photos selected — click Save Categories to publish');}
 }
 
 function renderAdminWhy(){
