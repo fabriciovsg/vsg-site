@@ -30,7 +30,12 @@ export function isAllowedOrigin(origin) {
 
 export function corsHeaders(req) {
   const origin = req.headers.get('origin');
-  if (!isAllowedOrigin(origin)) return {};
+  // Vary MUST be present on every response, allowed origin or not. These
+  // endpoints are CDN-cached, and without it the first cached copy (typically
+  // a same-origin request carrying no Origin header, so no CORS headers) gets
+  // replayed to cross-origin callers, who then see no Access-Control-Allow-Origin
+  // and fail — with the function never running to produce one.
+  if (!isAllowedOrigin(origin)) return { 'Vary': 'Origin' };
   return {
     'Access-Control-Allow-Origin': origin,
     'Vary': 'Origin',
