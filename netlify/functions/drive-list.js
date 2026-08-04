@@ -73,14 +73,22 @@ export default guard(async (req) => {
     return json(req, { files }, { cache: cacheControl(120, 300) });
   }
 
-  if (scope === 'slab-images' || scope === 'project-images') {
+  if (scope === 'slab-images' || scope === 'project-images' || scope === 'images') {
     if (!folder) return fail(req, 400, 'Missing folder parameter');
 
-    const root = scope === 'slab-images' ? SLAB_IMAGES_FOLDER_ID : PROJECT_IMAGES_FOLDER_ID;
-    // Project folders may be Shortcuts, so no mimeType filter on that root.
-    const allowed = await childIds(root, scope === 'slab-images' ? FOLDER_MIME : '');
+    // 'images' checks both roots. The page holds raw folder IDs from earlier
+    // listings and does not track which root they came from; validating against
+    // both keeps the scope guarantee without making the caller remember.
+    const roots = scope === 'slab-images'    ? [[SLAB_IMAGES_FOLDER_ID, FOLDER_MIME]]
+                : scope === 'project-images' ? [[PROJECT_IMAGES_FOLDER_ID, '']]
+                : [[SLAB_IMAGES_FOLDER_ID, FOLDER_MIME], [PROJECT_IMAGES_FOLDER_ID, '']];
 
-    if (!allowed.has(folder)) return fail(req, 403, 'Folder not in scope');
+    let allowed = false;
+    for (const [root, filter] of roots) {
+      const ids = await childIds(root, filter);
+      if (ids.has(folder)) { allowed = true; break; }
+    }
+    if (!allowed) return fail(req, 403, 'Folder not in scope');
 
     const files = await driveList(folder, IMAGE_MIME);
     return json(req, { files }, { cache: cacheControl(300, 900) });

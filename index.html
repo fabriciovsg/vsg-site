@@ -1421,7 +1421,7 @@ async function getAccessToken(){
   const r=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${hdr}.${pay}.${sig}`});
   const d=await r.json();accessToken=d.access_token;tokenExpiry=Date.now()+(d.expires_in||3600)*1000;return accessToken;
 }
-async function driveList(folderId,resourceKey,extraQuery=''){
+async function _rawDriveList(folderId,resourceKey,extraQuery=''){
   const token=await getAccessToken();
   const q=encodeURIComponent(`'${folderId}' in parents and trashed=false${extraQuery?' and '+extraQuery:''}`);
   const url=`${DRIVE_API}/files?q=${q}&fields=files(id,name,mimeType,modifiedTime)&pageSize=1000`;
@@ -1438,7 +1438,7 @@ async function driveGetParent(fileId){
   const parents=(await resp.json()).parents||[];
   return parents[0]||null;
 }
-async function driveFindFile(folderId,filename){
+async function _rawDriveFindFile(folderId,filename){
   const token=await getAccessToken();
   const q=encodeURIComponent(`'${folderId}' in parents and trashed=false and name='${filename}'`);
   const url=`${DRIVE_API}/files?q=${q}&fields=files(id,name)&pageSize=1`;
@@ -1447,7 +1447,7 @@ async function driveFindFile(folderId,filename){
   const files=(await resp.json()).files||[];
   return files[0]||null;
 }
-async function driveReadFileContent(fileId){
+async function _rawDriveReadFileContent(fileId){
   const token=await getAccessToken();
   const resp=await fetch(`${DRIVE_API}/files/${fileId}?alt=media`,{headers:{'Authorization':`Bearer ${token}`}});
   if(!resp.ok)return null;
@@ -1479,6 +1479,72 @@ async function driveWriteFile(folderId,filename,fileId,contentObj){
   }
 }
 
+// ── API-BACKED DRIVE READS ────────────────────────────────────
+// Reads go through Netlify functions that hold the service account credential
+// server-side. Same function names and signatures as before, so every call site
+// is unchanged — only the transport moved.
+//
+// Still using the raw (credentialed) path, and converted in part 2:
+//   clients.json, colour-cache.json, and all writes.
+const SITE_CONFIG_FILE_ID='1-CM8zoEfnObuVY53OW5chE_3jTJTQE1-';
+const API_READ_FILES={'location-map.json':1,'image-manifest.json':1};
+
+async function apiGet(url){
+  // One retry with a short backoff: a single dropped request should not push
+  // the page into its fallback, which fails silently and looks like an outage.
+  for(let attempt=0;attempt<2;attempt++){
+    try{
+      const r=await fetch(url);
+      if(r.ok)return await r.json();
+      if(r.status<500)break;
+    }catch(e){}
+    if(attempt===0)await new Promise(res=>setTimeout(res,600));
+  }
+  console.warn('[VSG] API request failed:',url);
+  return null;
+}
+
+async function driveFindFile(folderId,filename){
+  if(folderId===STOCK_FOLDER_ID&&filename===SITE_CONFIG_FILENAME)
+    return {id:SITE_CONFIG_FILE_ID,name:filename};
+  if(folderId===STOCK_FOLDER_ID&&API_READ_FILES[filename])
+    return {id:'api:'+filename,name:filename};
+  return _rawDriveFindFile(folderId,filename);
+}
+
+async function driveReadFileContent(fileId){
+  // Callers expect text; the endpoints return parsed JSON, so re-serialise.
+  if(fileId===SITE_CONFIG_FILE_ID){
+    const d=await apiGet('/api/config');
+    return d?JSON.stringify(d):null;
+  }
+  if(typeof fileId==='string'&&fileId.startsWith('api:')){
+    const d=await apiGet('/api/file?name='+encodeURIComponent(fileId.slice(4)));
+    return d?JSON.stringify(d):null;
+  }
+  return _rawDriveReadFileContent(fileId);
+}
+
+async function driveList(folderId,resourceKey,extraQuery=''){
+  const wantsFolders=/google-apps\.folder/.test(extraQuery);
+  const nameMatch=/name='([^']*)'/.exec(extraQuery);
+  let url;
+
+  if(folderId===SLAB_IMAGES_FOLDER_ID&&nameMatch){
+    // "find the folder called X" — the category listing already contains it,
+    // so filter client-side rather than adding a lookup endpoint.
+    const d=await apiGet('/api/drive-list?scope=slab-folders');
+    const want=nameMatch[1].toLowerCase();
+    return d&&d.files?d.files.filter(f=>(f.name||'').toLowerCase()===want):[];
+  }
+  if(folderId===SLAB_IMAGES_FOLDER_ID&&wantsFolders)  url='/api/drive-list?scope=slab-folders';
+  else if(folderId===PROJECT_IMAGES_FOLDER_ID)        url='/api/drive-list?scope=project-folders';
+  else url='/api/drive-list?scope=images&folder='+encodeURIComponent(folderId);
+
+  const d=await apiGet(url);
+  return d&&d.files?d.files:[];
+}
+
 // ── STOCK ─────────────────────────────────────────────────────
 let allStones=[],filteredStones=[],displayedCount=0,_rawStockRows=null;
 const PAGE_SIZE=24;
@@ -1487,18 +1553,11 @@ let accessToken2=null;
 
 async function loadStock(){
   setStatus('loading','Connecting to live inventory…');
-  if(PRIVATE_KEY_PEM.includes('REPLACE_WITH_YOUR_PRIVATE_KEY_HERE')){loadStaticFallback();return;}
   try{
-    setStatus('loading','Authenticating…');
-    const token=await getAccessToken();
-    if(!token){await tryLoadStockSnapshot();return;}
-    setStatus('loading','Finding stock file…');
-    const files=await driveList(STOCK_FOLDER_ID,'',`name contains 'ListedReport' and mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'`);
-    if(!files.length){await tryLoadStockSnapshot();return;}
-    files.sort((a,b)=>new Date(b.modifiedTime)-new Date(a.modifiedTime));
-    const stockFile=files[0];
     setStatus('loading','Loading live stock…');
-    const resp=await fetch(`${DRIVE_API}/files/${stockFile.id}?alt=media`,{headers:{'Authorization':`Bearer ${token}`}});
+    // /api/stock picks the newest report and streams the .xlsx. Selection and
+    // credentials are server-side; the parsing below is unchanged.
+    const resp=await fetch('/api/stock');
     if(!resp.ok){await tryLoadStockSnapshot();return;}
     const buf=await resp.arrayBuffer();
     const wb=XLSX.read(new Uint8Array(buf),{type:'array'});
@@ -1638,7 +1697,7 @@ function parseStockRows(rows,enabledLocations){
   allStones=stones;
   calcPriceThresholds();
   buildFinishingFilter();
-  saveStockSnapshot(_rawStockRows); // fire-and-forget — powers the fallback if a future load fails
+  // (snapshot write removed — /api/stock caches server-side instead)
   setStatus('live',stones.length+' lots in stock \u00b7 Live inventory');
   const pendingFilter=sessionStorage.getItem('vsg-pending-filter');
   if(pendingFilter){
@@ -2065,7 +2124,7 @@ async function loadColourCache(){
   if(colourCacheLoaded)return;
   colourCacheLoaded=true; // Set immediately to prevent re-entry
   try{
-    const file=await driveFindFile(STOCK_FOLDER_ID,'colour-cache.json');
+    const file=await _rawDriveFindFile(STOCK_FOLDER_ID,'colour-cache.json');
     if(file){
       const token=await getAccessToken();
       const resp=await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`,{headers:{Authorization:'Bearer '+token}});
@@ -2139,7 +2198,7 @@ async function saveColourOverride(block){
   const colour=sel.value;
   status.textContent='Saving…';
   try{
-    const file=await driveFindFile(STOCK_FOLDER_ID,'colour-cache.json');
+    const file=await _rawDriveFindFile(STOCK_FOLDER_ID,'colour-cache.json');
     let fileId=file?file.id:null;
     if(colour){stoneColourCache[block]=colour;}else{delete stoneColourCache[block];}
     const ok=await driveWriteFile(STOCK_FOLDER_ID,'colour-cache.json',fileId,stoneColourCache);
@@ -2216,7 +2275,7 @@ let clientsData=null;
 
 async function loadClientsData(){
   try{
-    const file=await driveFindFile(STOCK_FOLDER_ID,'clients.json');
+    const file=await _rawDriveFindFile(STOCK_FOLDER_ID,'clients.json');
     if(!file)return;
     const token=await getAccessToken();
     const resp=await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`,{headers:{Authorization:'Bearer '+token}});
@@ -2225,7 +2284,7 @@ async function loadClientsData(){
 }
 async function saveClientsData(){
   try{
-    const file=await driveFindFile(STOCK_FOLDER_ID,'clients.json');
+    const file=await _rawDriveFindFile(STOCK_FOLDER_ID,'clients.json');
     if(!file){showToast('clients.json not found — create it manually in Stock folder first');return false;}
     const token=await getAccessToken();
     const blob=new Blob([JSON.stringify(clientsData,null,2)],{type:'application/json'});
