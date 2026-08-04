@@ -10,6 +10,14 @@
   # the process instead, the cache is never saved and the next build starts cold.
   BUILD_TIMEOUT_MIN = "15"
 
+# ── Functions ──────────────────────────────────────────────────
+# The service account credential lives here as env vars, never in the pages.
+# Routes are declared in each function file (Functions v2 `export const config`),
+# so no redirect rules are needed.
+[functions]
+  directory    = "netlify/functions"
+  node_bundler = "esbuild"
+
 # ── Persist img/ between builds (fixes SIGBUS crash) ──────────
 # Without this Netlify starts fresh each build, re-downloads all
 # 3,462 images, runs out of memory. With it, subsequent builds
@@ -29,6 +37,35 @@
   for = "/image-manifest-cdn.json"
   [headers.values]
     Cache-Control = "public, max-age=900"
+
+# API responses set their own Cache-Control per endpoint; these are the
+# hardening headers that should apply to all of them.
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy        = "no-referrer"
+
+# publish = "." serves the whole repo root, so the function source, package.json
+# and build-images.js are all fetchable over HTTP today. None of them contain
+# secrets (the credential is an env var), but there is no reason to serve them.
+[[redirects]]
+  from   = "/netlify/*"
+  to     = "/"
+  status = 404
+  force  = true
+
+[[redirects]]
+  from   = "/build-images.js"
+  to     = "/"
+  status = 404
+  force  = true
+
+[[redirects]]
+  from   = "/package.json"
+  to     = "/"
+  status = 404
+  force  = true
 
 # ── Branch: develop = staging ──────────────────────────────────
 [context.develop]
