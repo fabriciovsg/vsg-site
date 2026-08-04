@@ -387,69 +387,25 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
 
 <script>
 // ── STONE KNOWLEDGE HUB — CMS IMAGE LOADER ──────────────────
-// Uses identical auth + CMS logic as main site
-const _H_SA='vsg-email-builder@vsg-email-builder.iam.gserviceaccount.com';
-const _H_STOCK='1BtszKasn-t-haVTX7JzUWTPhuriZsCCq';
-const _H_CFG='vsg-site-config.json';
-const PRIVATE_KEY_PEM=`-----BEGIN PRIVATE KEY-----
-MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCrhkjzQkbQNyGY
-2fyn5G+z2WtdLnwU7vi5AAJatRDk7w+36W6i7iyZUO2Pwm7BMmJqaWXBnMLQB9gk
-f1RDLBC2c+FdxyLrG0XEucQhs72v1rI7UqwLK27PuY1+fXhEo/uU7pOIWsCkGlZW
-327GO5JH+oNBey0LhzV4FGFylYUO+f5cQZ3Tjc77o3mDP7sg9cHxpuWcq+Z8iJ/O
-HKIoUjAEDsQbCieHYQWoZR77izvb/uNpJ3vZQ9QP7+9KTLYueHvdbtl+UzZI1BsC
-yC6SU1mwa3Nd1+xD+LRx8weL1BMW6hDZXR73WABHYgyQsn/AfkosttnrpYBAeL7u
-crwyPMEVAgMBAAECggEARuR+nERFXmOa+EEIox/QZ0YykNXYpRJMLLJrRrBVpjmE
-hp/tgVvthQSk22kiO6mmcZLUYtx2zGKhnBwgaI767V4hxI+8x+2CvZeGD+PpP5b+
-HXTC9O7joulvKNuU7NHV9q1Qvue7fVgBXXCFqVsPz74jp9nQOVaN6+6IhEJ2N0TA
-cfUzWUbx9Wr9bWz4G0r8yPgiNMEKq/uHFbGUOXd8x8jS0uFtHe4iabmcOfa9Jbo8
-YGf0yP+tZuXj/ld705yoMlnBTKzbNezXNPOIjV/L1ZHh17lEzT8hL+t//ODLGJkj
-7LfPHBEJlTjp5vgNz8SkcbB071ICWj/fm/KGVejtdQKBgQDivLndo5HuQ7568g5f
-foXk43tdKBmd2Xix8HmLfm5QPYDvWktLiq/LMluOK4/H5mx74zci7vaha4Jy4/SJ
-TLQ7vxBcnVLCNrxHM4kLwHPq+BASuTh9Of+kWwemXGD0nik5kTEJ5FA8pA+7bTku
-zrwu6DWRB0gBDJl4jUO4NS0k1wKBgQDBqVzZgJHt9xp9GmFTir4KqpqvVoPKkciq
-801P0EYC4jO4Hnzo+pd/2hOHC0mrKvKa/MhKxHljFTQ7jdhgfjlLNszqu80RubAL
-XVrQNZGBvdnFi8P51PZ1sAdwy3z8dCho6gYIu4Mt1jOBYx4WZZ01K3OHECIqmqGN
-NRMOiCFf8wKBgQDdRHfOB9ZdwtacfKPyJTLdT/IP0xZMqPHUFG1I6DUXMS4mZuOb
-8NflYFtgvrotxnyP2gjwmmss1BIVtMfrRWON+sMo3o7o4SmUAoL3aPS2lSZ6Xy71
-ZihIaF1qyDQGBGMOvtYwZRK4WxLPQaPQPgf/brT3tzdZbsZGkvVHSv2nOQKBgQCP
-Xhcrub/OwEEu3kmw9CRudxBev5h/bV92FvpkHNbHqbgKFR/5xhJEByivr86Q1hGW
-ZY7Nsxf+HyN09zR5cthtcxtOp0tQVPwb3beuLgoTV34Rfb/OgzcVtwQ7H5netwt3
-Z9ChxFd/pnSo07zhbcZtJ0a2dV4l1iXFCMab2nGCuwKBgHYVtjb3Btdgkq+410vA
-Wmq6JZfa66yznBBICVSpdDrB0mAjUqoQPgcjnAIJoIzw0gwcwTWNDzzVx7xYvV04
-o29Xj8H10O3z9ZkAzExZn4zo2E3C9DMOt/lbqInHjgMBV1+Q08ompoAruju2cs6X
-llW6PWS6cXTTD+oU7osXRTQY
------END PRIVATE KEY-----`;
-
-let _hToken=null,_hTokenExp=0;
-async function _hGetToken(){
-  if(_hToken&&Date.now()<_hTokenExp-60000)return _hToken;
-  const now=Math.floor(Date.now()/1000);
-  const hdr=btoa(JSON.stringify({alg:'RS256',typ:'JWT'})).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
-  const pay=btoa(JSON.stringify({iss:_H_SA,scope:'https://www.googleapis.com/auth/drive',aud:'https://oauth2.googleapis.com/token',exp:now+3600,iat:now})).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
-  const kd=PRIVATE_KEY_PEM.replace(/-----[^-]+-----/g,'').replace(/\s+/g,'');
-  const bk=Uint8Array.from(atob(kd),c=>c.charCodeAt(0));
-  const ck=await crypto.subtle.importKey('pkcs8',bk,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['sign']);
-  const sb=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',ck,new TextEncoder().encode(hdr+'.'+pay));
-  const sig=btoa(String.fromCharCode(...new Uint8Array(sb))).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
-  const r=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${hdr}.${pay}.${sig}`});
-  const d=await r.json();_hToken=d.access_token;_hTokenExp=Date.now()+(d.expires_in||3600)*1000;return _hToken;
-}
-
-async function _hFindFile(folderId,filename){
-  const token=await _hGetToken();
-  const q=encodeURIComponent(`'${folderId}' in parents and trashed=false and name='${filename}'`);
-  const url=`${"https://www.googleapis.com/drive/v3"}/files?q=${q}&fields=files(id,name)&pageSize=1`;
-  const resp=await fetch(url,{headers:{'Authorization':`Bearer ${token}`}});
-  if(!resp.ok)return null;
-  const files=(await resp.json()).files||[];
-  return files[0]||null;
-}
-
-async function _hReadFile(fileId){
-  const token=await _hGetToken();
-  const resp=await fetch(`${"https://www.googleapis.com/drive/v3"}/files/${fileId}?alt=media`,{headers:{'Authorization':`Bearer ${token}`}});
-  if(!resp.ok)return null;
-  return await resp.text();
+// ── SITE CONFIG ───────────────────────────────────────────────
+// Served by /api/config, a Netlify function that holds the service account
+// credential in an environment variable. No key in this page, so there is
+// nothing to keep in sync across pages — which is what caused the 3 Aug
+// outage, when this page was left carrying an older key than the other two.
+async function fetchSiteConfig(){
+  // One retry with a short backoff. A single dropped request should not drop
+  // straight to the hardcoded defaults: that failure is silent, and it looks
+  // identical to a real outage until somebody notices the page looks wrong.
+  for(let attempt=0;attempt<2;attempt++){
+    try{
+      const r=await fetch('/api/config');
+      if(r.ok)return await r.json();
+      if(r.status<500)break;            // 4xx will not fix itself on retry
+    }catch(e){ /* network blip — fall through and retry once */ }
+    if(attempt===0)await new Promise(res=>setTimeout(res,600));
+  }
+  console.warn('[VSG] /api/config unavailable — falling back to built-in defaults');
+  return null;
 }
 
 function normaliseImages(c){
@@ -479,22 +435,15 @@ function _hRender(cats){
 }
 
 (async()=>{
-  try{
-    const text=await _hReadFile('1-CM8zoEfnObuVY53OW5chE_3jTJTQE1-');
-    if(text){
-      const cms=JSON.parse(text);
-      // Same response the categories come from, so theming costs no extra Drive call.
-      // Must run BEFORE the early return below.
-      // vsg-theme.js is deferred, so it has run by the time this await resolves — but
-      // fall back to a direct setAttribute rather than depend on that ordering.
-      if(cms&&cms.siteTheme){
-        if(window.VSGTheme)VSGTheme.setFromConfig(cms.siteTheme);
-        else{document.body.setAttribute('data-theme',cms.siteTheme);try{localStorage.setItem('vsg-site-theme',cms.siteTheme)}catch(e){}}
-      }
-      if(cms&&cms.categories){_hRender(cms.categories);return;}
-    }
-  }catch(e){console.error('Hub CMS error:',e);}
-  _hRender(null);
+  const cms=await fetchSiteConfig();
+  // Theme comes from the same response, so it costs no extra request.
+  // vsg-theme.js is deferred and has normally run by now, but fall back to a
+  // direct setAttribute rather than depend on that ordering.
+  if(cms&&cms.siteTheme){
+    if(window.VSGTheme)VSGTheme.setFromConfig(cms.siteTheme);
+    else{document.body.setAttribute('data-theme',cms.siteTheme);try{localStorage.setItem('vsg-site-theme',cms.siteTheme)}catch(e){}}
+  }
+  _hRender(cms&&cms.categories?cms.categories:null);
 })();
 </script>
 </body>
