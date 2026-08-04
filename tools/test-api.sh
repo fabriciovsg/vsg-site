@@ -73,6 +73,44 @@ ACAO2=$(curl -s -D - -o /dev/null --max-time 30 \
   | grep -i '^access-control-allow-origin:' | tr -d '\r')
 if [ -z "$ACAO2" ]; then ok "CORS refuses unknown origin"; else bad "CORS leaked to unknown origin: $ACAO2"; fi
 
+
+# ── Write endpoints (Phase 2b) ─────────────────────────
+# Pass the admin password as the 2nd argument to exercise the authenticated
+# paths:  ./tools/test-api.sh <base-url> <admin-password>
+echo
+echo "── Write endpoints ────────────────────────────────"
+check_status "$BASE/api/admin-login" 405 "admin-login rejects GET"
+BADLOGIN=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 -X POST \
+  -H 'Content-Type: application/json' -d '{"password":"definitely-wrong"}' "$BASE/api/admin-login")
+[ "$BADLOGIN" = "401" ] && ok "wrong admin password refused (401)" || bad "wrong admin password gave $BADLOGIN"
+
+NOAUTH=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 -X POST \
+  -H 'Content-Type: application/json' -d '{"action":"list-clients"}' "$BASE/api/admin")
+[ "$NOAUTH" = "401" ] && ok "admin write refused without token (401)" || bad "unauthenticated admin gave $NOAUTH"
+
+BADCLIENT=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 -X POST \
+  -H 'Content-Type: application/json' -d '{"email":"nobody@example.com","password":"x"}' "$BASE/api/client-login")
+[ "$BADCLIENT" = "401" ] && ok "unknown client refused (401)" || bad "unknown client gave $BADCLIENT"
+
+ADMIN_PW="${2:-}"
+if [ -n "$ADMIN_PW" ]; then
+  TOKEN=$(curl -s --max-time 30 -X POST -H 'Content-Type: application/json' \
+    -d "{\"password\":\"$ADMIN_PW\"}" "$BASE/api/admin-login" \
+    | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
+  if [ -n "$TOKEN" ]; then
+    ok "admin login succeeded"
+    CL=$(curl -s --max-time 30 -X POST -H 'Content-Type: application/json' \
+      -H "Authorization: Bearer $TOKEN" -d '{"action":"list-clients"}' "$BASE/api/admin")
+    echo "$CL" | grep -q '"clients"' && ok "list-clients returned data" || bad "list-clients failed: $CL"
+    echo "$CL" | grep -qi '"password"' && bad "list-clients LEAKED password field" || ok "list-clients exposes no password material"
+    echo "     $(echo "$CL" | grep -o '"needsNewPassword":true' | wc -l | tr -d ' ') client(s) need a new password"
+  else
+    bad "admin login did not return a token"
+  fi
+else
+  echo "  —  skipping authenticated checks (pass the admin password as arg 2)"
+fi
+
 echo
 echo "──────────────────────────────────────────────────"
 echo "  $PASS passed, $FAIL failed"

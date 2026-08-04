@@ -39,8 +39,8 @@ export function corsHeaders(req) {
   return {
     'Access-Control-Allow-Origin': origin,
     'Vary': 'Origin',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Max-Age': '86400',
   };
 }
@@ -92,4 +92,38 @@ export function guard(handler) {
       return fail(req, 502, 'Upstream error');
     }
   };
+}
+
+/** As guard(), but for POST endpoints. Parses and hands over the JSON body. */
+export function guardPost(handler) {
+  return async (req, context) => {
+    const pre = preflight(req);
+    if (pre) return pre;
+    if (req.method !== 'POST') return fail(req, 405, 'Method not allowed');
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return fail(req, 400, 'Expected a JSON body');
+    }
+    try {
+      return await handler(req, body, context);
+    } catch (err) {
+      console.error('[vsg-api]', err && err.message ? err.message : err);
+      return fail(req, 502, 'Upstream error');
+    }
+  };
+}
+
+/** Pull a bearer token from the Authorization header. */
+export function bearer(req) {
+  const h = req.headers.get('authorization') || '';
+  return h.startsWith('Bearer ') ? h.slice(7) : null;
+}
+
+/** Best-effort client identifier for rate limiting. */
+export function clientKey(req) {
+  return req.headers.get('x-nf-client-connection-ip')
+    || req.headers.get('x-forwarded-for')
+    || 'unknown';
 }

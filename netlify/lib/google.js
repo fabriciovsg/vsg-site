@@ -23,7 +23,8 @@ export const SLAB_IMAGES_FOLDER_ID    = '1e2uzwpG0iOzg7O79F-aqMXeUsUIVF-AA';
 export const PROJECT_IMAGES_FOLDER_ID = '13meCoYDTCLZ9_CuHO2JjgxoTAlg_ElEv';
 export const SITE_CONFIG_FILE_ID      = '1-CM8zoEfnObuVY53OW5chE_3jTJTQE1-';
 
-const READONLY_SCOPE = 'https://www.googleapis.com/auth/drive.readonly';
+export const READONLY_SCOPE = 'https://www.googleapis.com/auth/drive.readonly';
+export const WRITE_SCOPE    = 'https://www.googleapis.com/auth/drive';
 
 function b64url(data) {
   const buf = typeof data === 'string' ? Buffer.from(data) : data;
@@ -31,21 +32,23 @@ function b64url(data) {
 }
 
 // Token cache lives in module scope, so it survives across warm invocations
-// of the same function instance. Cold starts pay one token exchange.
-let _token = null;
-let _tokenExpiry = 0;
+// of the same function instance. Keyed by scope: the read functions must never
+// be handed a write-capable token just because an admin call warmed the same
+// instance.
+const _tokens = new Map(); // scope -> { token, expiry }
 
-export async function getAccessToken() {
+export async function getAccessToken(scope = READONLY_SCOPE) {
   if (!SA_EMAIL || !RAW_KEY) {
     throw new Error('Missing VSG_SERVICE_ACCOUNT_EMAIL or VSG_PRIVATE_KEY — check the variable Scopes include Functions');
   }
-  if (_token && Date.now() < _tokenExpiry - 60_000) return _token;
+  const hit = _tokens.get(scope);
+  if (hit && Date.now() < hit.expiry - 60_000) return hit.token;
 
   const now = Math.floor(Date.now() / 1000);
   const header = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT', kid: KEY_ID }));
   const claim  = b64url(JSON.stringify({
     iss: SA_EMAIL,
-    scope: READONLY_SCOPE,
+    scope,
     aud: 'https://oauth2.googleapis.com/token',
     iat: now,
     exp: now + 3600,
@@ -63,17 +66,34 @@ export async function getAccessToken() {
     // Do not echo the response body — it can contain credential detail.
     throw new Error(`Token exchange failed (${resp.status})`);
   }
-  _token = data.access_token;
-  _tokenExpiry = Date.now() + (data.expires_in || 3600) * 1000;
-  return _token;
+  _tokens.set(scope, {
+    token: data.access_token,
+    expiry: Date.now() + (data.expires_in || 3600) * 1000,
+  });
+  return data.access_token;
 }
 
-async function driveFetch(url, init = {}) {
-  const token = await getAccessToken();
+async function driveFetch(url, init = {}, scope = READONLY_SCOPE) {
+  const token = await getAccessToken(scope);
   return fetch(url, {
     ...init,
     headers: { ...(init.headers || {}), Authorization: `Bearer ${token}` },
   });
+}
+
+/**
+ * Overwrite a file's contents. The only write path in the codebase, and the
+ * only place WRITE_SCOPE is requested.
+ */
+export async function driveWriteFile(fileId, content, mimeType = 'application/json') {
+  const url = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`;
+  const resp = await driveFetch(url, {
+    method: 'PATCH',
+    headers: { 'Content-Type': mimeType },
+    body: content,
+  }, WRITE_SCOPE);
+  if (!resp.ok) throw new Error(`Drive write failed (${resp.status})`);
+  return await resp.json().catch(() => ({}));
 }
 
 /** List children of a folder. Returns [] on any non-200 (matches page behaviour). */
