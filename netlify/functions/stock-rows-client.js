@@ -27,9 +27,10 @@ export default guard(async (req) => {
   const result = await getStockRows();
   if (!result) return fail(req, 404, 'No stock report found');
 
-  // Always keep price1 — the brackets and thresholds still use it — plus the
-  // client's own tier. Every other price column is blanked.
-  const keep = tier === 'price1' ? ['price1'] : ['price1', tier];
+  // Exactly one price column: the client's own tier. Retail is not bundled in
+  // as a matter of course — a Trade client seeing the Retail figure alongside
+  // their own is not something to hand over by default.
+  const keep = [tier];
   const rows = withPrices(result.rows, keep);
 
   return new Response(JSON.stringify({

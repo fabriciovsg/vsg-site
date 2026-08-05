@@ -94,7 +94,7 @@ document.getElementById('run').onclick=async()=>{
     // it here so those columns are accounted for rather than reported as
     // unexplained differences.
     const stripped=[];
-    H.forEach((cell,i)=>{ if(/PRICE|COST|RATE|\$/.test(cell) && i!==col.price1) stripped.push(i); });
+    H.forEach((cell,i)=>{ if(/PRICE|COST|RATE|\$/.test(cell)) stripped.push(i); });
     line('columns blanked by the server: '+stripped.map(i=>H[i]||('col'+i)).join(', '),'note');
     let diffs=[],checked=0;
     const n=Math.min(browserRows.length,serverRows.length);
@@ -117,11 +117,8 @@ document.getElementById('run').onclick=async()=>{
 
     // ── The point of the exercise ──
     head('Price exposure');
-    check('PRICE1 preserved for brackets and filters',
-      col.price1===undefined||serverRows.slice(1,80).some(r=>r[col.price1]!==''&&r[col.price1]!==undefined));
-
     const payload=JSON.stringify(serverRows);
-    for(const [name,idx] of [['PRICE2 (Trade)',col.price2],['PRICE3 (Bundle)',col.price3],['PRICE4 (Wholesale)',col.price4]]){
+    for(const [name,idx] of [['PRICE1 (Retail)',col.price1],['PRICE2 (Trade)',col.price2],['PRICE3 (Bundle)',col.price3],['PRICE4 (Wholesale)',col.price4]]){
       if(idx===undefined){line(name+': column not present in report','note');continue;}
       const anyValue=serverRows.slice(1).some(r=>r[idx]!==''&&r[idx]!==undefined&&r[idx]!==null);
       check(name+' fully blanked in server response', !anyValue);
@@ -153,7 +150,7 @@ document.getElementById('run').onclick=async()=>{
           if(String(cell).trim()===target&&leakRows.length<20)leakRows.push('row '+r+' col '+i+' ('+(H[i]||'?')+') = '+target);
         });
       }
-      check('no wholesale figure survives in any stripped column', leakRows.length===0);
+      check('no price figure survives in any stripped column', leakRows.length===0);
       if(leakRows.length)dump('Leaked cells:',leakRows.join('\n'));
       line('rows with a wholesale price checked: '+sampled.toLocaleString(),'note');
 
