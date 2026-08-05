@@ -60,8 +60,22 @@ export async function getStockRows() {
   const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
   if (!rows || rows.length < 2) throw new Error('Stock sheet has no data rows');
 
-  _cache = { key, rows, file };
-  return { rows, file };
+  // SheetJS returns sparse arrays for blank cells. JSON.stringify turns those
+  // holes into null, where the browser saw undefined — so a cell that read as
+  // '' in the page would arrive as the string "null" for any caller doing
+  // String(cell) without a fallback. parseStockRows happens to use
+  // String(x||'') everywhere, but shipping a gratuitous difference between the
+  // two parses invites a subtle bug later. Densify to '' instead.
+  const dense = rows.map(row => {
+    const out = new Array(row.length);
+    for (let i = 0; i < row.length; i++) {
+      out[i] = (row[i] === undefined || row[i] === null) ? '' : row[i];
+    }
+    return out;
+  });
+
+  _cache = { key, rows: dense, file };
+  return { rows: dense, file };
 }
 
 /**
@@ -82,29 +96,38 @@ export function priceColumns(rows) {
 }
 
 /**
+ * Indexes of every column this module would blank for a caller entitled to
+ * `keep`. Exported so the comparison harness can account for them rather than
+ * reporting each one as an unexplained difference.
+ */
+export function strippedColumns(rows, keep) {
+  const header = (rows[0] || []).map(c => String(c || '').trim().toUpperCase());
+  const cols = priceColumns(rows);
+  const keepIdx = new Set(keep.map(name => cols[name]).filter(i => i !== undefined));
+  const strip = [];
+  header.forEach((cell, i) => {
+    if (/PRICE|COST|RATE|\$/.test(cell) && !keepIdx.has(i)) strip.push(i);
+  });
+  return strip;
+}
+
+/**
  * Copy the rows, blanking every price column except those named in `keep`.
  *
  * Fails closed: any column whose header merely looks like a price is blanked
  * unless it is explicitly kept. Matching only the exact PRICE1..PRICE4 names
  * would mean a renamed or added column in a future Vavastone report passed
  * straight through to anonymous visitors — the values would sit in the JSON
- * even though parseStockRows would not display them.
+ * even though parseStockRows would not display them. That rule is what caught
+ * the COST column, which is not one of the four tiers and was being served to
+ * every visitor.
  *
  * Blanks rather than removes: parseStockRows locates prices by header position,
  * so dropping a column would shift every column after it. An empty cell parses
  * to 0 exactly as a genuinely empty price already does.
  */
 export function withPrices(rows, keep) {
-  const header = (rows[0] || []).map(c => String(c || '').trim().toUpperCase());
-  const cols = priceColumns(rows);
-  const keepIdx = new Set(keep.map(name => cols[name]).filter(i => i !== undefined));
-
-  const strip = [];
-  header.forEach((cell, i) => {
-    const looksLikePrice = /PRICE|COST|RATE|\$/.test(cell);
-    if (looksLikePrice && !keepIdx.has(i)) strip.push(i);
-  });
-
+  const strip = strippedColumns(rows, keep);
   if (!strip.length) return rows;
 
   return rows.map((row, i) => {

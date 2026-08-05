@@ -89,7 +89,13 @@ document.getElementById('run').onclick=async()=>{
 
     // ── Cell-by-cell diff, ignoring the stripped price columns ──
     head('Cell-by-cell comparison');
-    const stripped=[col.price2,col.price3,col.price4].filter(i=>i!==undefined);
+    // The server blanks anything whose header looks like a price, not just
+    // PRICE2-4 — that fail-closed rule is what caught the COST column. Mirror
+    // it here so those columns are accounted for rather than reported as
+    // unexplained differences.
+    const stripped=[];
+    H.forEach((cell,i)=>{ if(/PRICE|COST|RATE|\$/.test(cell) && i!==col.price1) stripped.push(i); });
+    line('columns blanked by the server: '+stripped.map(i=>H[i]||('col'+i)).join(', '),'note');
     let diffs=[],checked=0;
     const n=Math.min(browserRows.length,serverRows.length);
     for(let r=1;r<n;r++){
@@ -98,7 +104,8 @@ document.getElementById('run').onclick=async()=>{
       for(let c=0;c<width;c++){
         if(stripped.includes(c))continue;
         checked++;
-        const av=a[c]===undefined?'':a[c], bv=b[c]===undefined?'':b[c];
+        const norm=v=>(v===undefined||v===null)?'':v;
+        const av=norm(a[c]), bv=norm(b[c]);
         if(String(av)!==String(bv)&&diffs.length<25){
           diffs.push('row '+r+' col '+c+' ('+(H[c]||'?')+'): browser='+JSON.stringify(av)+'  server='+JSON.stringify(bv));
         }
@@ -123,12 +130,16 @@ document.getElementById('run').onclick=async()=>{
     // Independent check: do any of the browser's wholesale figures appear anywhere
     // in the server payload at all? Catches a value surviving in another column.
     if(col.price4!==undefined){
-      const wholesale=[...new Set(browserRows.slice(1).map(r=>r[col.price4]).filter(v=>typeof v==='number'&&v>0))].slice(0,40);
+      // Values arrive as strings as often as numbers, so sample on content
+      // rather than type — the earlier version silently sampled nothing.
+      const wholesale=[...new Set(browserRows.slice(1)
+        .map(r=>r[col.price4])
+        .filter(v=>v!==undefined&&v!==null&&String(v).trim()!==''&&parseFloat(v)>0)
+        .map(v=>String(v).trim()))].slice(0,60);
+      const retail=new Set(browserRows.slice(1).map(r=>String(r[col.price1]??'').trim()));
       const leaked=wholesale.filter(v=>{
-        // only meaningful if this value isn't also a legitimate PRICE1
-        const alsoRetail=browserRows.slice(1).some(r=>r[col.price1]===v);
-        if(alsoRetail)return false;
-        return payload.includes(':'+v+',')||payload.includes(','+v+',')||payload.includes(','+v+']');
+        if(retail.has(v))return false;          // also a legitimate PRICE1 value
+        return payload.includes('"'+v+'"')||payload.includes(','+v+',')||payload.includes(','+v+']');
       });
       check('no wholesale-only figure appears anywhere in the payload', leaked.length===0);
       if(leaked.length)dump('Values found in payload:',leaked.join(', '));
