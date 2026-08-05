@@ -16,9 +16,11 @@
 //   arriving-images  — images in the "Arriving Soon" folder
 //   project-folders  — per-stone subfolders of Project Images
 //   project-images   — images in one project folder (needs &folder)
+//   closeup-images   — images in the "Category Close-Ups" folder at the VSG root
 
 import {
   driveList,
+  driveGetParent,
   SLAB_IMAGES_FOLDER_ID,
   PROJECT_IMAGES_FOLDER_ID,
 } from '../lib/google.js';
@@ -63,6 +65,21 @@ export default guard(async (req) => {
     const all = await driveList(PROJECT_IMAGES_FOLDER_ID, '');
     return json(req, { files: all.filter(f => f.name.includes('-')) },
       { cache: cacheControl(300, 900) });
+  }
+
+  // Resolving this needs a walk from Slab Images up to the VSG root. That
+  // traversal stays server-side: handing the browser a general "get parent"
+  // would let anyone climb to the root and enumerate the whole Drive, which is
+  // most of what the exposed key allowed.
+  if (scope === 'closeup-images') {
+    const root = await driveGetParent(SLAB_IMAGES_FOLDER_ID);
+    if (!root) return json(req, { files: [] }, { cache: cacheControl(120, 300) });
+    const siblings = await driveList(root, FOLDER_MIME);
+    const target = siblings.find(f =>
+      (f.name || '').trim().toLowerCase() === 'category close-ups');
+    if (!target) return json(req, { files: [] }, { cache: cacheControl(120, 300) });
+    const files = await driveList(target.id, IMAGE_MIME);
+    return json(req, { files }, { cache: cacheControl(300, 900) });
   }
 
   if (scope === 'transit-images' || scope === 'arriving-images') {

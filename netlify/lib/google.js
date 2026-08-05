@@ -130,3 +130,15 @@ export async function driveReadText(fileId) {
   if (!resp.ok) throw new Error(`Drive read failed (${resp.status})`);
   return await resp.text();
 }
+
+/**
+ * The parent folder of a given file or folder. Used only to resolve the VSG
+ * root from a known child, so the close-up folder can be found by name without
+ * exposing a general "walk upwards" capability to the browser.
+ */
+export async function driveGetParent(fileId) {
+  const resp = await driveFetch(`${DRIVE_API}/files/${fileId}?fields=parents`);
+  if (!resp.ok) return null;
+  const parents = (await resp.json()).parents || [];
+  return parents[0] || null;
+}

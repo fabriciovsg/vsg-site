@@ -1154,7 +1154,6 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // ── CONFIG ────────────────────────────────────────────────────
-const SERVICE_ACCOUNT_EMAIL='vsg-email-builder@vsg-email-builder.iam.gserviceaccount.com';
 const STOCK_FOLDER_ID='1BtszKasn-t-haVTX7JzUWTPhuriZsCCq';
 const SLAB_IMAGES_FOLDER_ID='1e2uzwpG0iOzg7O79F-aqMXeUsUIVF-AA';
 // Category tile close-ups live at the VSG root, alongside Slab Images / Project Images.
@@ -1164,40 +1163,8 @@ const CLOSEUP_FOLDER_NAME='Category Close-Ups';
 const CLOSEUP_FOLDER_ID='';
 const PROJECT_IMAGES_FOLDER_ID='13meCoYDTCLZ9_CuHO2JjgxoTAlg_ElEv';
 const SITE_CONFIG_FILENAME='vsg-site-config.json';
-const DRIVE_API='https://www.googleapis.com/drive/v3';
-const ADMIN_PASSWORD='vsg3739';
 const MANIFEST_FILENAME='image-manifest.json';
 const CMS_KEY='vsg_cms_v1';
-
-const PRIVATE_KEY_PEM=`-----BEGIN PRIVATE KEY-----
-MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCrhkjzQkbQNyGY
-2fyn5G+z2WtdLnwU7vi5AAJatRDk7w+36W6i7iyZUO2Pwm7BMmJqaWXBnMLQB9gk
-f1RDLBC2c+FdxyLrG0XEucQhs72v1rI7UqwLK27PuY1+fXhEo/uU7pOIWsCkGlZW
-327GO5JH+oNBey0LhzV4FGFylYUO+f5cQZ3Tjc77o3mDP7sg9cHxpuWcq+Z8iJ/O
-HKIoUjAEDsQbCieHYQWoZR77izvb/uNpJ3vZQ9QP7+9KTLYueHvdbtl+UzZI1BsC
-yC6SU1mwa3Nd1+xD+LRx8weL1BMW6hDZXR73WABHYgyQsn/AfkosttnrpYBAeL7u
-crwyPMEVAgMBAAECggEARuR+nERFXmOa+EEIox/QZ0YykNXYpRJMLLJrRrBVpjmE
-hp/tgVvthQSk22kiO6mmcZLUYtx2zGKhnBwgaI767V4hxI+8x+2CvZeGD+PpP5b+
-HXTC9O7joulvKNuU7NHV9q1Qvue7fVgBXXCFqVsPz74jp9nQOVaN6+6IhEJ2N0TA
-cfUzWUbx9Wr9bWz4G0r8yPgiNMEKq/uHFbGUOXd8x8jS0uFtHe4iabmcOfa9Jbo8
-YGf0yP+tZuXj/ld705yoMlnBTKzbNezXNPOIjV/L1ZHh17lEzT8hL+t//ODLGJkj
-7LfPHBEJlTjp5vgNz8SkcbB071ICWj/fm/KGVejtdQKBgQDivLndo5HuQ7568g5f
-foXk43tdKBmd2Xix8HmLfm5QPYDvWktLiq/LMluOK4/H5mx74zci7vaha4Jy4/SJ
-TLQ7vxBcnVLCNrxHM4kLwHPq+BASuTh9Of+kWwemXGD0nik5kTEJ5FA8pA+7bTku
-zrwu6DWRB0gBDJl4jUO4NS0k1wKBgQDBqVzZgJHt9xp9GmFTir4KqpqvVoPKkciq
-801P0EYC4jO4Hnzo+pd/2hOHC0mrKvKa/MhKxHljFTQ7jdhgfjlLNszqu80RubAL
-XVrQNZGBvdnFi8P51PZ1sAdwy3z8dCho6gYIu4Mt1jOBYx4WZZ01K3OHECIqmqGN
-NRMOiCFf8wKBgQDdRHfOB9ZdwtacfKPyJTLdT/IP0xZMqPHUFG1I6DUXMS4mZuOb
-8NflYFtgvrotxnyP2gjwmmss1BIVtMfrRWON+sMo3o7o4SmUAoL3aPS2lSZ6Xy71
-ZihIaF1qyDQGBGMOvtYwZRK4WxLPQaPQPgf/brT3tzdZbsZGkvVHSv2nOQKBgQCP
-Xhcrub/OwEEu3kmw9CRudxBev5h/bV92FvpkHNbHqbgKFR/5xhJEByivr86Q1hGW
-ZY7Nsxf+HyN09zR5cthtcxtOp0tQVPwb3beuLgoTV34Rfb/OgzcVtwQ7H5netwt3
-Z9ChxFd/pnSo07zhbcZtJ0a2dV4l1iXFCMab2nGCuwKBgHYVtjb3Btdgkq+410vA
-Wmq6JZfa66yznBBICVSpdDrB0mAjUqoQPgcjnAIJoIzw0gwcwTWNDzzVx7xYvV04
-o29Xj8H10O3z9ZkAzExZn4zo2E3C9DMOt/lbqInHjgMBV1+Q08ompoAruju2cs6X
-llW6PWS6cXTTD+oU7osXRTQY
------END PRIVATE KEY-----
-`;
 
 // ── CMS DEFAULTS ──────────────────────────────────────────────
 const CMS_DEFAULTS={
@@ -1283,19 +1250,8 @@ async function loadCMS(){
   if(currentAdminTab)openAdminTab(currentAdminTab); // refresh open admin tab with real data once loaded
 }
 async function saveCMS(){
-  try{
-    const ok=await driveWriteFile(STOCK_FOLDER_ID,SITE_CONFIG_FILENAME,cmsFileId,cms);
-    if(!ok){showToast('⚠ Save failed — check connection');return false;}
-    if(!cmsFileId){
-      const file=await driveFindFile(STOCK_FOLDER_ID,SITE_CONFIG_FILENAME);
-      if(file)cmsFileId=file.id;
-    }
-    return true;
-  }catch(e){
-    console.error('saveCMS Drive error:',e);
-    showToast('⚠ Save failed — check connection');
-    return false;
-  }
+  const res=await adminPost({action:'save-config',config:cms});
+  return !!(res&&res.ok);
 }
 function g(k){return cms[k]!==undefined?cms[k]:CMS_DEFAULTS[k];}
 
@@ -1407,77 +1363,6 @@ function renderWhyGrid(){
 }
 
 // ── AUTH ──────────────────────────────────────────────────────
-let accessToken=null,tokenExpiry=0;
-async function getAccessToken(){
-  if(accessToken&&Date.now()<tokenExpiry-60000)return accessToken;
-  const now=Math.floor(Date.now()/1000);
-  const hdr=btoa(JSON.stringify({alg:'RS256',typ:'JWT'})).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
-  const pay=btoa(JSON.stringify({iss:SERVICE_ACCOUNT_EMAIL,scope:'https://www.googleapis.com/auth/drive',aud:'https://oauth2.googleapis.com/token',exp:now+3600,iat:now})).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
-  const kd=PRIVATE_KEY_PEM.replace(/-----[^-]+-----/g,'').replace(/\s+/g,'');
-  const bk=Uint8Array.from(atob(kd),c=>c.charCodeAt(0));
-  const ck=await crypto.subtle.importKey('pkcs8',bk,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['sign']);
-  const sb=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',ck,new TextEncoder().encode(hdr+'.'+pay));
-  const sig=btoa(String.fromCharCode(...new Uint8Array(sb))).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
-  const r=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${hdr}.${pay}.${sig}`});
-  const d=await r.json();accessToken=d.access_token;tokenExpiry=Date.now()+(d.expires_in||3600)*1000;return accessToken;
-}
-async function _rawDriveList(folderId,resourceKey,extraQuery=''){
-  const token=await getAccessToken();
-  const q=encodeURIComponent(`'${folderId}' in parents and trashed=false${extraQuery?' and '+extraQuery:''}`);
-  const url=`${DRIVE_API}/files?q=${q}&fields=files(id,name,mimeType,modifiedTime)&pageSize=1000`;
-  const headers={'Authorization':`Bearer ${token}`};
-  if(resourceKey)headers['X-Goog-Drive-Resource-Keys']=`${folderId}/${resourceKey}`;
-  const resp=await fetch(url,{headers});
-  if(!resp.ok)return[];
-  return(await resp.json()).files||[];
-}
-async function driveGetParent(fileId){
-  const token=await getAccessToken();
-  const resp=await fetch(`${DRIVE_API}/files/${fileId}?fields=parents`,{headers:{'Authorization':`Bearer ${token}`}});
-  if(!resp.ok)return null;
-  const parents=(await resp.json()).parents||[];
-  return parents[0]||null;
-}
-async function _rawDriveFindFile(folderId,filename){
-  const token=await getAccessToken();
-  const q=encodeURIComponent(`'${folderId}' in parents and trashed=false and name='${filename}'`);
-  const url=`${DRIVE_API}/files?q=${q}&fields=files(id,name)&pageSize=1`;
-  const resp=await fetch(url,{headers:{'Authorization':`Bearer ${token}`}});
-  if(!resp.ok)return null;
-  const files=(await resp.json()).files||[];
-  return files[0]||null;
-}
-async function _rawDriveReadFileContent(fileId){
-  const token=await getAccessToken();
-  const resp=await fetch(`${DRIVE_API}/files/${fileId}?alt=media`,{headers:{'Authorization':`Bearer ${token}`}});
-  if(!resp.ok)return null;
-  return await resp.text();
-}
-async function driveWriteFile(folderId,filename,fileId,contentObj){
-  const token=await getAccessToken();
-  const body=JSON.stringify(contentObj);
-  if(fileId){
-    const resp=await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`,{
-      method:'PATCH',
-      headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
-      body
-    });
-    return resp.ok;
-  }else{
-    const boundary='vsgconfig'+Date.now();
-    const metadata={name:filename,parents:[folderId],mimeType:'application/json'};
-    const multipartBody=
-      `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`+
-      `--${boundary}\r\nContent-Type: application/json\r\n\r\n${body}\r\n`+
-      `--${boundary}--`;
-    const resp=await fetch(`https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`,{
-      method:'POST',
-      headers:{'Authorization':`Bearer ${token}`,'Content-Type':`multipart/related; boundary=${boundary}`},
-      body:multipartBody
-    });
-    return resp.ok;
-  }
-}
 
 // ── API-BACKED DRIVE READS ────────────────────────────────────
 // Reads go through Netlify functions that hold the service account credential
@@ -1509,7 +1394,8 @@ async function driveFindFile(folderId,filename){
     return {id:SITE_CONFIG_FILE_ID,name:filename};
   if(folderId===STOCK_FOLDER_ID&&API_READ_FILES[filename])
     return {id:'api:'+filename,name:filename};
-  return _rawDriveFindFile(folderId,filename);
+  console.warn('[VSG] no API route for',filename);
+  return null;
 }
 
 async function driveReadFileContent(fileId){
@@ -1522,7 +1408,8 @@ async function driveReadFileContent(fileId){
     const d=await apiGet('/api/file?name='+encodeURIComponent(fileId.slice(4)));
     return d?JSON.stringify(d):null;
   }
-  return _rawDriveReadFileContent(fileId);
+  console.warn('[VSG] no API route for file id',fileId);
+  return null;
 }
 
 async function driveList(folderId,resourceKey,extraQuery=''){
@@ -1537,7 +1424,8 @@ async function driveList(folderId,resourceKey,extraQuery=''){
     const want=nameMatch[1].toLowerCase();
     return d&&d.files?d.files.filter(f=>(f.name||'').toLowerCase()===want):[];
   }
-  if(folderId===SLAB_IMAGES_FOLDER_ID&&wantsFolders)  url='/api/drive-list?scope=slab-folders';
+  if(folderId==='__closeup__')                        url='/api/drive-list?scope=closeup-images';
+  else if(folderId===SLAB_IMAGES_FOLDER_ID&&wantsFolders)  url='/api/drive-list?scope=slab-folders';
   else if(folderId===PROJECT_IMAGES_FOLDER_ID)        url='/api/drive-list?scope=project-folders';
   else url='/api/drive-list?scope=images&folder='+encodeURIComponent(folderId);
 
@@ -1723,39 +1611,12 @@ function loadStaticFallback(){
 // Saved to Drive after every successful live load. If a future load fails
 // (Drive hiccup, file mid-write during sync, unexpected parse error), we
 // fall back to this instead of showing visitors an empty catalogue.
-const STOCK_SNAPSHOT_FILENAME='stock-snapshot.json';
-
-async function saveStockSnapshot(rawRows){
-  try{
-    if(!rawRows||!rawRows.length)return;
-    const file=await driveFindFile(STOCK_FOLDER_ID,STOCK_SNAPSHOT_FILENAME);
-    const fileId=file?file.id:null;
-    const payload={savedAt:new Date().toISOString(),rows:rawRows};
-    await driveWriteFile(STOCK_FOLDER_ID,STOCK_SNAPSHOT_FILENAME,fileId,payload);
-  }catch(e){
-    console.warn('Could not save stock snapshot:',e.message);
-  }
-}
 
 async function tryLoadStockSnapshot(){
-  try{
-    const file=await driveFindFile(STOCK_FOLDER_ID,STOCK_SNAPSHOT_FILENAME);
-    if(!file){loadStaticFallback();return;}
-    const token=await getAccessToken().catch(()=>null);
-    if(!token){loadStaticFallback();return;}
-    const resp=await fetch(`${DRIVE_API}/files/${file.id}?alt=media`,{headers:{'Authorization':`Bearer ${token}`}});
-    if(!resp.ok){loadStaticFallback();return;}
-    const data=await resp.json();
-    if(!data.rows||!data.rows.length){loadStaticFallback();return;}
-    _rawStockRows=data.rows;
-    parseStockRows(_rawStockRows,g('enabledLocations')||['VSG']);
-    const saved=new Date(data.savedAt);
-    const when=saved.toLocaleDateString()+' '+saved.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    setStatus('stale',`Showing last available stock (updated ${when}) — live connection unavailable`);
-  }catch(e){
-    console.error('Snapshot fallback failed:',e);
-    loadStaticFallback();
-  }
+  // The Drive snapshot is gone: it was written by every anonymous visitor, and
+  // /api/stock now serves a CDN-cached copy with stale-while-revalidate, which
+  // covers the same "Drive is briefly unavailable" case without a public write.
+  loadStaticFallback();
 }
 
 // ── LOCATION MAP ─────────────────────────────────────────────
@@ -1948,7 +1809,7 @@ async function loadSlabImages(stones){
 }
 
 async function getProjectImages(blockNumber,name){
-  if(!blockNumber||PRIVATE_KEY_PEM.includes('REPLACE_WITH_YOUR_PRIVATE_KEY_HERE'))return[];
+  if(!blockNumber)return[];
   try{
     await loadManifest();
     if(_manifest){
@@ -2021,7 +1882,6 @@ function refreshCardImage(stone){
 }
 
 async function loadProjectBadges(){
-  if(PRIVATE_KEY_PEM.includes('REPLACE_WITH_YOUR_PRIVATE_KEY_HERE'))return;
   try{
     await loadManifest();
     if(_manifest){
@@ -2124,16 +1984,9 @@ async function loadColourCache(){
   if(colourCacheLoaded)return;
   colourCacheLoaded=true; // Set immediately to prevent re-entry
   try{
-    const file=await _rawDriveFindFile(STOCK_FOLDER_ID,'colour-cache.json');
-    if(file){
-      const token=await getAccessToken();
-      const resp=await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`,{headers:{Authorization:'Bearer '+token}});
-      if(resp.ok){
-        const data=await resp.json();
-        stoneColourCache=data||{};
-        // Don't call applyFilter here — would cause infinite loop via loadSlabImages chain
-      }
-    }
+    const data=await apiGet('/api/file?name=colour-cache.json');
+    if(data)stoneColourCache=data||{};
+    // Don't call applyFilter here — would cause infinite loop via loadSlabImages chain
   }catch(e){console.warn('Colour cache load failed, using keyword fallback:',e);}
   colourCacheLoaded=true;
 }
@@ -2198,10 +2051,9 @@ async function saveColourOverride(block){
   const colour=sel.value;
   status.textContent='Saving…';
   try{
-    const file=await _rawDriveFindFile(STOCK_FOLDER_ID,'colour-cache.json');
-    let fileId=file?file.id:null;
     if(colour){stoneColourCache[block]=colour;}else{delete stoneColourCache[block];}
-    const ok=await driveWriteFile(STOCK_FOLDER_ID,'colour-cache.json',fileId,stoneColourCache);
+    const res=await adminPost({action:'save-colour-cache',cache:stoneColourCache});
+    const ok=!!(res&&res.ok);
     status.textContent=ok?'Saved — this stone will now use this colour tag.':'Save failed — check connection and try again.';
     if(ok&&allStones.length)applyFilter(document.getElementById('stoneSearch')?.value.toLowerCase().trim()||'');
   }catch(e){
@@ -2273,27 +2125,24 @@ function getClientPrice(stone){
 let currentClient=null;
 let clientsData=null;
 
+// clients.json is no longer fetched by the browser. It used to load on every
+// page view — customer names, emails, plaintext passwords and pricing tiers —
+// before anyone had logged in. The admin panel now asks /api/admin for a list
+// with no password material, and login is validated server-side.
 async function loadClientsData(){
-  try{
-    const file=await _rawDriveFindFile(STOCK_FOLDER_ID,'clients.json');
-    if(!file)return;
-    const token=await getAccessToken();
-    const resp=await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`,{headers:{Authorization:'Bearer '+token}});
-    if(resp.ok)clientsData=await resp.json();
-  }catch(e){console.warn('Could not load clients data:',e);}
+  if(!adminUnlocked)return;
+  const res=await adminPost({action:'list-clients'});
+  if(res&&res.clients)clientsData={clients:res.clients};
 }
 async function saveClientsData(){
-  try{
-    const file=await _rawDriveFindFile(STOCK_FOLDER_ID,'clients.json');
-    if(!file){showToast('clients.json not found — create it manually in Stock folder first');return false;}
-    const token=await getAccessToken();
-    const blob=new Blob([JSON.stringify(clientsData,null,2)],{type:'application/json'});
-    const form=new FormData();
-    form.append('metadata',new Blob([JSON.stringify({name:'clients.json',mimeType:'application/json'})],{type:'application/json'}));
-    form.append('file',blob);
-    const resp=await fetch(`https://www.googleapis.com/upload/drive/v3/files/${file.id}?uploadType=multipart`,{method:'PATCH',headers:{Authorization:'Bearer '+token},body:form});
-    return resp.ok;
-  }catch(e){return false;}
+  const list=(clientsData&&clientsData.clients)||[];
+  const res=await adminPost({action:'save-clients',clients:list});
+  if(res&&res.ok){
+    // Re-read so the panel reflects what was actually stored, and so freshly
+    // typed passwords are dropped from memory rather than lingering in inputs.
+    await loadClientsData();
+  }
+  return !!(res&&res.ok);
 }
 function openClientLogin(){
   document.getElementById('clientModalBackdrop').classList.add('open');
@@ -2313,13 +2162,26 @@ async function clientLoginSubmit(){
   const errEl=document.getElementById('clientLoginError');
   errEl.textContent='';
   if(!email||!password){errEl.textContent='Please enter email and password.';return;}
-  if(!clientsData){
-    errEl.textContent='Checking credentials…';
-    await loadClientsData();
+  errEl.textContent='Checking credentials…';
+  let client=null;
+  try{
+    const r=await fetch('/api/client-login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email,password})
+    });
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){
+      // 409 means the stored password predates hashing and must be reissued.
+      errEl.textContent=d.error||'Email or password incorrect.';
+      return;
+    }
+    client={name:d.name,email,tier:d.tier};
+  }catch(e){
+    errEl.textContent='Could not reach the server — please try again.';
+    return;
   }
-  if(!clientsData||!clientsData.clients){errEl.textContent='Client access not available.';return;}
-  const client=clientsData.clients.find(c=>c.email.toLowerCase()===email&&c.password===password&&c.active!==false);
-  if(!client){errEl.textContent='Email or password incorrect.';return;}
+  errEl.textContent='';
   currentClient=client;
   closeClientLogin();
   updateClientUI();
@@ -2664,7 +2526,7 @@ async function openModal(stone){
   document.getElementById('modalBackdrop').scrollTop=0;
   updateStoneNav();
   // Load project images in background
-  if(stone.block&&!PRIVATE_KEY_PEM.includes('REPLACE_WITH_YOUR_PRIVATE_KEY_HERE')){
+  if(stone.block){
     const projImgs=await getProjectImages(stone.block,stone.name);
     if(projImgs.length>0){
       currentGalleryImages=stone.image?[stone.image,...projImgs]:projImgs;
@@ -2871,11 +2733,60 @@ function updateShortlistUI(){
 // ── ADMIN CMS ─────────────────────────────────────────────────
 let adminUnlocked=false,currentAdminTab='';
 
-function showAdminLogin(){
+// The password is checked by /api/admin-login against an environment variable.
+// It used to be compared here, against a string in the page source — which meant
+// anyone could read it and write to the CMS config, colour cache or client list.
+let adminToken=null;
+
+async function showAdminLogin(){
   if(adminUnlocked){toggleAdminBar();return;}
   const pw=prompt('Staff password:');
-  if(pw===ADMIN_PASSWORD){adminUnlocked=true;document.getElementById('adminBar').classList.add('visible');openAdminTab('content');}
-  else if(pw!==null)alert('Incorrect password');
+  if(pw===null)return;
+  try{
+    const r=await fetch('/api/admin-login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({password:pw})
+    });
+    if(!r.ok){
+      const d=await r.json().catch(()=>({}));
+      alert(r.status===429?'Too many attempts — wait a few minutes.':(d.error||'Incorrect password'));
+      return;
+    }
+    const d=await r.json();
+    adminToken=d.token;
+    adminUnlocked=true;
+    document.getElementById('adminBar').classList.add('visible');
+    openAdminTab('content');
+  }catch(e){
+    alert('Could not reach the server — check your connection.');
+  }
+}
+
+/** Every admin write goes through here. Returns parsed JSON, or null. */
+async function adminPost(payload){
+  if(!adminToken){showToast('Session expired — sign in again');adminUnlocked=false;return null;}
+  try{
+    const r=await fetch('/api/admin',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+adminToken},
+      body:JSON.stringify(payload)
+    });
+    if(r.status===401){
+      adminToken=null;adminUnlocked=false;
+      showToast('Session expired — sign in again');
+      return null;
+    }
+    if(!r.ok){
+      const d=await r.json().catch(()=>({}));
+      showToast('⚠ '+(d.error||'Save failed'));
+      return null;
+    }
+    return await r.json();
+  }catch(e){
+    showToast('⚠ Save failed — check connection');
+    return null;
+  }
 }
 function toggleAdminBar(){
   const bar=document.getElementById('adminBar');
@@ -3395,15 +3306,9 @@ async function cipLoadCategoryFiles(cat){
 }
 // Close-up photos — dedicated folder at the VSG root: Victoria Stone Gallery / Category Close-Ups
 async function cipResolveCloseupFolderId(){
-  if(closeupFolderId!==null)return closeupFolderId;
-  if(CLOSEUP_FOLDER_ID){closeupFolderId=CLOSEUP_FOLDER_ID;return closeupFolderId;}
-  // Slab Images is a sibling — walk up to the VSG root, then match by name within it.
-  const rootId=await driveGetParent(SLAB_IMAGES_FOLDER_ID);
-  if(!rootId){closeupFolderId=false;return false;}
-  const siblings=await driveList(rootId,'',`mimeType='application/vnd.google-apps.folder'`);
-  const hit=siblings.find(f=>f.name.trim().toLowerCase()===CLOSEUP_FOLDER_NAME.toLowerCase());
-  closeupFolderId=hit?hit.id:false;
-  return closeupFolderId;
+  // /api/drive-list?scope=closeup-images resolves the folder server-side, so
+  // there is nothing to look up here — the sentinel routes driveList() there.
+  return '__closeup__';
 }
 async function cipLoadCloseupFiles(cat){
   const folderId=await cipResolveCloseupFolderId();
@@ -3706,13 +3611,18 @@ async function renderAdminClients(){
   panel.innerHTML=`
     <div class="admin-section">
       <div class="admin-section-title">Client Access <span style="font-size:14px;color:var(--stone-dark);font-family:'Jost',sans-serif;font-weight:300">(${clients.length} client${clients.length!==1?'s':''})</span></div>
-      <p style="font-size:12px;color:rgba(200,184,154,.45);margin-bottom:20px;line-height:1.6">Clients can log in to see their assigned price tier on every slab. Passwords are stored as plain text — use simple memorable passwords, not sensitive ones.</p>
+      <p style="font-size:12px;color:rgba(200,184,154,.45);margin-bottom:20px;line-height:1.6">Clients log in to see their assigned price tier. Passwords are hashed on save and cannot be read back — leave the field blank to keep the current one, or type a new one to replace it. Use <b>Generate</b> for a readable password to send the client.</p>
       <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px" id="clientsList">
         ${clients.map((c,i)=>`
         <div style="background:rgba(255,255,255,.03);border:1px solid rgba(200,184,154,.12);padding:16px;display:grid;grid-template-columns:1fr 1fr 1fr auto auto;gap:10px;align-items:center">
           <div class="admin-field"><div class="admin-label">Name</div><input class="admin-input" value="${c.name||''}" data-ci="${i}" data-field="name"></div>
           <div class="admin-field"><div class="admin-label">Email</div><input class="admin-input" value="${c.email||''}" data-ci="${i}" data-field="email"></div>
-          <div class="admin-field"><div class="admin-label">Password</div><input class="admin-input" value="${c.password||''}" data-ci="${i}" data-field="password"></div>
+          <div class="admin-field"><div class="admin-label">${c.needsNewPassword?'Password (RESET NEEDED)':(c.hasPassword?'New password (blank = keep)':'Set password')}</div>
+            <div style="display:flex;gap:6px">
+              <input class="admin-input" value="" placeholder="${c.needsNewPassword?'must be reset':(c.hasPassword?'••••••':'not set')}" data-ci="${i}" data-field="newPassword" style="flex:1">
+              <button onclick="generateClientPassword(${i})" style="background:transparent;border:1px solid rgba(200,184,154,.2);color:rgba(200,184,154,.6);padding:0 10px;cursor:pointer;font-size:11px;white-space:nowrap">Generate</button>
+            </div>
+          </div>
           <div class="admin-field"><div class="admin-label">Price Tier</div>
             <select class="admin-input" data-ci="${i}" data-field="tier" style="padding:9px 10px">
               ${PRICE_TIER_OPTIONS.map(o=>`<option value="${o.value}" ${(c.tier||'price2')===o.value?'selected':''}>${o.label}</option>`).join('')}
@@ -3735,8 +3645,20 @@ async function renderAdminClients(){
 function addClient(){
   if(!clientsData)clientsData={clients:[]};
   if(!clientsData.clients)clientsData.clients=[];
-  clientsData.clients.push({name:'',email:'',password:'',tier:'price2',active:true});
+  clientsData.clients.push({name:'',email:'',tier:'price2',active:true});
   renderAdminClients();
+}
+
+/** Ask the server for a readable password and drop it into the row. */
+async function generateClientPassword(i){
+  const res=await adminPost({action:'generate-password'});
+  if(!res||!res.password)return;
+  const input=document.querySelector(`[data-ci="${i}"][data-field="newPassword"]`);
+  if(input){
+    input.value=res.password;
+    // Shown once so it can be sent to the client; it is never readable again.
+    showToast('Password for row '+(i+1)+': '+res.password+' — copy it now, then Save');
+  }
 }
 function removeClient(idx){
   if(!confirm('Remove this client?'))return;
@@ -3751,6 +3673,9 @@ async function saveClients(){
     const field=el.dataset.field;
     let val=el.value;
     if(field==='active')val=val==='true';
+    // A blank newPassword means "leave the stored one alone" — do not send it,
+    // or the server would treat it as a deliberate change.
+    if(field==='newPassword'&&!val)return;
     clientsData.clients[i][field]=val;
   });
   const ok=await saveClientsData();
@@ -3908,11 +3833,9 @@ const ARRIVING_FOLDER_NAME = 'Arriving Soon';
 
 async function loadArrivingSoon() {
   if(g('arrivingSoonVisible')===false) return;
-  if(PRIVATE_KEY_PEM.includes('REPLACE_WITH_YOUR_PRIVATE_KEY_HERE')) return;
   const grid = document.getElementById('arrivingGrid');
   if(!grid) return;
   try {
-    const token = await getAccessToken();
     // Find the "Arriving Soon" subfolder inside Slab Images
     const folders = await driveList(SLAB_IMAGES_FOLDER_ID, '', `name='${ARRIVING_FOLDER_NAME}'`);
     if(!folders.length) { grid.innerHTML = '<div class="arriving-empty">No incoming stones at the moment — check back soon.</div>'; return; }
@@ -4293,7 +4216,7 @@ document.querySelectorAll('.nav-links a,.nav-links button').forEach(el=>{
 // loadCMS must complete before loadStock so enabledLocations is set correctly for the location filter
 loadCMS().then(()=>{loadStock();loadArrivingSoon();});
 updateShortlistUI();
-loadClientsData().then(()=>updateClientUI());
+updateClientUI();
 </script>
 
 <!-- GALLERY PRESENTATION MODE -->

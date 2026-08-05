@@ -111,6 +111,11 @@ else
   echo "  —  skipping authenticated checks (pass the admin password as arg 2)"
 fi
 
+
+echo
+echo "── Close-up scope ─────────────────────────────────"
+check_status "$BASE/api/drive-list?scope=closeup-images" 200 "closeup-images"
+
 echo
 echo "──────────────────────────────────────────────────"
 echo "  $PASS passed, $FAIL failed"
