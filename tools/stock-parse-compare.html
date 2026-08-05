@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>VSG — stock parse comparison</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+  body{font-family:ui-monospace,Menlo,monospace;background:#141110;color:#e8e0d4;margin:0;padding:32px;line-height:1.6}
+  h1{font-family:Georgia,serif;font-weight:400;font-size:26px;color:#c9a96e;margin:0 0 4px}
+  p.sub{color:#8a8378;margin:0 0 24px;font-size:13px}
+  input{background:#1e1b19;border:1px solid #3a352f;color:#e8e0d4;padding:9px 12px;width:460px;font:inherit;font-size:13px}
+  button{background:#c9a96e;color:#141110;border:0;padding:10px 20px;font:inherit;font-weight:600;cursor:pointer;margin-left:8px}
+  button:disabled{opacity:.4;cursor:default}
+  .row{margin:3px 0;font-size:13px}
+  .ok::before{content:'PASS  ';color:#6dbf67}
+  .bad::before{content:'FAIL  ';color:#d76b6b}
+  .bad{color:#d76b6b}
+  .note{color:#8a8378}
+  pre{background:#1e1b19;border:1px solid #2c2825;padding:12px;overflow:auto;font-size:12px;max-height:320px}
+  h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#7a6340;margin:28px 0 8px;font-weight:600}
+  .summary{margin-top:24px;padding:14px 18px;border:1px solid #3a352f;font-size:15px}
+</style>
+</head>
+<body>
+
+<h1>Stock parse comparison</h1>
+<p class="sub">
+  Fetches the raw .xlsx and parses it in the browser exactly as the page used to,
+  then fetches the server-parsed rows and diffs them cell by cell.
+  They must be identical apart from the deliberately blanked price columns.
+</p>
+
+<input id="base" value="https://develop--vsgnewwebsite.netlify.app">
+<button id="run">Run comparison</button>
+
+<div id="out"></div>
+
+<script>
+const out=document.getElementById('out');
+let pass=0,fail=0;
+function line(text,cls){const d=document.createElement('div');d.className='row '+(cls||'');d.textContent=text;out.appendChild(d);}
+function check(name,cond){cond?pass++:fail++;line(name,cond?'ok':'bad');}
+function head(t){const h=document.createElement('h2');h.textContent=t;out.appendChild(h);}
+function dump(label,obj){const p=document.createElement('pre');p.textContent=label+'\n'+obj;out.appendChild(p);}
+
+document.getElementById('run').onclick=async()=>{
+  out.innerHTML=''; pass=0; fail=0;
+  const base=document.getElementById('base').value.replace(/\/$/,'');
+  const btn=document.getElementById('run'); btn.disabled=true; btn.textContent='Running…';
+
+  try{
+    // ── Browser parse, identical to the page's original loadStock ──
+    head('Browser parse (the current behaviour)');
+    const xr=await fetch(base+'/api/stock');
+    if(!xr.ok){line('could not fetch /api/stock — status '+xr.status,'bad');fail++;return;}
+    const buf=await xr.arrayBuffer();
+    const wb=XLSX.read(new Uint8Array(buf),{type:'array'});
+    let ws=null;
+    for(const name of wb.SheetNames){
+      const c=wb.Sheets[name];
+      const probe=XLSX.utils.sheet_to_json(c,{header:1,range:0});
+      const header=(probe[0]||[]).map(x=>String(x||'').toUpperCase());
+      if(header.includes('MATERIAL')||header.includes('LOT #')){ws=c;break;}
+    }
+    if(!ws)ws=wb.Sheets[wb.SheetNames[0]];
+    const browserRows=XLSX.utils.sheet_to_json(ws,{header:1});
+    line('rows parsed in browser: '+browserRows.length,'note');
+
+    // ── Server parse ──
+    head('Server parse (/api/stock-rows)');
+    const sr=await fetch(base+'/api/stock-rows');
+    if(!sr.ok){line('could not fetch /api/stock-rows — status '+sr.status,'bad');fail++;return;}
+    const data=await sr.json();
+    const serverRows=data.rows;
+    line('rows returned by server: '+serverRows.length,'note');
+    line('report: '+data.file+'  ('+data.modified+')','note');
+
+    // ── Structure ──
+    head('Structure');
+    check('same row count', browserRows.length===serverRows.length);
+    check('same header row', JSON.stringify(browserRows[0])===JSON.stringify(serverRows[0]));
+
+    // Locate the price columns from the header
+    const H=(browserRows[0]||[]).map(c=>String(c||'').trim().toUpperCase());
+    const col={};
+    H.forEach((c,i)=>{if(/^PRICE[1-4]$/.test(c))col[c.toLowerCase()]=i;});
+    line('price columns: '+JSON.stringify(col),'note');
+    check('PRICE1 column found', col.price1!==undefined);
+
+    // ── Cell-by-cell diff, ignoring the stripped price columns ──
+    head('Cell-by-cell comparison');
+    const stripped=[col.price2,col.price3,col.price4].filter(i=>i!==undefined);
+    let diffs=[],checked=0;
+    const n=Math.min(browserRows.length,serverRows.length);
+    for(let r=1;r<n;r++){
+      const a=browserRows[r]||[], b=serverRows[r]||[];
+      const width=Math.max(a.length,b.length);
+      for(let c=0;c<width;c++){
+        if(stripped.includes(c))continue;
+        checked++;
+        const av=a[c]===undefined?'':a[c], bv=b[c]===undefined?'':b[c];
+        if(String(av)!==String(bv)&&diffs.length<25){
+          diffs.push('row '+r+' col '+c+' ('+(H[c]||'?')+'): browser='+JSON.stringify(av)+'  server='+JSON.stringify(bv));
+        }
+      }
+    }
+    line('cells compared: '+checked.toLocaleString(),'note');
+    check('every non-price cell identical', diffs.length===0);
+    if(diffs.length)dump('First differences:',diffs.join('\n'));
+
+    // ── The point of the exercise ──
+    head('Price exposure');
+    check('PRICE1 preserved for brackets and filters',
+      col.price1===undefined||serverRows.slice(1,80).some(r=>r[col.price1]!==''&&r[col.price1]!==undefined));
+
+    const payload=JSON.stringify(serverRows);
+    for(const [name,idx] of [['PRICE2 (Trade)',col.price2],['PRICE3 (Bundle)',col.price3],['PRICE4 (Wholesale)',col.price4]]){
+      if(idx===undefined){line(name+': column not present in report','note');continue;}
+      const anyValue=serverRows.slice(1).some(r=>r[idx]!==''&&r[idx]!==undefined&&r[idx]!==null);
+      check(name+' fully blanked in server response', !anyValue);
+    }
+
+    // Independent check: do any of the browser's wholesale figures appear anywhere
+    // in the server payload at all? Catches a value surviving in another column.
+    if(col.price4!==undefined){
+      const wholesale=[...new Set(browserRows.slice(1).map(r=>r[col.price4]).filter(v=>typeof v==='number'&&v>0))].slice(0,40);
+      const leaked=wholesale.filter(v=>{
+        // only meaningful if this value isn't also a legitimate PRICE1
+        const alsoRetail=browserRows.slice(1).some(r=>r[col.price1]===v);
+        if(alsoRetail)return false;
+        return payload.includes(':'+v+',')||payload.includes(','+v+',')||payload.includes(','+v+']');
+      });
+      check('no wholesale-only figure appears anywhere in the payload', leaked.length===0);
+      if(leaked.length)dump('Values found in payload:',leaked.join(', '));
+      line('distinct wholesale values sampled: '+wholesale.length,'note');
+    }
+
+    // ── Payload size, for information ──
+    head('Payload');
+    line('xlsx bytes: '+buf.byteLength.toLocaleString(),'note');
+    line('json bytes: '+payload.length.toLocaleString()+'  (gzip on the wire will be far smaller)','note');
+
+  }catch(e){
+    line('harness error: '+e.message,'bad'); fail++;
+  }finally{
+    const s=document.createElement('div');
+    s.className='summary';
+    s.style.borderColor=fail?'#d76b6b':'#6dbf67';
+    s.textContent=pass+' passed, '+fail+' failed'+(fail?'  — do not switch the page over yet':'  — safe to switch loadStock to /api/stock-rows');
+    out.appendChild(s);
+    const btn=document.getElementById('run'); btn.disabled=false; btn.textContent='Run comparison';
+  }
+};
+</script>
+</body>
+</html>

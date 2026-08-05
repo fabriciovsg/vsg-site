@@ -6,7 +6,8 @@
     "build": "node build-images.js"
   },
   "dependencies": {
-    "sharp": "^0.33.0"
+    "sharp": "^0.33.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "netlify-plugin-cache": "^1.0.0"

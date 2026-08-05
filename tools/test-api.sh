@@ -116,6 +116,15 @@ echo
 echo "── Close-up scope ─────────────────────────────────"
 check_status "$BASE/api/drive-list?scope=closeup-images" 200 "closeup-images"
 
+
+echo
+echo "── Stock rows (price stripping) ───────────────────"
+ROWS=$(curl -s --max-time 60 "$BASE/api/stock-rows")
+echo "$ROWS" | grep -q '"rows"' && ok "stock-rows returns rows" || bad "stock-rows failed"
+echo "$ROWS" | grep -q '"file"' && ok "stock-rows reports the source file" || bad "no source file reported"
+# The client feed must refuse anonymous callers outright.
+check_status "$BASE/api/stock-rows-client" 401 "tiered prices refused without token"
+
 echo
 echo "──────────────────────────────────────────────────"
 echo "  $PASS passed, $FAIL failed"
