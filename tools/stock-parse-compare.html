@@ -127,23 +127,45 @@ document.getElementById('run').onclick=async()=>{
       check(name+' fully blanked in server response', !anyValue);
     }
 
-    // Independent check: do any of the browser's wholesale figures appear anywhere
-    // in the server payload at all? Catches a value surviving in another column.
+    // Independent per-row check. A payload-wide substring search is too blunt:
+    // a wholesale figure like 280 is also a perfectly ordinary slab dimension,
+    // so it matches for innocent reasons. This asks the precise question
+    // instead — in each row, does the browser's PRICE4 value appear anywhere in
+    // the server's version of THAT row, in a place the browser didn't already
+    // have it legitimately?
     if(col.price4!==undefined){
-      // Values arrive as strings as often as numbers, so sample on content
-      // rather than type — the earlier version silently sampled nothing.
-      const wholesale=[...new Set(browserRows.slice(1)
-        .map(r=>r[col.price4])
-        .filter(v=>v!==undefined&&v!==null&&String(v).trim()!==''&&parseFloat(v)>0)
-        .map(v=>String(v).trim()))].slice(0,60);
-      const retail=new Set(browserRows.slice(1).map(r=>String(r[col.price1]??'').trim()));
-      const leaked=wholesale.filter(v=>{
-        if(retail.has(v))return false;          // also a legitimate PRICE1 value
-        return payload.includes('"'+v+'"')||payload.includes(','+v+',')||payload.includes(','+v+']');
-      });
-      check('no wholesale-only figure appears anywhere in the payload', leaked.length===0);
-      if(leaked.length)dump('Values found in payload:',leaked.join(', '));
-      line('distinct wholesale values sampled: '+wholesale.length,'note');
+      const strippedSet=new Set(stripped);
+      let leakRows=[],sampled=0;
+      for(let r=1;r<n;r++){
+        const a=browserRows[r]||[], b=serverRows[r]||[];
+        const v=a[col.price4];
+        if(v===undefined||v===null||String(v).trim()===''||!(parseFloat(v)>0))continue;
+        sampled++;
+        const target=String(v).trim();
+        // Values the browser legitimately holds in this row outside the
+        // stripped columns — a coincidence there is not a leak.
+        const innocent=new Set();
+        a.forEach((cell,i)=>{ if(!strippedSet.has(i)&&cell!==undefined&&cell!==null) innocent.add(String(cell).trim()); });
+        // Now: does the server's row carry it in a stripped column?
+        b.forEach((cell,i)=>{
+          if(!strippedSet.has(i))return;
+          if(cell===undefined||cell===null)return;
+          if(String(cell).trim()===target&&leakRows.length<20)leakRows.push('row '+r+' col '+i+' ('+(H[i]||'?')+') = '+target);
+        });
+      }
+      check('no wholesale figure survives in any stripped column', leakRows.length===0);
+      if(leakRows.length)dump('Leaked cells:',leakRows.join('\n'));
+      line('rows with a wholesale price checked: '+sampled.toLocaleString(),'note');
+
+      // Also confirm the stripped columns are empty everywhere, not just where
+      // a wholesale price happened to exist.
+      let nonEmpty=0;
+      for(let r=1;r<n;r++){
+        const b=serverRows[r]||[];
+        for(const i of stripped){ const c=b[i]; if(c!==undefined&&c!==null&&String(c).trim()!=='')nonEmpty++; }
+      }
+      check('every stripped column empty in every row', nonEmpty===0);
+      if(nonEmpty)line('non-empty stripped cells: '+nonEmpty,'bad');
     }
 
     // ── Payload size, for information ──
