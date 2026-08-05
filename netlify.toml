@@ -49,6 +49,15 @@
 # publish = "." serves the whole repo root, so the function source, package.json
 # and build-images.js are all fetchable over HTTP today. None of them contain
 # secrets (the credential is an env var), but there is no reason to serve them.
+# Diagnostics. tools/stock-parse-compare.html has to be same-origin with the
+# API to run, so it lives in the published site — but there is no reason to
+# serve it once a comparison is done. Comment this rule out to run it again.
+[[redirects]]
+  from   = "/tools/*"
+  to     = "/"
+  status = 404
+  force  = true
+
 [[redirects]]
   from   = "/netlify/*"
   to     = "/"

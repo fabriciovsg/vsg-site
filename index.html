@@ -1151,7 +1151,6 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
   <button class="admin-bar-btn danger" onclick="adminLogout()">Sign Out</button>
 </div>
 <div class="admin-panel" id="adminPanel"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // ── CONFIG ────────────────────────────────────────────────────
 const STOCK_FOLDER_ID='1BtszKasn-t-haVTX7JzUWTPhuriZsCCq';
@@ -1443,22 +1442,26 @@ async function loadStock(){
   setStatus('loading','Connecting to live inventory…');
   try{
     setStatus('loading','Loading live stock…');
-    // /api/stock picks the newest report and streams the .xlsx. Selection and
-    // credentials are server-side; the parsing below is unchanged.
-    const resp=await fetch('/api/stock');
-    if(!resp.ok){await tryLoadStockSnapshot();return;}
-    const buf=await resp.arrayBuffer();
-    const wb=XLSX.read(new Uint8Array(buf),{type:'array'});
-    // Find the sheet containing stock data — look for one with MATERIAL or LOT # in headers
-    let ws=null;
-    for(const name of wb.SheetNames){
-      const candidate=wb.Sheets[name];
-      const rows=XLSX.utils.sheet_to_json(candidate,{header:1,range:0});
-      const header=(rows[0]||[]).map(c=>String(c||'').toUpperCase());
-      if(header.includes('MATERIAL')||header.includes('LOT #')){ws=candidate;break;}
+    // The report is parsed server-side now. The browser used to download the
+    // raw .xlsx, which carried PRICE2/3/4 (Trade, Bundle, Wholesale) and COST
+    // in every row — readable by any visitor who opened devtools, logged in or
+    // not. /api/stock-rows returns the same row arrays with those columns
+    // blanked; a signed-in client gets their own tier and nobody else's.
+    const resp=clientToken
+      ? await fetch('/api/stock-rows-client',{headers:{'Authorization':'Bearer '+clientToken}})
+      : await fetch('/api/stock-rows');
+    if(!resp.ok){
+      // An expired client session should not leave the gallery empty — drop
+      // back to the public feed and sign the client out.
+      if(clientToken&&resp.status===401){
+        clientToken=null;currentClient=null;updateClientUI();
+        showToast('Session expired — signed out');
+        return loadStock();
+      }
+      await tryLoadStockSnapshot();return;
     }
-    if(!ws)ws=wb.Sheets[wb.SheetNames[0]]; // fallback
-    _rawStockRows=XLSX.utils.sheet_to_json(ws,{header:1});
+    const data=await resp.json();
+    _rawStockRows=data&&data.rows;
     if(!_rawStockRows||_rawStockRows.length<2){await tryLoadStockSnapshot();return;}
     parseStockRows(_rawStockRows,g('enabledLocations')||['VSG']);
   }catch(e){
@@ -2123,6 +2126,9 @@ function getClientPrice(stone){
 
 // ── CLIENT AUTH ───────────────────────────────────────────────
 let currentClient=null;
+// Issued by /api/client-login. Held in memory only — a refresh signs the
+// client out, which is the right default for shared showroom machines.
+let clientToken=null;
 let clientsData=null;
 
 // clients.json is no longer fetched by the browser. It used to load on every
@@ -2177,6 +2183,7 @@ async function clientLoginSubmit(){
       return;
     }
     client={name:d.name,email,tier:d.tier};
+    clientToken=d.token;
   }catch(e){
     errEl.textContent='Could not reach the server — please try again.';
     return;
@@ -2185,12 +2192,20 @@ async function clientLoginSubmit(){
   currentClient=client;
   closeClientLogin();
   updateClientUI();
+  // Re-fetch with the token: tiered prices are not in the public feed, so the
+  // stock in memory has none. Without this the client would see the gallery
+  // but no pricing until the next reload.
+  await loadStock();
   renderGrid(true);
   showToast(`Welcome, ${client.name||client.email}`);
 }
-function clientLogout(){
+async function clientLogout(){
   currentClient=null;
+  clientToken=null;
   updateClientUI();
+  // Reload from the public feed so the tiered prices leave memory too, rather
+  // than merely being hidden by the UI.
+  await loadStock();
   renderGrid(true);
 }
 function updateClientUI(){
