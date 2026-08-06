@@ -214,6 +214,27 @@ section{padding:72px 48px;}
 .stone-card-specs{font-size:13px;color:var(--surface-dark-text-muted);line-height:1.7;}
 .stone-card-specs span{display:block;}
 .stone-card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
+/* ADMIN INLINE CARD CONTROLS ─────────────────────────────────
+   Staff-only strip on each gallery card so colour tagging, hiding a lot and
+   flagging a photo for retake can all be done while scrolling the grid,
+   rather than opening every stone's modal one at a time. Rendered only when
+   adminUnlocked is true, so visitors never receive this markup.
+   Colours use the surface-* vars so it reads correctly on both the dark
+   gallery and the "+ Light Gallery" themes. */
+.card-admin-row{display:flex;align-items:center;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--surface-dark-border,rgba(200,184,154,.14));}
+.card-admin-select{flex:1;min-width:0;background:rgba(127,127,127,.10);border:1px solid var(--surface-dark-border,rgba(200,184,154,.22));color:var(--surface-dark-text);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.04em;padding:5px 6px;border-radius:2px;outline:none;cursor:pointer;}
+.card-admin-select:focus{border-color:var(--gold);}
+/* Italic + faded = colour was guessed from the stone name, not confirmed in
+   colour-cache.json. Lets you spot untagged lots at a glance while browsing. */
+.card-admin-select.guessed{font-style:italic;opacity:.55;}
+.card-admin-btn{flex:0 0 auto;width:30px;height:28px;display:flex;align-items:center;justify-content:center;background:rgba(127,127,127,.10);border:1px solid var(--surface-dark-border,rgba(200,184,154,.22));color:var(--surface-dark-text-muted);font-size:13px;line-height:1;border-radius:2px;cursor:pointer;transition:background .18s,border-color .18s,color .18s;}
+.card-admin-btn:hover{background:rgba(127,127,127,.22);}
+.card-admin-btn:disabled,.card-admin-select:disabled{opacity:.4;cursor:wait;}
+.card-admin-btn.on-hidden{background:rgba(180,40,30,.22);border-color:rgba(180,40,30,.6);color:#e88;}
+.card-admin-btn.on-retake{background:rgba(160,95,0,.22);border-color:rgba(160,95,0,.6);color:#e8a82a;}
+.card-admin-ok{outline:1px solid var(--gold);outline-offset:1px;}
+.card-hidden-badge{position:absolute;top:0;left:0;z-index:3;background:rgba(180,40,30,.85);color:#fff;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:0 0 6px 0;pointer-events:none;}
+.card-retake-badge{position:absolute;bottom:0;right:0;z-index:3;background:rgba(160,95,0,.9);color:#ffe0a0;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:4px 0 0 0;pointer-events:none;}
 /* SLAB COUNT BAR */
 .slab-bar-wrap{display:flex;align-items:center;gap:6px;margin-top:6px;}
 .slab-bar-track{flex:1;height:3px;background:rgba(200,184,154,.12);border-radius:2px;overflow:hidden;}
@@ -2064,6 +2085,141 @@ async function saveColourOverride(block){
   }
 }
 
+// ── ADMIN: INLINE CARD CONTROLS (gallery grid) ───────────────
+// The same three controls that live in the stone modal — colour tag, hide
+// lot, flag photo for retake — surfaced directly on each gallery card so a
+// whole screen of stock can be worked through without opening anything.
+//
+// WHY THESE DON'T CALL applyFilter():
+//   The modal versions call applyFilter() after every save, which rebuilds
+//   the grid from scratch and resets displayedCount to 0. That's fine when
+//   you're saving one stone and closing a modal, but it would throw you back
+//   to the top of the gallery every time you tagged a card — exactly the
+//   thing this feature exists to avoid. These handlers therefore mutate cms /
+//   stoneColourCache, save, and then repaint only the affected card.
+//
+// Consequence worth knowing: if a colour filter is active and you retag a
+// stone out of that colour, the card stays put until the next filter change.
+// That's deliberate — cards vanishing from under the cursor mid-pass is worse.
+
+function findStoneCard(block){
+  const b=String(block);
+  return [...document.querySelectorAll('.stone-card[data-block]')].find(c=>c.dataset.block===b)||null;
+}
+
+function adminCardControls(stone){
+  if(!adminUnlocked||!stone.block)return '';
+  const b=String(stone.block).replace(/'/g,"\\'");
+  // Distinguish a confirmed tag (colour-cache.json / Gemini) from a name-keyword
+  // guess — the guess renders italic and faded so untagged lots stand out.
+  const explicit=stoneColourCache[stone.block]||'';
+  const shown=explicit||detectColourFromName(stone.name)||'';
+  const hidden=(cms.hiddenLots||[]).includes(String(stone.block));
+  const retake=isRetakePhoto(stone);
+  const opts=['<option value="">— Colour —</option>']
+    .concat(VALID_COLOUR_FAMILIES_JS.map(c=>`<option value="${c}"${shown===c?' selected':''}>${c}</option>`))
+    .join('');
+  return `<div class="card-admin-row" data-admin-block="${String(stone.block).replace(/"/g,'&quot;')}">
+    <select class="card-admin-select${explicit?'':' guessed'}" data-admin="colour" title="${explicit?'Colour tag (confirmed)':shown?'Colour guessed from the stone name — pick to confirm':'No colour tag — pick one'}" onchange="saveCardColour('${b}',this)">${opts}</select>
+    <button class="card-admin-btn${hidden?' on-hidden':''}" data-admin="hide" title="${hidden?'Hidden from site — click to unhide':'Hide lot from website'}" onclick="toggleHiddenFromCard('${b}',this)">${hidden?'&#8856;':'&#128065;'}</button>
+    <button class="card-admin-btn${retake?' on-retake':''}" data-admin="retake" title="${retake?'Flagged for retake — click to clear':'Flag photo for retake'}" onclick="toggleRetakeFromCard('${b}',this)">&#128247;</button>
+  </div>`;
+}
+
+/** Repaints one card's badges and button states from current cms state. */
+function paintCardAdminState(block){
+  const card=findStoneCard(block);
+  if(!card)return;
+  const key=String(block);
+  const hidden=(cms.hiddenLots||[]).includes(key);
+  const retake=(cms.retakePhotos||[]).includes(key);
+  const wrap=card.querySelector('.stone-card-img-wrap');
+  if(wrap){
+    wrap.style.opacity=hidden?'.55':'';
+    let hb=wrap.querySelector('.card-hidden-badge');
+    if(hidden&&!hb){hb=document.createElement('div');hb.className='card-hidden-badge';hb.textContent='Hidden';wrap.appendChild(hb);}
+    else if(!hidden&&hb)hb.remove();
+    let rb=wrap.querySelector('.card-retake-badge');
+    if(retake&&!rb){rb=document.createElement('div');rb.className='card-retake-badge';rb.innerHTML='&#128247; Retake';wrap.appendChild(rb);}
+    else if(!retake&&rb)rb.remove();
+  }
+  const hBtn=card.querySelector('[data-admin="hide"]');
+  if(hBtn){
+    hBtn.classList.toggle('on-hidden',hidden);
+    hBtn.innerHTML=hidden?'&#8856;':'&#128065;';
+    hBtn.title=hidden?'Hidden from site — click to unhide':'Hide lot from website';
+  }
+  const rBtn=card.querySelector('[data-admin="retake"]');
+  if(rBtn){
+    rBtn.classList.toggle('on-retake',retake);
+    rBtn.title=retake?'Flagged for retake — click to clear':'Flag photo for retake';
+  }
+}
+
+function flashSaved(el){
+  if(!el)return;
+  el.classList.add('card-admin-ok');
+  setTimeout(()=>el.classList.remove('card-admin-ok'),900);
+}
+
+async function saveCardColour(block,sel){
+  const colour=sel.value;
+  const prev=stoneColourCache[block];
+  sel.disabled=true;
+  if(colour)stoneColourCache[block]=colour;else delete stoneColourCache[block];
+  const res=await adminPost({action:'save-colour-cache',cache:stoneColourCache});
+  sel.disabled=false;
+  if(res&&res.ok){
+    sel.classList.toggle('guessed',!colour);
+    sel.title=colour?'Colour tag (confirmed)':'Colour guessed from name — pick to confirm';
+    flashSaved(sel);
+    // Keep the modal in step if it happens to be open on this stone.
+    if(currentModalStone&&String(currentModalStone.block)===String(block))renderColourOverride(currentModalStone);
+  }else{
+    if(prev)stoneColourCache[block]=prev;else delete stoneColourCache[block];
+    sel.value=prev||detectColourFromName((allStones.find(s=>String(s.block)===String(block))||{}).name)||'';
+    showToast('⚠ Colour not saved');
+  }
+}
+
+async function toggleHiddenFromCard(block,btn){
+  if(!cms.hiddenLots)cms.hiddenLots=[];
+  const key=String(block);
+  const idx=cms.hiddenLots.indexOf(key);
+  const wasHidden=idx>=0;
+  if(wasHidden)cms.hiddenLots.splice(idx,1);else cms.hiddenLots.push(key);
+  btn.disabled=true;
+  const ok=await saveCMS();
+  btn.disabled=false;
+  if(ok){
+    paintCardAdminState(key);
+    updateLiveCounts();
+    showToast(wasHidden?'Lot unhidden':'Lot hidden from site');
+    if(currentAdminTab==='coverage')renderAdminCoverage();
+  }else{
+    if(wasHidden)cms.hiddenLots.push(key);else cms.hiddenLots.splice(cms.hiddenLots.indexOf(key),1);
+  }
+}
+
+async function toggleRetakeFromCard(block,btn){
+  if(!cms.retakePhotos)cms.retakePhotos=[];
+  const key=String(block);
+  const idx=cms.retakePhotos.indexOf(key);
+  const wasFlagged=idx>=0;
+  if(wasFlagged)cms.retakePhotos.splice(idx,1);else cms.retakePhotos.push(key);
+  btn.disabled=true;
+  const ok=await saveCMS();
+  btn.disabled=false;
+  if(ok){
+    paintCardAdminState(key);
+    updateAdminMissingCount();
+    showToast(wasFlagged?'Retake flag cleared':'Marked for photo retake');
+    if(currentAdminTab==='missing')renderAdminMissing();
+  }else{
+    if(wasFlagged)cms.retakePhotos.push(key);else cms.retakePhotos.splice(cms.retakePhotos.indexOf(key),1);
+  }
+}
+
 // ── PRICE BRACKETS (anonymous visitors) ──────────────────────
 const PRICE_TIERS={price1:'Retail',price2:'Trade',price3:'Bundle',price4:'Wholesale'};
 // 5-tier price system
@@ -2266,11 +2422,54 @@ function filterPriceTier(tier,el){
 
 // ── FILTER / SORT / RENDER ────────────────────────────────────
 function setSort(val){activeSort=val;applyFilter(document.getElementById('stoneSearch').value.toLowerCase());}
+// Normalises whatever Vavastone put in the AVAILABLE column into a timestamp.
+// That column has arrived as "YYYY-MM-DD", as "DD/MM/YYYY", and as a raw Excel
+// serial number depending on how the report was generated, and SheetJS is read
+// here without cellDates, so dates can land as numbers. new Date() alone would
+// silently read 03/04/2026 as March in the US order, so parse explicitly.
+// Returns null when there's no usable date.
+function stockDateValue(v){
+  if(v===null||v===undefined||v==='')return null;
+  if(v instanceof Date)return isNaN(v.getTime())?null:v.getTime();
+  const excel=n=>(n>20000&&n<80000)?Math.round((n-25569)*86400000):null; // 1900 system; 25569 = 1970-01-01
+  if(typeof v==='number')return isFinite(v)?excel(v):null;
+  const s=String(v).trim();
+  if(!s)return null;
+  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m)return Date.UTC(+m[1],+m[2]-1,+m[3]);
+  m=s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})/); // AU order: day first
+  if(m)return Date.UTC(+m[3],+m[2]-1,+m[1]);
+  if(/^\d+(\.\d+)?$/.test(s))return excel(parseFloat(s));
+  const t=Date.parse(s);
+  return isNaN(t)?null:t;
+}
+
+// "Newest" previously sorted on stone.available — a field parseStockRows() has
+// never written, so every comparison returned 0 and the order never changed.
+// The date we actually hold is stone.eta, read from the AVAILABLE column: the
+// warehouse arrival date for AVAILABLE lots, the expected arrival for TRANSIT
+// ones. Later date = newer either way. Lots with no usable date sort last,
+// alphabetically, rather than being scattered through the results.
+let _warnedNoStockDates=false;
 function sortStones(s){
   const a=[...s];
   if(activeSort==='name')a.sort((x,y)=>x.name.localeCompare(y.name));
   else if(activeSort==='category')a.sort((x,y)=>(x.category||'').localeCompare(y.category||'')||x.name.localeCompare(y.name));
-  else a.sort((x,y)=>{if(!x.available&&!y.available)return 0;if(!x.available)return 1;if(!y.available)return -1;return new Date(y.available)-new Date(x.available);});
+  else{
+    const d=new Map();
+    a.forEach(st=>d.set(st,stockDateValue(st.eta)));
+    if(!_warnedNoStockDates&&a.length&&![...d.values()].some(v=>v!==null)){
+      _warnedNoStockDates=true;
+      console.warn('[VSG] Sort: Newest — no lot has a readable date in stone.eta. Check that the stock report still has a column headed exactly "AVAILABLE"; falling back to alphabetical.');
+    }
+    a.sort((x,y)=>{
+      const dx=d.get(x),dy=d.get(y);
+      if(dx===null&&dy===null)return x.name.localeCompare(y.name);
+      if(dx===null)return 1;
+      if(dy===null)return -1;
+      return dy-dx||x.name.localeCompare(y.name);
+    });
+  }
   return a;
 }
 function filterCategory(cat,btn){
@@ -2358,18 +2557,23 @@ function applyFilter(search=''){
   filteredStones=sortStones(filtered);
   displayedCount=0;
   renderGrid(true);
-  // Update status to show live vs total
+  updateLiveCounts();
+  if(slabAllFiles)loadSlabImages(filteredStones.slice(0,PAGE_SIZE)).then(()=>stampBadgesOnCards());
+  else stampBadgesOnCards();
+}
+
+// Live vs total lot counts. Split out of applyFilter() so the inline admin
+// card controls can refresh the header numbers after hiding/unhiding a lot
+// without triggering a full grid rebuild.
+function updateLiveCounts(){
   const totalLots=allStones.length;
   const liveLots=allStones.filter(s=>!isLotHidden(s)&&!isTransitNotVisible(s)).length;
-  const totalSlabs=allStones.reduce((acc,s)=>acc+parseInt(s.qty||0),0);
-  document.getElementById('statusText').textContent=liveLots+' lots live \u00b7 '+totalLots+' lots in stock';
-  // Update prominent live count badge
+  const st=document.getElementById('statusText');
+  if(st)st.textContent=liveLots+' lots live \u00b7 '+totalLots+' lots in stock';
   const lcn=document.getElementById('liveCountNum');
   const lcb=document.getElementById('liveCountBadge');
   if(lcn)lcn.textContent=liveLots;
   if(lcb)lcb.classList.add('visible');
-  if(slabAllFiles)loadSlabImages(filteredStones.slice(0,PAGE_SIZE)).then(()=>stampBadgesOnCards());
-  else stampBadgesOnCards();
 }
 
 function isShortlisted(stone){return shortlist.some(s=>s.block===stone.block&&s.name===stone.name);}
@@ -2391,8 +2595,10 @@ function renderGrid(reset=false){
         </div>`;
     const isHidden=isLotHidden(stone);
     const isRetake=adminUnlocked&&isRetakePhoto(stone);
-    const hiddenBadge=isHidden?`<div style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:2;pointer-events:none;display:flex;align-items:flex-start;justify-content:flex-start"><div style="background:rgba(180,40,30,.85);color:#fff;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:0 0 6px 0">Hidden</div></div>`:'';
-    const retakeBadge=isRetake?`<div style="position:absolute;bottom:0;right:0;z-index:2;pointer-events:none"><div style="background:rgba(160,95,0,.9);color:#ffe0a0;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:4px 0 0 0">&#128247; Retake</div></div>`:'';
+    // Badges are classed (not inline-styled) so paintCardAdminState() can add
+    // and remove them in place when a flag is toggled from the card itself.
+    const hiddenBadge=isHidden?`<div class="card-hidden-badge">Hidden</div>`:'';
+    const retakeBadge=isRetake?`<div class="card-retake-badge">&#128247; Retake</div>`:'';
     const imgHTML=`<div class="stone-card-img-wrap" style="${isHidden?'opacity:.55;':''}">${imgInner}${hiddenBadge}${retakeBadge}</div>`;
     const inList=isShortlisted(stone);
     const isTransit=stone.status==='TRANSIT';
@@ -2442,8 +2648,13 @@ function renderGrid(reset=false){
           ${stone.finishing?`<span class="stone-card-tag">${stone.finishing}</span>`:`<span></span>`}
           <button class="card-shortlist-btn ${inList?'active':''}" onclick="event.stopPropagation();toggleShortlistCard(this,'${stone.name.replace(/'/g,"\\'")}','${stone.block}')">${inList?'♥':'♡'}</button>
         </div>
+        ${adminCardControls(stone)}
       </div>`;
-    card.onclick=(e)=>{if(!e.target.classList.contains('card-shortlist-btn'))openModal(stone);};
+    card.onclick=(e)=>{
+      if(e.target.classList.contains('card-shortlist-btn'))return;
+      if(e.target.closest&&e.target.closest('.card-admin-row'))return; // admin strip handles its own clicks
+      openModal(stone);
+    };
     grid.appendChild(card);
   });
   displayedCount+=batch.length;
@@ -2772,6 +2983,9 @@ async function showAdminLogin(){
     adminToken=d.token;
     adminUnlocked=true;
     document.getElementById('adminBar').classList.add('visible');
+    // Repaint the gallery so the inline per-card admin controls appear now,
+    // rather than only after the next filter/search change.
+    if(allStones.length)applyFilter(document.getElementById('stoneSearch')?.value.toLowerCase().trim()||'');
     openAdminTab('content');
   }catch(e){
     alert('Could not reach the server — check your connection.');
@@ -2810,9 +3024,12 @@ function toggleAdminBar(){
 }
 function adminLogout(){
   adminUnlocked=false;
+  adminToken=null;
   document.getElementById('adminBar').classList.remove('visible');
   document.getElementById('adminPanel').classList.remove('open');
   currentAdminTab='';
+  // Repaint so the inline admin controls and Hidden/Retake badges come off.
+  if(allStones.length)applyFilter(document.getElementById('stoneSearch')?.value.toLowerCase().trim()||'');
 }
 
 function browseStock(){
@@ -3708,7 +3925,9 @@ async function toggleHiddenLot(block,btnEl){
   if(ok){
     if(allStones.length)applyFilter(document.getElementById('stoneSearch')?.value.toLowerCase().trim()||'');
     showToast(idx>=0?'Lot unhidden':'Lot hidden from site');
-    renderAdminCoverage();
+    // Only redraw Coverage if it's the tab on screen — it writes into
+    // #adminPanel and would otherwise wipe out whatever tab was open.
+    if(currentAdminTab==='coverage')renderAdminCoverage();
   }else{
     // revert on failure
     if(idx>=0)cms.hiddenLots.push(block);else cms.hiddenLots.splice(cms.hiddenLots.indexOf(block),1);
