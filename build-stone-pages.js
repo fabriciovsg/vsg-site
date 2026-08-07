@@ -85,9 +85,15 @@ function aggregate(wb, cms){
   const rows = XLSX.utils.sheet_to_json(ws, { header:1 });
   const hdr = rows[0].map(h=>String(h||'').trim());
   const ix = Object.fromEntries(hdr.map((h,i)=>[h,i]));
-  const need = ['MATERIAL','CATEGORY','LOT #','STATUS','FININSHING','THICKNESS','SELL WIDTH','SELL HEIGHT','AVAILABLE'];
+  const need = ['LOCATION','MATERIAL','CATEGORY','LOT #','STATUS','FININSHING','THICKNESS','SELL WIDTH','SELL HEIGHT','AVAILABLE'];
   for(const h of need) if(!(h in ix)){ console.error(`Stone pages: column "${h}" missing from stock report — header changed?`); process.exit(1); }
 
+  // Location filter — same rule as the gallery. SYD (a pending consignment)
+  // is deliberately excluded in the site config; the generator must not
+  // resurrect it. Empty/missing config falls back to including everything,
+  // with a loud warning, rather than silently guessing a location list.
+  const enabled = new Set(cms.enabledLocations||[]);
+  if(!enabled.size) console.warn('Stone pages: enabledLocations missing from config — including ALL locations');
   const hidden = new Set((cms.hiddenLots||[]).map(String));
   const transitVisible = new Set((cms.visibleTransitLots||[]).map(String));
   const anomalies = [];
@@ -99,6 +105,8 @@ function aggregate(wb, cms){
     const name = cleanVarietyName(raw);
     const lot = String(r[ix['LOT #']]||'').trim();
     const status = String(r[ix['STATUS']]||'').trim();
+    const loc = String(r[ix['LOCATION']]||'').trim();
+    if(enabled.size && !enabled.has(loc)) continue;            // admin: disabled location
     if(hidden.has(lot)) continue;                                   // admin: hidden lot
     if(status==='TRANSIT' && !transitVisible.has(lot)) continue;    // admin: uncurated transit
     if(status!=='AVAILABLE' && status!=='TRANSIT') continue;
@@ -248,19 +256,58 @@ function legacyPage(entry){
 }
 
 function cataloguePage(entries, cms, stamp){
+  // Three tiers per material: featured tiles, family cards (expandable),
+  // then the remainder collapsed as text links. All links are in the HTML
+  // whether expanded or not (<details>), so crawl completeness survives the
+  // visual trim — one page carries every stone's internal link.
   const order = ['Marble','Quartzite','Granite','Dolomite','Travertine','Limestone','Onyx'];
+  const FAMILIES = PAGES_CONFIG.families || {};
+  const FEATURED = PAGES_CONFIG.featuredStones || {};
+  const famOf = {};
+  for(const [fam,members] of Object.entries(FAMILIES)) for(const m of members) famOf[m]=fam;
+
   const byMat = new Map();
   for(const e of entries){ if(!byMat.has(e.material)) byMat.set(e.material,[]); byMat.get(e.material).push(e); }
+
+  const tile = e => `<a class="tile" href="/stone/${e.slug}/"><span class="tile-img"><img src="${e.thumb}" alt="${esc(e.name)} close up" loading="lazy"></span><div class="tile-name">${esc(e.name)}</div><div class="tile-sub">${e.lotCount} lot${e.lotCount!==1?'s':''}</div></a>`;
+
   const sections = order.filter(m=>byMat.has(m)).map(m=>{
     const list = byMat.get(m).sort((a,b)=>a.name.localeCompare(b.name));
-    const tiles = list.map(e=>`<a class="tile" href="/stone/${e.slug}/"><img src="${e.thumb}" alt="${esc(e.name)} ${m.toLowerCase()}" loading="lazy"><div class="tile-name">${esc(e.name)}</div><div class="tile-sub">${e.lotCount} lot${e.lotCount!==1?'s':''}</div></a>`).join('\n      ');
+    const byName = Object.fromEntries(list.map(e=>[e.name,e]));
+
+    // families present in this material (family goes where most members sit)
+    const famsHere = {};
+    for(const e of list){ const f=famOf[e.name]; if(f){ (famsHere[f]=famsHere[f]||[]).push(e); } }
+    const famNames = Object.keys(famsHere).filter(f=>famsHere[f].length>=2).sort();
+    const inFam = new Set(famNames.flatMap(f=>famsHere[f].map(e=>e.name)));
+    const standalone = list.filter(e=>!inFam.has(e.name));
+
+    // featured: curated list, else auto = most lots among photographed standalones
+    const curated = (FEATURED[m]||[]).map(n=>byName[n]).filter(Boolean);
+    const featured = curated.length ? curated
+      : standalone.filter(e=>e.thumb).sort((a,b)=>b.lotCount-a.lotCount).slice(0,6);
+    const featNames = new Set(featured.map(e=>e.name));
+    const rest = standalone.filter(e=>!featNames.has(e.name));
+
+    const famCards = famNames.map(f=>{
+      const members = famsHere[f].sort((a,b)=>a.name.localeCompare(b.name));
+      const flagship = members.filter(e=>e.thumb).sort((a,b)=>b.lotCount-a.lotCount)[0]||members[0];
+      const lots = members.reduce((a,e)=>a+e.lotCount,0);
+      return `<details class="family"><summary class="tile family-card"><span class="tile-img">${flagship.thumb?`<img src="${flagship.thumb}" alt="${esc(f)} family close up" loading="lazy">`:''}</span><div class="tile-name">${esc(f)}</div><div class="tile-sub">${members.length} varieties &middot; ${lots} lots</div></summary><div class="family-members">${members.map(tile).join('')}</div></details>`;
+    }).join('\n      ');
+
+    const restLinks = rest.length?`<details class="rest"><summary>All other ${m}s (${rest.length})</summary><div class="rest-links">${rest.map(e=>`<a href="/stone/${e.slug}/">${esc(e.name)}</a>`).join('')}</div></details>`:'';
+
     return `<section id="${MAT_SLUG[m]}">
   <h2>${m} <em>&middot; ${list.length}</em></h2>
   <div class="tiles">
-      ${tiles}
+      ${featured.map(tile).join('\n      ')}
+      ${famCards}
   </div>
+  ${restLinks}
 </section>`;
   }).join('\n');
+
   const total = entries.length;
   const body = `
 <div class="crumbs"><a href="/">Home</a> &nbsp;/&nbsp; Catalogue</div>
@@ -268,7 +315,7 @@ function cataloguePage(entries, cms, stamp){
   <div>
     <div class="eyebrow">The Collection, By Name</div>
     <h1>Stone <em style="font-style:italic;color:var(--stone-dark)">Catalogue</em></h1>
-    <p class="intro" style="margin-top:18px">Every stone currently in the gallery, by name &mdash; ${total} varieties across marble, quartzite, granite, dolomite, travertine and limestone. Each links to its own page with lot photography and current availability. Stock as at ${stamp}.</p>
+    <p class="intro" style="margin-top:18px">Every stone currently in the gallery, by name. Each links to its own page with lot photography and current availability. Stock as at ${stamp}.</p>
   </div>
 </header>
 ${sections}`;
@@ -286,6 +333,9 @@ async function main(){
   const stamp = new Date().toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric',timeZone:'Australia/Melbourne'});
   console.log(`Stone pages: ${varieties.size} in-stock varieties after visibility rules`);
 
+  // Clean output first — stale pages from a previous run must not survive a
+  // filter change (Netlify checkouts are fresh anyway; this covers local dev).
+  fs.rmSync(path.join(CWD,'stone'),{recursive:true,force:true});
   fs.mkdirSync(path.join(CWD,'stone'),{recursive:true});
   fs.writeFileSync(path.join(CWD,'stone','stone-pages.css'), STONE_CSS);
 
@@ -388,10 +438,23 @@ main.legacy{padding:56px 5vw 80px;max-width:820px}
 .status{display:inline-block;margin-top:26px;margin-bottom:6px;padding:8px 16px;border:1px solid rgba(200,184,154,.3);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--stone-dark)}
 main.legacy .intro{margin-top:20px}
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
-.tile{text-decoration:none;display:block}
-.tile img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.tile{text-decoration:none;display:block;cursor:pointer}
+.tile-img{display:block;width:100%;aspect-ratio:4/3;overflow:hidden;background:var(--bg2)}
+.tile-img img{width:100%;height:100%;object-fit:cover;transform:scale(2.2);transform-origin:center 42%;display:block;transition:transform .5s ease}
+.tile:hover .tile-img img{transform:scale(1)}
 .tile-name{font-family:'Cormorant Garamond',serif;font-size:21px;margin-top:10px}
 .tile-sub{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone-dark)}
+details.family{display:block}
+details.family>summary{list-style:none}
+details.family>summary::-webkit-details-marker{display:none}
+.family-card .tile-name::after{content:' +';color:var(--gold)}
+details.family[open] .family-card .tile-name::after{content:' \\2212'}
+.family-members{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:18px;padding:18px 0 8px;border-top:1px solid rgba(200,184,154,.14);border-bottom:1px solid rgba(200,184,154,.14);margin:14px 0 6px}
+details.family[open]{grid-column:1/-1}
+details.rest{margin-top:24px}
+details.rest summary{cursor:pointer;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--stone-dark)}
+.rest-links{display:flex;flex-wrap:wrap;gap:8px 22px;padding-top:16px}
+.rest-links a{font-size:13px;color:var(--stone);text-decoration:none;border-bottom:1px solid rgba(200,184,154,.25)}
 footer{border-top:1px solid rgba(200,184,154,.1);padding:34px 5vw;font-size:11px;letter-spacing:.06em;color:var(--mid);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 @media(max-width:820px){header.stone{grid-template-columns:1fr}.specs{transform:none;margin-top:26px}}`;
 
