@@ -195,7 +195,14 @@ section{padding:72px 48px;}
 .stone-card-img-wrap{position:relative;display:block;overflow:hidden;background:var(--surface-card-img-dark);isolation:isolate;}
 .stone-card-img-wrap::before{content:'';position:absolute;inset:0;z-index:0;background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.07) 50%,rgba(255,255,255,.04) 75%);background-size:200% 100%;animation:shimmer 1.6s infinite;}
 .stone-card-img-wrap:has(.stone-card-img.loaded)::before,.stone-card-img-wrap:has(.stone-card-img-placeholder)::before{display:none;}
-.stone-card-img{position:relative;z-index:1;width:100%;aspect-ratio:4/3;object-fit:cover;display:block;opacity:0;transition:opacity .5s ease;}
+.stone-card-img{position:relative;z-index:1;width:100%;aspect-ratio:4/3;object-fit:cover;display:block;opacity:0;transition:opacity .5s ease,transform .6s ease;
+  /* Modest crop so the slab fills the frame instead of warehouse roof and
+     floor. Slab photos put the stone in the middle band, so origin sits just
+     below centre; 1.35 trims surroundings without losing the slab's shape —
+     the catalogue's 2.2x close-up is a different, deliberate look. Hover
+     eases back to the full framing. */
+  transform:scale(1.35);transform-origin:center 55%;}
+.stone-card:hover .stone-card-img{transform:scale(1);}
 .stone-card-img.loaded{opacity:1;}
 .stone-card:hover .stone-card-img{opacity:1;}
 .stone-renders-badge{position:absolute;z-index:2;bottom:9px;left:9px;background:rgba(10,8,6,.72);backdrop-filter:blur(4px);color:var(--gold);font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-family:'Jost',sans-serif;padding:4px 8px;display:flex;align-items:center;gap:5px;pointer-events:none;opacity:0;transition:opacity .3s;}
