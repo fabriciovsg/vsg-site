@@ -138,10 +138,6 @@ nav.scrolled{box-shadow:0 4px 32px rgba(0,0,0,.4);}
 @keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(110,200,110,.5);}70%{box-shadow:0 0 0 6px rgba(110,200,110,0);}}
 .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#6ec86e;flex-shrink:0;animation:livePulse 2.2s ease-out infinite;}
 /* Live count badge in gallery section */
-.live-count-badge{display:none;align-items:center;gap:10px;margin-bottom:24px;padding:8px 16px;background:rgba(110,200,110,.06);border:1px solid rgba(110,200,110,.18);border-radius:2px;width:fit-content;}
-.live-count-badge.visible{display:flex;}
-.live-count-num{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;color:#8fd88f;line-height:1;}
-.live-count-label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(110,200,110,.7);line-height:1.4;}
 /* BUTTONS */
 .btn-primary{background:var(--gold);color:white;text-decoration:none;padding:16px 36px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-family:'Jost',sans-serif;transition:background .2s,transform .2s;display:inline-block;border:none;cursor:pointer;}
 .btn-primary:hover{background:var(--gold-light);transform:translateY(-1px);}
@@ -860,10 +856,6 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
   <div class="section-label">In the Gallery</div>
   <h2 class="section-title" style="color:var(--surface-dark-text)">Current <em style="color:var(--stone)">Collection</em></h2>
   <p class="section-body">Every stone in the gallery, updated as pieces arrive and sell.</p>
-  <div class="live-count-badge" id="liveCountBadge">
-    <span class="live-count-num" id="liveCountNum">—</span>
-    <span class="live-count-label">lots in<br>the gallery</span>
-  </div>
   <div id="clientSessionRow" class="client-login-row" style="display:none">
     <button class="client-login-link" onclick="openClientLogin()">Client Login</button>
   </div>
@@ -1156,6 +1148,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
 <!-- ADMIN BAR -->
 <div id="adminBar">
   <span class="admin-bar-label">&#9881; Admin</span>
+  <span id="adminLotCounts" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(200,184,154,.55);font-family:'Jost',sans-serif;white-space:nowrap" title="Live = visible to visitors. Excludes hidden lots, no-photo lots (when hidden) and non-visible transit stock.">&#8230;</span>
   <button class="admin-bar-btn" id="adminTabContent" onclick="openAdminTab('content')">Content</button>
   <button class="admin-bar-btn" id="adminTabCategories" onclick="openAdminTab('categories')">Categories</button>
   <button class="admin-bar-btn" id="adminTabWhy" onclick="openAdminTab('why')">Why VSG</button>
@@ -2566,18 +2559,15 @@ function applyFilter(search=''){
   else stampBadgesOnCards();
 }
 
-// Live vs total lot counts. Split out of applyFilter() so the inline admin
-// card controls can refresh the header numbers after hiding/unhiding a lot
-// without triggering a full grid rebuild.
+// statusText belongs to the freshness line; nothing else may write to it.
+// The lots-live/lots-in-stock readout lives in the admin bar instead — the
+// live/total gap (hidden lots, no-photo lots, non-visible transit) is staff
+// information, not visitor copy. Cheap enough to recompute on every call.
 function updateLiveCounts(){
-  const totalLots=allStones.length;
-  const liveLots=allStones.filter(s=>!isLotHidden(s)&&!isTransitNotVisible(s)).length;
-  const st=document.getElementById('statusText');
-  if(st)st.textContent=liveLots+' lots live \u00b7 '+totalLots+' lots in stock';
-  const lcn=document.getElementById('liveCountNum');
-  const lcb=document.getElementById('liveCountBadge');
-  if(lcn)lcn.textContent=liveLots;
-  if(lcb)lcb.classList.add('visible');
+  const el=document.getElementById('adminLotCounts');
+  if(!el||!allStones.length)return;
+  const live=allStones.filter(s=>!isLotHidden(s)&&!isTransitNotVisible(s)).length;
+  el.textContent=live+' lots live \u00b7 '+allStones.length+' lots in stock';
 }
 
 function isShortlisted(stone){return shortlist.some(s=>s.block===stone.block&&s.name===stone.name);}
