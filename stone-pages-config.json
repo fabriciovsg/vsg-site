@@ -1,0 +1,1360 @@
+{
+ "bannedTerms": [
+  "Damascas"
+ ],
+ "materialOverrides": {
+  "Ice Grey": "Dolomite",
+  "Landscape": "Dolomite"
+ },
+ "legacyPages": [
+  {
+   "name": "Arabescato Vagli",
+   "material": "Marble",
+   "slug": "arabescato-vagli-marble"
+  },
+  {
+   "name": "Black Pearl",
+   "material": "Granite",
+   "slug": "black-pearl-granite"
+  },
+  {
+   "name": "Emerald Pearl",
+   "material": "Granite",
+   "slug": "emerald-pearl-granite"
+  },
+  {
+   "name": "Dona Grey",
+   "material": "Granite",
+   "slug": "dona-grey-granite"
+  },
+  {
+   "name": "Black Galaxy",
+   "material": "Granite",
+   "slug": "black-galaxy-granite"
+  },
+  {
+   "name": "Titanium",
+   "material": "Granite",
+   "slug": "titanium-granite"
+  },
+  {
+   "name": "Matarazzo",
+   "material": "Quartzite",
+   "slug": "matarazzo-quartzite"
+  },
+  {
+   "name": "Salvatore",
+   "material": "Marble",
+   "slug": "salvatore-marble"
+  },
+  {
+   "name": "Elba Volakas",
+   "material": "Marble",
+   "slug": "elba-volakas-marble"
+  },
+  {
+   "name": "Grey Goose",
+   "material": "Quartzite",
+   "slug": "grey-goose-quartzite"
+  },
+  {
+   "name": "Rainforest Multi",
+   "material": "Marble",
+   "slug": "rainforest-multi-marble"
+  },
+  {
+   "name": "Blue Macaubas",
+   "material": "Quartzite",
+   "slug": "blue-macaubas-quartzite"
+  },
+  {
+   "name": "Calacatta Four Seasons",
+   "material": "Marble",
+   "slug": "calacatta-four-seasons-marble"
+  }
+ ],
+ "wpRedirects": [
+  {
+   "from": "/product/calacatta-belgia/",
+   "slug": "calacatta-belgia-marble"
+  },
+  {
+   "from": "/product/calacatta-belgia",
+   "slug": "calacatta-belgia-marble"
+  },
+  {
+   "from": "/product/calacatta-oro/",
+   "slug": "calacatta-oro-marble"
+  },
+  {
+   "from": "/product/calacatta-oro",
+   "slug": "calacatta-oro-marble"
+  },
+  {
+   "from": "/product/carrara/",
+   "slug": "carrara-marble"
+  },
+  {
+   "from": "/product/carrara",
+   "slug": "carrara-marble"
+  },
+  {
+   "from": "/product/statuario-gioia/",
+   "slug": "statuario-gioia-marble"
+  },
+  {
+   "from": "/product/statuario-gioia",
+   "slug": "statuario-gioia-marble"
+  },
+  {
+   "from": "/product/statuario-venato/",
+   "slug": "statuario-venato-marble"
+  },
+  {
+   "from": "/product/statuario-venato",
+   "slug": "statuario-venato-marble"
+  },
+  {
+   "from": "/product/statuario-extra/",
+   "slug": "statuario-extra-marble"
+  },
+  {
+   "from": "/product/statuario-extra",
+   "slug": "statuario-extra-marble"
+  },
+  {
+   "from": "/product/carrara-extra/",
+   "slug": "carrara-extra-marble"
+  },
+  {
+   "from": "/product/carrara-extra",
+   "slug": "carrara-extra-marble"
+  },
+  {
+   "from": "/product/carrara-venato/",
+   "slug": "carrara-venato-marble"
+  },
+  {
+   "from": "/product/carrara-venato",
+   "slug": "carrara-venato-marble"
+  },
+  {
+   "from": "/product/carrara-bluette/",
+   "slug": "carrara-bluette-marble"
+  },
+  {
+   "from": "/product/carrara-bluette",
+   "slug": "carrara-bluette-marble"
+  },
+  {
+   "from": "/product/carrara-venato-belgia/",
+   "slug": "carrara-venato-belgia-marble"
+  },
+  {
+   "from": "/product/carrara-venato-belgia",
+   "slug": "carrara-venato-belgia-marble"
+  },
+  {
+   "from": "/product/arabesacto-vagli/",
+   "slug": "arabescato-vagli-marble"
+  },
+  {
+   "from": "/product/arabesacto-vagli",
+   "slug": "arabescato-vagli-marble"
+  },
+  {
+   "from": "/product/calacatta-luxe/",
+   "slug": "calacatta-luxe-marble"
+  },
+  {
+   "from": "/product/calacatta-luxe",
+   "slug": "calacatta-luxe-marble"
+  },
+  {
+   "from": "/product/calacatta-paonazzo/",
+   "slug": "calacatta-paonazzo-marble"
+  },
+  {
+   "from": "/product/calacatta-paonazzo",
+   "slug": "calacatta-paonazzo-marble"
+  },
+  {
+   "from": "/product/belgia-extra/",
+   "slug": "belgia-extra-marble"
+  },
+  {
+   "from": "/product/belgia-extra",
+   "slug": "belgia-extra-marble"
+  },
+  {
+   "from": "/product/bianco-gioia/",
+   "slug": "bianco-gioia-marble"
+  },
+  {
+   "from": "/product/bianco-gioia",
+   "slug": "bianco-gioia-marble"
+  },
+  {
+   "from": "/product/statuario/",
+   "slug": "statuario-marble"
+  },
+  {
+   "from": "/product/statuario",
+   "slug": "statuario-marble"
+  },
+  {
+   "from": "/product/statuarietto/",
+   "slug": "statuarietto-marble"
+  },
+  {
+   "from": "/product/statuarietto",
+   "slug": "statuarietto-marble"
+  },
+  {
+   "from": "/product/angola-black/",
+   "slug": "angola-black-granite"
+  },
+  {
+   "from": "/product/angola-black",
+   "slug": "angola-black-granite"
+  },
+  {
+   "from": "/product/viscount-white/",
+   "slug": "viscount-white-granite"
+  },
+  {
+   "from": "/product/viscount-white",
+   "slug": "viscount-white-granite"
+  },
+  {
+   "from": "/product/black-pearl/",
+   "slug": "black-pearl-granite"
+  },
+  {
+   "from": "/product/black-pearl",
+   "slug": "black-pearl-granite"
+  },
+  {
+   "from": "/product/jet-black/",
+   "slug": "jet-black-granite"
+  },
+  {
+   "from": "/product/jet-black",
+   "slug": "jet-black-granite"
+  },
+  {
+   "from": "/product/titanium-gold/",
+   "slug": "titanium-gold-granite"
+  },
+  {
+   "from": "/product/titanium-gold",
+   "slug": "titanium-gold-granite"
+  },
+  {
+   "from": "/product/black-forest/",
+   "slug": "black-forest-granite"
+  },
+  {
+   "from": "/product/black-forest",
+   "slug": "black-forest-granite"
+  },
+  {
+   "from": "/product/emerald-pearl/",
+   "slug": "emerald-pearl-granite"
+  },
+  {
+   "from": "/product/emerald-pearl",
+   "slug": "emerald-pearl-granite"
+  },
+  {
+   "from": "/product/barocco/",
+   "slug": "barocco-granite"
+  },
+  {
+   "from": "/product/barocco",
+   "slug": "barocco-granite"
+  },
+  {
+   "from": "/product/dona-grey/",
+   "slug": "dona-grey-granite"
+  },
+  {
+   "from": "/product/dona-grey",
+   "slug": "dona-grey-granite"
+  },
+  {
+   "from": "/product/thunder-white/",
+   "slug": "thunder-white-granite"
+  },
+  {
+   "from": "/product/thunder-white",
+   "slug": "thunder-white-granite"
+  },
+  {
+   "from": "/product/eclipse-white/",
+   "slug": "eclipse-white-granite"
+  },
+  {
+   "from": "/product/eclipse-white",
+   "slug": "eclipse-white-granite"
+  },
+  {
+   "from": "/product/eclipse-black/",
+   "slug": "eclipse-black-granite"
+  },
+  {
+   "from": "/product/eclipse-black",
+   "slug": "eclipse-black-granite"
+  },
+  {
+   "from": "/product/mystic-black/",
+   "slug": "mystic-black-granite"
+  },
+  {
+   "from": "/product/mystic-black",
+   "slug": "mystic-black-granite"
+  },
+  {
+   "from": "/product/madagascar-blue/",
+   "slug": "madagascar-blue-granite"
+  },
+  {
+   "from": "/product/madagascar-blue",
+   "slug": "madagascar-blue-granite"
+  },
+  {
+   "from": "/product/nepal-white/",
+   "slug": "nepal-white-granite"
+  },
+  {
+   "from": "/product/nepal-white",
+   "slug": "nepal-white-granite"
+  },
+  {
+   "from": "/product/mona-lisa/",
+   "slug": "mona-lisa-granite"
+  },
+  {
+   "from": "/product/mona-lisa",
+   "slug": "mona-lisa-granite"
+  },
+  {
+   "from": "/product/cosmic-gold/",
+   "slug": "cosmic-gold-granite"
+  },
+  {
+   "from": "/product/cosmic-gold",
+   "slug": "cosmic-gold-granite"
+  },
+  {
+   "from": "/product/blue-antico/",
+   "slug": "blue-antico-granite"
+  },
+  {
+   "from": "/product/blue-antico",
+   "slug": "blue-antico-granite"
+  },
+  {
+   "from": "/product/black-galaxy/",
+   "slug": "black-galaxy-granite"
+  },
+  {
+   "from": "/product/black-galaxy",
+   "slug": "black-galaxy-granite"
+  },
+  {
+   "from": "/product/bianco-antico/",
+   "slug": "bianco-antico-granite"
+  },
+  {
+   "from": "/product/bianco-antico",
+   "slug": "bianco-antico-granite"
+  },
+  {
+   "from": "/product/titanium-2/",
+   "slug": "titanium-granite"
+  },
+  {
+   "from": "/product/titanium-2",
+   "slug": "titanium-granite"
+  },
+  {
+   "from": "/product/blue-galaxy/",
+   "slug": "blue-galaxy-granite"
+  },
+  {
+   "from": "/product/blue-galaxy",
+   "slug": "blue-galaxy-granite"
+  },
+  {
+   "from": "/product/titanium-extra/",
+   "slug": "titanium-extra-granite"
+  },
+  {
+   "from": "/product/titanium-extra",
+   "slug": "titanium-extra-granite"
+  },
+  {
+   "from": "/product/lemurian-blue/",
+   "slug": "lemurian-blue-granite"
+  },
+  {
+   "from": "/product/lemurian-blue",
+   "slug": "lemurian-blue-granite"
+  },
+  {
+   "from": "/product/makalu/",
+   "slug": "makalu-granite"
+  },
+  {
+   "from": "/product/makalu",
+   "slug": "makalu-granite"
+  },
+  {
+   "from": "/product/volga-blue/",
+   "slug": "volga-blue-granite"
+  },
+  {
+   "from": "/product/volga-blue",
+   "slug": "volga-blue-granite"
+  },
+  {
+   "from": "/product/glacier-white/",
+   "slug": "glacier-white-granite"
+  },
+  {
+   "from": "/product/glacier-white",
+   "slug": "glacier-white-granite"
+  },
+  {
+   "from": "/product/gloria-grey/",
+   "slug": "gloria-grey-marble"
+  },
+  {
+   "from": "/product/gloria-grey",
+   "slug": "gloria-grey-marble"
+  },
+  {
+   "from": "/product/blue-fantasy/",
+   "slug": "fantasy-blue-marble"
+  },
+  {
+   "from": "/product/blue-fantasy",
+   "slug": "fantasy-blue-marble"
+  },
+  {
+   "from": "/product/cote-dazur-blue/",
+   "slug": "cote-dazur-blue-marble"
+  },
+  {
+   "from": "/product/cote-dazur-blue",
+   "slug": "cote-dazur-blue-marble"
+  },
+  {
+   "from": "/product/calacatta-macchia-oro/",
+   "slug": "calacatta-macchia-oro-dolomite"
+  },
+  {
+   "from": "/product/calacatta-macchia-oro",
+   "slug": "calacatta-macchia-oro-dolomite"
+  },
+  {
+   "from": "/product/tempesta-grey/",
+   "slug": "tempesta-grey-marble"
+  },
+  {
+   "from": "/product/tempesta-grey",
+   "slug": "tempesta-grey-marble"
+  },
+  {
+   "from": "/product/imperial-white/",
+   "slug": "imperial-white-marble"
+  },
+  {
+   "from": "/product/imperial-white",
+   "slug": "imperial-white-marble"
+  },
+  {
+   "from": "/product/cascade-grey/",
+   "slug": "cascade-grey-marble"
+  },
+  {
+   "from": "/product/cascade-grey",
+   "slug": "cascade-grey-marble"
+  },
+  {
+   "from": "/product/sunset-pink/",
+   "slug": "sunset-pink-marble"
+  },
+  {
+   "from": "/product/sunset-pink",
+   "slug": "sunset-pink-marble"
+  },
+  {
+   "from": "/product/silver-agate/",
+   "slug": "silver-agate-marble"
+  },
+  {
+   "from": "/product/silver-agate",
+   "slug": "silver-agate-marble"
+  },
+  {
+   "from": "/product/red-valentino/",
+   "slug": "rosso-valentino-marble"
+  },
+  {
+   "from": "/product/red-valentino",
+   "slug": "rosso-valentino-marble"
+  },
+  {
+   "from": "/product/calacatta-viola/",
+   "slug": "calacatta-viola-marble"
+  },
+  {
+   "from": "/product/calacatta-viola",
+   "slug": "calacatta-viola-marble"
+  },
+  {
+   "from": "/product/calacatta-grecia/",
+   "slug": "calacatta-grecia-marble"
+  },
+  {
+   "from": "/product/calacatta-grecia",
+   "slug": "calacatta-grecia-marble"
+  },
+  {
+   "from": "/product/port-laurent/",
+   "slug": "port-laurent-marble"
+  },
+  {
+   "from": "/product/port-laurent",
+   "slug": "port-laurent-marble"
+  },
+  {
+   "from": "/product/phantom-pink/",
+   "slug": "phantom-pink-quartzite"
+  },
+  {
+   "from": "/product/phantom-pink",
+   "slug": "phantom-pink-quartzite"
+  },
+  {
+   "from": "/product/mont-verde/",
+   "slug": "verde-mont-marble"
+  },
+  {
+   "from": "/product/mont-verde",
+   "slug": "verde-mont-marble"
+  },
+  {
+   "from": "/product/matarazzo/",
+   "slug": "matarazzo-quartzite"
+  },
+  {
+   "from": "/product/matarazzo",
+   "slug": "matarazzo-quartzite"
+  },
+  {
+   "from": "/product/jurassic/",
+   "slug": "jurassic-marble"
+  },
+  {
+   "from": "/product/jurassic",
+   "slug": "jurassic-marble"
+  },
+  {
+   "from": "/product/volakas-gold/",
+   "slug": "volakas-gold-dolomite"
+  },
+  {
+   "from": "/product/volakas-gold",
+   "slug": "volakas-gold-dolomite"
+  },
+  {
+   "from": "/product/onyx-sunrise/",
+   "slug": "onyx-sunrise"
+  },
+  {
+   "from": "/product/onyx-sunrise",
+   "slug": "onyx-sunrise"
+  },
+  {
+   "from": "/product/calacatta-lincoln/",
+   "slug": "calacatta-lincoln-marble"
+  },
+  {
+   "from": "/product/calacatta-lincoln",
+   "slug": "calacatta-lincoln-marble"
+  },
+  {
+   "from": "/product/elba-white/",
+   "slug": "elba-white-marble"
+  },
+  {
+   "from": "/product/elba-white",
+   "slug": "elba-white-marble"
+  },
+  {
+   "from": "/product/portoro-gold/",
+   "slug": "portoro-gold-marble"
+  },
+  {
+   "from": "/product/portoro-gold",
+   "slug": "portoro-gold-marble"
+  },
+  {
+   "from": "/product/vena-rossa/",
+   "slug": "vena-rossa-marble"
+  },
+  {
+   "from": "/product/vena-rossa",
+   "slug": "vena-rossa-marble"
+  },
+  {
+   "from": "/product/volakas/",
+   "slug": "volakas-marble"
+  },
+  {
+   "from": "/product/volakas",
+   "slug": "volakas-marble"
+  },
+  {
+   "from": "/product/antique-silver/",
+   "slug": "antique-silver-marble"
+  },
+  {
+   "from": "/product/antique-silver",
+   "slug": "antique-silver-marble"
+  },
+  {
+   "from": "/product/arabescato-antico/",
+   "slug": "arabescato-antico-marble"
+  },
+  {
+   "from": "/product/arabescato-antico",
+   "slug": "arabescato-antico-marble"
+  },
+  {
+   "from": "/product/salvatore/",
+   "slug": "salvatore-marble"
+  },
+  {
+   "from": "/product/salvatore",
+   "slug": "salvatore-marble"
+  },
+  {
+   "from": "/product/calacatta-bonearo/",
+   "slug": "calacatta-bonearo-marble"
+  },
+  {
+   "from": "/product/calacatta-bonearo",
+   "slug": "calacatta-bonearo-marble"
+  },
+  {
+   "from": "/product/oyster/",
+   "slug": "oyster-marble"
+  },
+  {
+   "from": "/product/oyster",
+   "slug": "oyster-marble"
+  },
+  {
+   "from": "/product/landcape/",
+   "slug": "landscape-dolomite"
+  },
+  {
+   "from": "/product/landcape",
+   "slug": "landscape-dolomite"
+  },
+  {
+   "from": "/product/daino-reale/",
+   "slug": "daino-reale-marble"
+  },
+  {
+   "from": "/product/daino-reale",
+   "slug": "daino-reale-marble"
+  },
+  {
+   "from": "/product/fossil-black/",
+   "slug": "fossil-black-marble"
+  },
+  {
+   "from": "/product/fossil-black",
+   "slug": "fossil-black-marble"
+  },
+  {
+   "from": "/product/fossil-brown/",
+   "slug": "fossil-brown-marble"
+  },
+  {
+   "from": "/product/fossil-brown",
+   "slug": "fossil-brown-marble"
+  },
+  {
+   "from": "/product/new-york/",
+   "slug": "new-york-marble"
+  },
+  {
+   "from": "/product/new-york",
+   "slug": "new-york-marble"
+  },
+  {
+   "from": "/product/mercury-black/",
+   "slug": "mercury-black-marble"
+  },
+  {
+   "from": "/product/mercury-black",
+   "slug": "mercury-black-marble"
+  },
+  {
+   "from": "/product/rainforest-brown/",
+   "slug": "rainforest-brown-marble"
+  },
+  {
+   "from": "/product/rainforest-brown",
+   "slug": "rainforest-brown-marble"
+  },
+  {
+   "from": "/product/super-white/",
+   "slug": "super-white-dolomite"
+  },
+  {
+   "from": "/product/super-white",
+   "slug": "super-white-dolomite"
+  },
+  {
+   "from": "/product/silver-travertine/",
+   "slug": "travertine-silver"
+  },
+  {
+   "from": "/product/silver-travertine",
+   "slug": "travertine-silver"
+  },
+  {
+   "from": "/product/atlas-green/",
+   "slug": "atlas-green-marble"
+  },
+  {
+   "from": "/product/atlas-green",
+   "slug": "atlas-green-marble"
+  },
+  {
+   "from": "/product/eclair-white/",
+   "slug": "eclair-white-marble"
+  },
+  {
+   "from": "/product/eclair-white",
+   "slug": "eclair-white-marble"
+  },
+  {
+   "from": "/product/pietra-grey/",
+   "slug": "pietra-grey-marble"
+  },
+  {
+   "from": "/product/pietra-grey",
+   "slug": "pietra-grey-marble"
+  },
+  {
+   "from": "/product/dark-slate/",
+   "slug": "dark-slate-marble"
+  },
+  {
+   "from": "/product/dark-slate",
+   "slug": "dark-slate-marble"
+  },
+  {
+   "from": "/product/elba-blue/",
+   "slug": "elba-blue-marble"
+  },
+  {
+   "from": "/product/elba-blue",
+   "slug": "elba-blue-marble"
+  },
+  {
+   "from": "/product/fantasy-brown/",
+   "slug": "fantasy-brown-marble"
+  },
+  {
+   "from": "/product/fantasy-brown",
+   "slug": "fantasy-brown-marble"
+  },
+  {
+   "from": "/product/elba-volakas/",
+   "slug": "elba-volakas-marble"
+  },
+  {
+   "from": "/product/elba-volakas",
+   "slug": "elba-volakas-marble"
+  },
+  {
+   "from": "/product/icebreaker/",
+   "slug": "icebreaker-marble"
+  },
+  {
+   "from": "/product/icebreaker",
+   "slug": "icebreaker-marble"
+  },
+  {
+   "from": "/product/cortado/",
+   "slug": "cortado-marble"
+  },
+  {
+   "from": "/product/cortado",
+   "slug": "cortado-marble"
+  },
+  {
+   "from": "/product/glacier-amg/",
+   "slug": "glacier-amg-marble"
+  },
+  {
+   "from": "/product/glacier-amg",
+   "slug": "glacier-amg-marble"
+  },
+  {
+   "from": "/product/mercury/",
+   "slug": "mercury-marble"
+  },
+  {
+   "from": "/product/mercury",
+   "slug": "mercury-marble"
+  },
+  {
+   "from": "/product/nero-marquina/",
+   "slug": "nero-marquina-marble"
+  },
+  {
+   "from": "/product/nero-marquina",
+   "slug": "nero-marquina-marble"
+  },
+  {
+   "from": "/product/emperador-brown/",
+   "slug": "emperador-brown-marble"
+  },
+  {
+   "from": "/product/emperador-brown",
+   "slug": "emperador-brown-marble"
+  },
+  {
+   "from": "/product/rainforest-green/",
+   "slug": "rainforest-green-marble"
+  },
+  {
+   "from": "/product/rainforest-green",
+   "slug": "rainforest-green-marble"
+  },
+  {
+   "from": "/product/grey-goose/",
+   "slug": "grey-goose-quartzite"
+  },
+  {
+   "from": "/product/grey-goose",
+   "slug": "grey-goose-quartzite"
+  },
+  {
+   "from": "/product/calacatta-luna/",
+   "slug": "calacatta-luna-marble"
+  },
+  {
+   "from": "/product/calacatta-luna",
+   "slug": "calacatta-luna-marble"
+  },
+  {
+   "from": "/product/rainforest-multi/",
+   "slug": "rainforest-multi-marble"
+  },
+  {
+   "from": "/product/rainforest-multi",
+   "slug": "rainforest-multi-marble"
+  },
+  {
+   "from": "/product/vermont-white/",
+   "slug": "vermont-white-dolomite"
+  },
+  {
+   "from": "/product/vermont-white",
+   "slug": "vermont-white-dolomite"
+  },
+  {
+   "from": "/product/silver-fantasy-breccia/",
+   "slug": "silver-fantasy-breccia-marble"
+  },
+  {
+   "from": "/product/silver-fantasy-breccia",
+   "slug": "silver-fantasy-breccia-marble"
+  },
+  {
+   "from": "/product/cote-dazur/",
+   "slug": "cote-dazur-marble"
+  },
+  {
+   "from": "/product/cote-dazur",
+   "slug": "cote-dazur-marble"
+  },
+  {
+   "from": "/product/veria-green/",
+   "slug": "veria-green-marble"
+  },
+  {
+   "from": "/product/veria-green",
+   "slug": "veria-green-marble"
+  },
+  {
+   "from": "/product/michelangelo/",
+   "slug": "michelangelo-dolomite"
+  },
+  {
+   "from": "/product/michelangelo",
+   "slug": "michelangelo-dolomite"
+  },
+  {
+   "from": "/product/blue-roma-quartzite/",
+   "slug": "blue-roma-quartzite"
+  },
+  {
+   "from": "/product/blue-roma-quartzite",
+   "slug": "blue-roma-quartzite"
+  },
+  {
+   "from": "/product/cygnus/",
+   "slug": "cygnus-granite"
+  },
+  {
+   "from": "/product/cygnus",
+   "slug": "cygnus-granite"
+  },
+  {
+   "from": "/product/negresco-quartzite/",
+   "slug": "negresco-quartzite"
+  },
+  {
+   "from": "/product/negresco-quartzite",
+   "slug": "negresco-quartzite"
+  },
+  {
+   "from": "/product/diesel-blue-quartzite/",
+   "slug": "diesel-blue-quartzite"
+  },
+  {
+   "from": "/product/diesel-blue-quartzite",
+   "slug": "diesel-blue-quartzite"
+  },
+  {
+   "from": "/product/taj-mahal-quartzite/",
+   "slug": "taj-mahal-quartzite"
+  },
+  {
+   "from": "/product/taj-mahal-quartzite",
+   "slug": "taj-mahal-quartzite"
+  },
+  {
+   "from": "/product/emerald-green/",
+   "slug": "emerald-green-quartzite"
+  },
+  {
+   "from": "/product/emerald-green",
+   "slug": "emerald-green-quartzite"
+  },
+  {
+   "from": "/product/nuvolato/",
+   "slug": "nuvolato-quartzite"
+  },
+  {
+   "from": "/product/nuvolato",
+   "slug": "nuvolato-quartzite"
+  },
+  {
+   "from": "/product/roma-imperiale/",
+   "slug": "roma-imperiale-quartzite"
+  },
+  {
+   "from": "/product/roma-imperiale",
+   "slug": "roma-imperiale-quartzite"
+  },
+  {
+   "from": "/product/white-santorini/",
+   "slug": "white-santorini-quartzite"
+  },
+  {
+   "from": "/product/white-santorini",
+   "slug": "white-santorini-quartzite"
+  },
+  {
+   "from": "/product/crystallo/",
+   "slug": "crystallo-quartzite"
+  },
+  {
+   "from": "/product/crystallo",
+   "slug": "crystallo-quartzite"
+  },
+  {
+   "from": "/product/blue-macaubas/",
+   "slug": "blue-macaubas-quartzite"
+  },
+  {
+   "from": "/product/blue-macaubas",
+   "slug": "blue-macaubas-quartzite"
+  },
+  {
+   "from": "/product/bianco-superiore/",
+   "slug": "bianco-superiore-quartzite"
+  },
+  {
+   "from": "/product/bianco-superiore",
+   "slug": "bianco-superiore-quartzite"
+  },
+  {
+   "from": "/product/aquarella-quartzite/",
+   "slug": "aquarella-quartzite"
+  },
+  {
+   "from": "/product/aquarella-quartzite",
+   "slug": "aquarella-quartzite"
+  },
+  {
+   "from": "/product/celestial-grey/",
+   "slug": "celestial-grey-quartzite"
+  },
+  {
+   "from": "/product/celestial-grey",
+   "slug": "celestial-grey-quartzite"
+  },
+  {
+   "from": "/product/fusion/",
+   "slug": "fusion-quartzite"
+  },
+  {
+   "from": "/product/fusion",
+   "slug": "fusion-quartzite"
+  },
+  {
+   "from": "/product/winter-falls/",
+   "slug": "winter-falls-quartzite"
+  },
+  {
+   "from": "/product/winter-falls",
+   "slug": "winter-falls-quartzite"
+  },
+  {
+   "from": "/product/aquarella-gold/",
+   "slug": "aquarella-gold-quartzite"
+  },
+  {
+   "from": "/product/aquarella-gold",
+   "slug": "aquarella-gold-quartzite"
+  },
+  {
+   "from": "/product/macaubas-fantasy/",
+   "slug": "macaubas-fantasy-quartzite"
+  },
+  {
+   "from": "/product/macaubas-fantasy",
+   "slug": "macaubas-fantasy-quartzite"
+  },
+  {
+   "from": "/product/aquarella-red/",
+   "slug": "aquarella-red-quartzite"
+  },
+  {
+   "from": "/product/aquarella-red",
+   "slug": "aquarella-red-quartzite"
+  },
+  {
+   "from": "/product/cosmopolitan/",
+   "slug": "cosmopolitan-quartzite"
+  },
+  {
+   "from": "/product/cosmopolitan",
+   "slug": "cosmopolitan-quartzite"
+  },
+  {
+   "from": "/product/aquarius/",
+   "slug": "aquarius-quartzite"
+  },
+  {
+   "from": "/product/aquarius",
+   "slug": "aquarius-quartzite"
+  },
+  {
+   "from": "/product/atlantic-stone/",
+   "slug": "atlantic-stone-quartzite"
+  },
+  {
+   "from": "/product/atlantic-stone",
+   "slug": "atlantic-stone-quartzite"
+  },
+  {
+   "from": "/product/da-vinci/",
+   "slug": "da-vinci-quartzite"
+  },
+  {
+   "from": "/product/da-vinci",
+   "slug": "da-vinci-quartzite"
+  },
+  {
+   "from": "/product/extreme-blanc/",
+   "slug": "extreme-blanc-quartzite"
+  },
+  {
+   "from": "/product/extreme-blanc",
+   "slug": "extreme-blanc-quartzite"
+  },
+  {
+   "from": "/product/iridium-blue/",
+   "slug": "iridium-blue-quartzite"
+  },
+  {
+   "from": "/product/iridium-blue",
+   "slug": "iridium-blue-quartzite"
+  },
+  {
+   "from": "/product/ijen-blue/",
+   "slug": "ijen-blue-quartzite"
+  },
+  {
+   "from": "/product/ijen-blue",
+   "slug": "ijen-blue-quartzite"
+  },
+  {
+   "from": "/product/atlantic-black/",
+   "slug": "atlantic-black-quartzite"
+  },
+  {
+   "from": "/product/atlantic-black",
+   "slug": "atlantic-black-quartzite"
+  },
+  {
+   "from": "/product/patagonia-2/",
+   "slug": "patagonia-quartzite"
+  },
+  {
+   "from": "/product/patagonia-2",
+   "slug": "patagonia-quartzite"
+  },
+  {
+   "from": "/product/spider-black/",
+   "slug": "spider-black-quartzite"
+  },
+  {
+   "from": "/product/spider-black",
+   "slug": "spider-black-quartzite"
+  },
+  {
+   "from": "/product/seagrass/",
+   "slug": "seagrass-limestone"
+  },
+  {
+   "from": "/product/seagrass",
+   "slug": "seagrass-limestone"
+  },
+  {
+   "from": "/product/portsea-grey/",
+   "slug": "portsea-grey-limestone"
+  },
+  {
+   "from": "/product/portsea-grey",
+   "slug": "portsea-grey-limestone"
+  },
+  {
+   "from": "/product/crema-imperiale/",
+   "slug": "crema-imperiale-limestone"
+  },
+  {
+   "from": "/product/crema-imperiale",
+   "slug": "crema-imperiale-limestone"
+  },
+  {
+   "from": "/product/tundra-grey/",
+   "slug": "tundra-grey-limestone"
+  },
+  {
+   "from": "/product/tundra-grey",
+   "slug": "tundra-grey-limestone"
+  },
+  {
+   "from": "/product/turco-argento/",
+   "slug": "turco-argento-limestone"
+  },
+  {
+   "from": "/product/turco-argento",
+   "slug": "turco-argento-limestone"
+  },
+  {
+   "from": "/product/tundra-light/",
+   "slug": "tundra-light-limestone"
+  },
+  {
+   "from": "/product/tundra-light",
+   "slug": "tundra-light-limestone"
+  },
+  {
+   "from": "/product/arabescato-oyster/",
+   "slug": "arabescato-oyster-marble"
+  },
+  {
+   "from": "/product/arabescato-oyster",
+   "slug": "arabescato-oyster-marble"
+  },
+  {
+   "from": "/product/milano/",
+   "slug": "milano-dolomite"
+  },
+  {
+   "from": "/product/milano",
+   "slug": "milano-dolomite"
+  },
+  {
+   "from": "/product/ice-grey/",
+   "slug": "ice-grey-dolomite"
+  },
+  {
+   "from": "/product/ice-grey",
+   "slug": "ice-grey-dolomite"
+  },
+  {
+   "from": "/product/bailkal/",
+   "slug": "baikal-quartzite"
+  },
+  {
+   "from": "/product/bailkal",
+   "slug": "baikal-quartzite"
+  },
+  {
+   "from": "/product/calacatta-lumen/",
+   "slug": "calacatta-lumen-dolomite"
+  },
+  {
+   "from": "/product/calacatta-lumen",
+   "slug": "calacatta-lumen-dolomite"
+  },
+  {
+   "from": "/product/arctic-blue/",
+   "slug": "arctic-blue-granite"
+  },
+  {
+   "from": "/product/arctic-blue",
+   "slug": "arctic-blue-granite"
+  },
+  {
+   "from": "/product/tourmaline/",
+   "slug": "tourmaline-granite"
+  },
+  {
+   "from": "/product/tourmaline",
+   "slug": "tourmaline-granite"
+  },
+  {
+   "from": "/product/white-knight/",
+   "slug": "white-knight-granite"
+  },
+  {
+   "from": "/product/white-knight",
+   "slug": "white-knight-granite"
+  },
+  {
+   "from": "/product/botanic-green/",
+   "slug": "botanic-green-quartzite"
+  },
+  {
+   "from": "/product/botanic-green",
+   "slug": "botanic-green-quartzite"
+  },
+  {
+   "from": "/product/colorado/",
+   "slug": "colorado-quartzite"
+  },
+  {
+   "from": "/product/colorado",
+   "slug": "colorado-quartzite"
+  },
+  {
+   "from": "/product/calacatta-four-seasons/",
+   "slug": "calacatta-four-seasons-marble"
+  },
+  {
+   "from": "/product/calacatta-four-seasons",
+   "slug": "calacatta-four-seasons-marble"
+  },
+  {
+   "from": "/product/aurora-white/",
+   "slug": "aurora-white-quartzite"
+  },
+  {
+   "from": "/product/aurora-white",
+   "slug": "aurora-white-quartzite"
+  },
+  {
+   "from": "/product/aurora-gold/",
+   "slug": "aurora-gold-quartzite"
+  },
+  {
+   "from": "/product/aurora-gold",
+   "slug": "aurora-gold-quartzite"
+  },
+  {
+   "from": "/product/white-kairos/",
+   "slug": "white-kairos-quartzite"
+  },
+  {
+   "from": "/product/white-kairos",
+   "slug": "white-kairos-quartzite"
+  },
+  {
+   "from": "/product/pink-crystallo/",
+   "slug": "pink-crystallo-quartzite"
+  },
+  {
+   "from": "/product/pink-crystallo",
+   "slug": "pink-crystallo-quartzite"
+  },
+  {
+   "from": "/product/alaska-blue/",
+   "slug": "alaska-blue-granite"
+  },
+  {
+   "from": "/product/alaska-blue",
+   "slug": "alaska-blue-granite"
+  },
+  {
+   "from": "/product/damastas-marble/",
+   "slug": "damastas-marble"
+  },
+  {
+   "from": "/product/damastas-marble",
+   "slug": "damastas-marble"
+  },
+  {
+   "from": "/product/verde-calacatta/",
+   "slug": "verde-calacatta-marble"
+  },
+  {
+   "from": "/product/verde-calacatta",
+   "slug": "verde-calacatta-marble"
+  },
+  {
+   "from": "/product/macchia-bella/",
+   "slug": "macchia-bella-dolomite"
+  },
+  {
+   "from": "/product/macchia-bella",
+   "slug": "macchia-bella-dolomite"
+  },
+  {
+   "from": "/product/silver-grey-2/",
+   "slug": "silver-grey-granite"
+  },
+  {
+   "from": "/product/silver-grey-2",
+   "slug": "silver-grey-granite"
+  },
+  {
+   "from": "/product/verde-imperiale/",
+   "slug": "verde-imperiale-marble"
+  },
+  {
+   "from": "/product/verde-imperiale",
+   "slug": "verde-imperiale-marble"
+  }
+ ],
+ "redirectsHeader": "# \u2500\u2500 VSG WordPress \u2192 Netlify redirect map \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n# GENERATED by build-stone-pages.js \u2014 edit stone-pages-config.json, not this file.\n# Core pages first, then 160 exact WP product rules, then catch-alls.\n/about/                                   /#about        301\n/contact/events/                          /#events       301\n/contact/subscribe/                       /#contact      301\n/contact/                                 /#contact      301\n/purchasing-wholesale-trade/fabricators/  /#fabricators  301\n/purchasing-wholesale-trade/             /#contact      301\n/shortlist/                               /#gallery      301\n/shop/                                    /catalogue/    301\n/online-showroom/                         /#gallery      301\n/online-showroom-2/                       /#gallery      301\n/product-catalogue/marble/                /catalogue/#marble        301\n/product-catalogue/quartzite/             /catalogue/#quartzite     301\n/product-catalogue/granite/               /catalogue/#granite       301\n/product-catalogue/super-white-dolomite/  /catalogue/#dolomite      301\n/product-catalogue/travertine-3/          /catalogue/#travertine    301\n/product-catalogue/limestone/             /catalogue/#limestone     301\n/product-catalogue/carrara-marble/        /catalogue/#marble        301\n/product-catalogue/                       /catalogue/    301\n# \u2500\u2500 Exact WP product rules (generated) \u2500\u2500",
+ "redirectsFooter": "# \u2500\u2500 Knowledge content \u2192 Stone Guide \u2500\u2500\n/blog/                                    /stones/       301\n/faq-references/                          /stones/       301\n/guide-to-quartzites/                     /stones/       301\n/marble-vs-quartzite/                     /stones/       301\n/learn-super-white-dolomite/              /stones/       301\n/more-about-marble/                       /stones/       301\n/carrara-v-calacatta-differences/         /stones/       301\n/outdoor-stone-care/                      /stones/       301\n/granite-benchtop-care/                   /stones/       301\n/clean-marble/                            /stones/       301\n/natural-stone-imperfections/             /stones/       301\n/quartz-v-natural-stone/                  /stones/       301\n/category/*                               /stones/       301\n/product-category/*                       /catalogue/    301\n/product/*                                /catalogue/    301\n/wp-content/*                             /              301\n/*                                        /              301"
+}

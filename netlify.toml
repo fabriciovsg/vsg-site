@@ -1,5 +1,5 @@
 [build]
-  command = "npm install && node build-images.js"
+  command = "npm install && node build-images.js && node build-stone-pages.js"
   publish = "."
 
 [build.environment]
@@ -80,5 +80,5 @@
 
 # ── Branch: develop = staging ──────────────────────────────────
 [context.develop]
-  command = "npm install && node build-images.js"
+  command = "npm install && node build-images.js && node build-stone-pages.js"
   publish = "."
