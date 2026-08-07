@@ -875,10 +875,9 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
     <button class="filter-btn" onclick="filterCategory('Dolomite',this)">Dolomite</button>
     <button class="filter-btn" onclick="filterCategory('Travertine',this)">Travertine</button>
     <button class="filter-btn" onclick="filterCategory('Limestone',this)">Limestone</button>
-    <select class="sort-select" onchange="setSort(this.value)">
-      <option value="newest">Sort: Newest</option>
+    <select class="sort-select" id="sortSelect" onchange="setSort(this.value)">
+      <option value="gallery" selected>Sort: Featured</option>
       <option value="name">Sort: Name A&#8211;Z</option>
-      <option value="category">Sort: Category</option>
     </select>
     <button class="gp-launch-btn" onclick="openGalleryPresentation()">&#9654; Present Collection</button>
   </div>
@@ -964,7 +963,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
 <section id="arriving" style="display:none">
   <div class="section-label"><span>ARRIVING SOON</span></div>
   <h2 class="section-title" style="max-width:600px">Stones <em>en route</em></h2>
-  <p class="section-body" style="max-width:560px;margin:0 auto">A preview of what's on its way — hand-selected on recent sourcing trips and currently in transit. Register your interest and we'll be in touch the moment they arrive.</p>
+  <p class="section-body" style="max-width:560px;margin:0 auto">A preview of what's on its way to the gallery. Register your interest and we'll be in touch the moment it arrives.</p>
   <div class="arriving-grid" id="arrivingGrid"><div class="arriving-empty">Loading incoming collection…</div></div>
 </section>
 
@@ -1207,6 +1206,7 @@ const CMS_DEFAULTS={
   priceBracketVisible:true, // show $$$$ bracket tag on individual stone cards
   minSlabsFilterVisible:true, // show min slabs quantity filter
   finishingFilterVisible:true, // show finishing filter row on public gallery
+  sortSelectorVisible:true, // show the sort dropdown; when hidden, visitors get Featured (gallery order)
   arrivingSoonVisible:false, // show Arriving Soon section (enable when folder has content)
   fabricatorsVisible:true, // show Recommended Fabricators section
   // Site-wide, applies to /, /catalogue/ and /stones/. Every value here must have a
@@ -1312,6 +1312,12 @@ function applyCMS(){
     // Apply showroom settings
     const pfr=document.getElementById('priceFilterRow');
     if(pfr)pfr.style.display=g('priceFilterVisible')===false?'none':'flex';
+    const ss=document.getElementById('sortSelect');
+    if(ss){
+      const hide=g('sortSelectorVisible')===false;
+      ss.style.display=hide?'none':'';
+      if(hide&&activeSort!=='gallery'){activeSort='gallery';ss.value='gallery';}
+    }
   const msfr=document.getElementById('minSlabsFilter');if(msfr)msfr.style.display=g('minSlabsFilterVisible')===false?'none':'flex';
   const asec=document.getElementById('arriving');if(asec)asec.style.display=g('arrivingSoonVisible')===false?'none':'block';
   const lsHide=g('lightSelectorEnabled')===false;
@@ -1446,7 +1452,7 @@ async function driveList(folderId,resourceKey,extraQuery=''){
 // ── STOCK ─────────────────────────────────────────────────────
 let allStones=[],filteredStones=[],displayedCount=0,_rawStockRows=null;
 const PAGE_SIZE=24;
-let activeCategory='All',activeSort='newest';
+let activeCategory='All',activeSort='gallery';
 let accessToken2=null;
 
 async function loadStock(){
@@ -1618,7 +1624,7 @@ function parseStockRows(rows,enabledLocations){
     applyFilter();
   }
   loadLocationMap();
-  loadSlabImages(stones).then(()=>{applyFilter();loadProjectBadges();loadColourCache();});
+  loadSlabImages(stones).then(()=>{applyFilter();renderArrivingSoon();loadProjectBadges();loadColourCache();});
   openFromQueryParams();
 }
 
@@ -2419,54 +2425,36 @@ function filterPriceTier(tier,el){
 
 // ── FILTER / SORT / RENDER ────────────────────────────────────
 function setSort(val){activeSort=val;applyFilter(document.getElementById('stoneSearch').value.toLowerCase());}
-// Normalises whatever Vavastone put in the AVAILABLE column into a timestamp.
-// That column has arrived as "YYYY-MM-DD", as "DD/MM/YYYY", and as a raw Excel
-// serial number depending on how the report was generated, and SheetJS is read
-// here without cellDates, so dates can land as numbers. new Date() alone would
-// silently read 03/04/2026 as March in the US order, so parse explicitly.
-// Returns null when there's no usable date.
-function stockDateValue(v){
-  if(v===null||v===undefined||v==='')return null;
-  if(v instanceof Date)return isNaN(v.getTime())?null:v.getTime();
-  const excel=n=>(n>20000&&n<80000)?Math.round((n-25569)*86400000):null; // 1900 system; 25569 = 1970-01-01
-  if(typeof v==='number')return isFinite(v)?excel(v):null;
-  const s=String(v).trim();
-  if(!s)return null;
-  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-  if(m)return Date.UTC(+m[1],+m[2]-1,+m[3]);
-  m=s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})/); // AU order: day first
-  if(m)return Date.UTC(+m[3],+m[2]-1,+m[1]);
-  if(/^\d+(\.\d+)?$/.test(s))return excel(parseFloat(s));
-  const t=Date.parse(s);
-  return isNaN(t)?null:t;
+// ── GALLERY ORDER (default sort, "Featured") ─────────────────
+// Two rules, in order:
+//   1. Photographed lots before placeholder lots — photos sell, grey tiles
+//      don't. (With hideNoPhoto on, group 2 isn't public anyway; the rule
+//      still matters when hidden lots are being browsed by staff.)
+//   2. Within each group, a DAILY ROTATION: a deterministic shuffle seeded by
+//      the Melbourne date. Same order for every visitor all day (stable while
+//      browsing, shareable), reshuffles overnight — so over a couple of weeks
+//      every stone gets its turn near the top, instead of alphabetical
+//      permanently favouring the A-names or Newest burying aged stock.
+// The seed uses Australia/Melbourne regardless of visitor timezone so the
+// rotation ticks over once per business day, not at each visitor's midnight.
+function _dailySeed(){
+  return new Date().toLocaleDateString('en-AU',{timeZone:'Australia/Melbourne'});
 }
-
-// "Newest" previously sorted on stone.available — a field parseStockRows() has
-// never written, so every comparison returned 0 and the order never changed.
-// The date we actually hold is stone.eta, read from the AVAILABLE column: the
-// warehouse arrival date for AVAILABLE lots, the expected arrival for TRANSIT
-// ones. Later date = newer either way. Lots with no usable date sort last,
-// alphabetically, rather than being scattered through the results.
-let _warnedNoStockDates=false;
+function _rotHash(key){
+  // FNV-1a — tiny, deterministic, good enough spread for ordering
+  let h=0x811c9dc5;
+  const str=_dailySeed()+'|'+key;
+  for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,0x01000193);}
+  return h>>>0;
+}
 function sortStones(s){
   const a=[...s];
-  if(activeSort==='name')a.sort((x,y)=>x.name.localeCompare(y.name));
-  else if(activeSort==='category')a.sort((x,y)=>(x.category||'').localeCompare(y.category||'')||x.name.localeCompare(y.name));
-  else{
-    const d=new Map();
-    a.forEach(st=>d.set(st,stockDateValue(st.eta)));
-    if(!_warnedNoStockDates&&a.length&&![...d.values()].some(v=>v!==null)){
-      _warnedNoStockDates=true;
-      console.warn('[VSG] Sort: Newest — no lot has a readable date in stone.eta. Check that the stock report still has a column headed exactly "AVAILABLE"; falling back to alphabetical.');
-    }
-    a.sort((x,y)=>{
-      const dx=d.get(x),dy=d.get(y);
-      if(dx===null&&dy===null)return x.name.localeCompare(y.name);
-      if(dx===null)return 1;
-      if(dy===null)return -1;
-      return dy-dx||x.name.localeCompare(y.name);
-    });
-  }
+  if(activeSort==='name'){a.sort((x,y)=>x.name.localeCompare(y.name));return a;}
+  a.sort((x,y)=>{
+    const px=x.noImage===false?0:1,py=y.noImage===false?0:1;
+    if(px!==py)return px-py;
+    return _rotHash(x.block||x.name)-_rotHash(y.block||y.name)||x.name.localeCompare(y.name);
+  });
   return a;
 }
 function filterCategory(cat,btn){
@@ -2668,16 +2656,16 @@ function loadMore(){
 // Exact minutes for the first hour; a clock time after that (a stale figure
 // like "Updated 4 hours ago" says "refresh me" better than a big minute count).
 let stockLoadedAt=null,_freshnessTimer=null;
+// Clock time, not relative wording. "Just now" was vague enough to read as a
+// claim; a stated time is a fact the visitor can judge for themselves — and it
+// ages honestly in a stale tab ("Stock as at 9:02 am" read at 3pm speaks for
+// itself). The ticker only matters across midnight, when the weekday appears.
 function freshnessLabel(){
   if(!stockLoadedAt)return '';
-  const mins=Math.floor((Date.now()-stockLoadedAt)/60000);
-  if(mins<1)return 'Updated just now';
-  if(mins===1)return 'Updated 1 minute ago';
-  if(mins<60)return 'Updated '+mins+' minutes ago';
   const d=new Date(stockLoadedAt);
-  const sameDay=new Date().toDateString()===d.toDateString();
   const t=d.toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit'});
-  return sameDay?'Updated at '+t:'Updated '+d.toLocaleDateString('en-AU',{weekday:'long'})+' at '+t;
+  const sameDay=new Date().toDateString()===d.toDateString();
+  return sameDay?'Stock as at '+t:'Stock as at '+t+' '+d.toLocaleDateString('en-AU',{weekday:'long'});
 }
 function startFreshnessTicker(){
   clearInterval(_freshnessTimer);
@@ -3193,6 +3181,13 @@ function renderAdminContent(){
           </select>
         </div>
         <div class="admin-field">
+          <div class="admin-label">Sort Selector</div>
+          <select class="admin-input" id="af-sortSelectorVisible" style="padding:9px 12px">
+            <option value="true" ${g('sortSelectorVisible')!==false?'selected':''}>Visible to public</option>
+            <option value="false" ${g('sortSelectorVisible')===false?'selected':''}>Hidden &#8212; Featured order only</option>
+          </select>
+        </div>
+        <div class="admin-field">
           <div class="admin-label">Finishing Filter</div>
           <select class="admin-input" id="af-finishingFilterVisible" style="padding:9px 12px">
             <option value="true" ${g('finishingFilterVisible')!==false?'selected':''}>Visible to public</option>
@@ -3271,6 +3266,15 @@ async function saveAdminContent(){
   if(msfEl)cms.minSlabsFilterVisible=msfEl.value==='true';
   const ffEl=document.getElementById('af-finishingFilterVisible');
   if(ffEl){cms.finishingFilterVisible=ffEl.value==='true';buildFinishingFilter();}
+  const ssEl=document.getElementById('af-sortSelectorVisible');
+  if(ssEl){
+    cms.sortSelectorVisible=ssEl.value==='true';
+    const sel=document.getElementById('sortSelect');
+    if(sel){
+      sel.style.display=cms.sortSelectorVisible?'':'none';
+      if(!cms.sortSelectorVisible&&activeSort!=='gallery'){activeSort='gallery';sel.value='gallery';applyFilter(document.getElementById('stoneSearch').value.toLowerCase());}
+    }
+  }
   const fabVisEl=document.getElementById('af-fabricatorsVisible');
   if(fabVisEl)cms.fabricatorsVisible=fabVisEl.value==='true';
   const themeEl=document.getElementById('af-siteTheme');
@@ -3280,7 +3284,7 @@ async function saveAdminContent(){
   const cfsEl=document.getElementById('af-colourFilterStyle');
   if(cfsEl){cms.colourFilterStyle=cfsEl.value;applyColourFilterStyle();}
     const asEl=document.getElementById('af-arrivingSoonVisible');
-  if(asEl){cms.arrivingSoonVisible=asEl.value==='true';const asec=document.getElementById('arriving');if(asec)asec.style.display=cms.arrivingSoonVisible?'block':'none';if(cms.arrivingSoonVisible)loadArrivingSoon();}
+  if(asEl){cms.arrivingSoonVisible=asEl.value==='true';renderArrivingSoon();}
   const hnpEl=document.getElementById('af-hideNoPhoto');
   if(hnpEl)cms.hideNoPhoto=hnpEl.value==='true';
   const locChecks=[...document.querySelectorAll('[id^="af-loc-"]')].filter(c=>c.checked).map(c=>c.value);
@@ -4081,52 +4085,50 @@ document.getElementById('contactForm').addEventListener('submit',async function(
 });
 
 // ── ARRIVING SOON ─────────────────────────────────────────────
-const ARRIVING_FOLDER_NAME = 'Arriving Soon';
-
-async function loadArrivingSoon() {
-  if(g('arrivingSoonVisible')===false) return;
-  const grid = document.getElementById('arrivingGrid');
-  if(!grid) return;
-  try {
-    // Find the "Arriving Soon" subfolder inside Slab Images
-    const folders = await driveList(SLAB_IMAGES_FOLDER_ID, '', `name='${ARRIVING_FOLDER_NAME}'`);
-    if(!folders.length) { grid.innerHTML = '<div class="arriving-empty">No incoming stones at the moment — check back soon.</div>'; return; }
-    const folderId = folders[0].id;
-    const files = await driveList(folderId, '', `mimeType contains 'image/'`);
-    if(!files.length) { grid.innerHTML = '<div class="arriving-empty">No incoming stones at the moment — check back soon.</div>'; return; }
-    // Parse filename: StoneName-Origin-ETA.jpg (last part before extension is ETA, second-to-last is origin)
-    const cards = files.map(file => {
-      const base = file.name.replace(/\.[^.]+$/, '').replace(/-VSG$/i, '');
-      const parts = base.split('-');
-      // Last segment = ETA hint, second-to-last = origin hint, rest = stone name
-      let eta = '', origin = '', nameParts = parts;
-      // Detect ETA: contains year or month name
-      const months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
-      const etaIdx = parts.findIndex(p => /^\d{4}$/.test(p) || months.includes(p.toLowerCase().slice(0,3)));
-      if(etaIdx > 0) { eta = parts.slice(etaIdx).join(' '); nameParts = parts.slice(0, etaIdx); }
-      // Detect origin: capitalised single word that looks like a country/region
-      const origins = ['italy','portugal','brazil','turkey','india','spain','greece','iran','norway'];
-      const oriIdx = nameParts.findLastIndex(p => origins.includes(p.toLowerCase()));
-      if(oriIdx > 0) { origin = nameParts[oriIdx]; nameParts = nameParts.filter((_,i)=>i!==oriIdx); }
-      const name = nameParts.map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(' ');
-      const imgUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`;
-      return { name, origin, eta, imgUrl };
-    }).sort((a,b)=>a.name.localeCompare(b.name));
-
-    grid.innerHTML = cards.map(c => `
-      <div class="arriving-card">
+// Sourced from stock, not from a Drive folder. The section simply replicates
+// the TRANSIT lots already surfaced in the gallery (admin In Transit tab →
+// visibleTransitLots), so there is exactly one place to curate what's shown
+// and one ETA per stone — the stock report's, through the same fuzzy window
+// the gallery cards use. The old folder-driven version needed hand-named
+// files and could disagree with the stock ETA; this can't.
+// (Its folder+filename pattern lives on in the planned NZ direct-stock
+// section, where the data genuinely isn't in Vavastone.)
+function renderArrivingSoon() {
+  const asec=document.getElementById('arriving');
+  const grid=document.getElementById('arrivingGrid');
+  if(!asec||!grid)return;
+  if(g('arrivingSoonVisible')===false){asec.style.display='none';return;}
+  const visible=cms.visibleTransitLots||[];
+  const lots=allStones.filter(s=>s.status==='TRANSIT'&&visible.includes((s.block||'').toString()));
+  // Toggle on but nothing in transit: hide the section rather than showing an
+  // empty "check back soon" — an empty section is clutter, not anticipation.
+  if(!lots.length){asec.style.display='none';return;}
+  asec.style.display='block';
+  const seen=new Set();
+  const cards=lots.filter(st=>{const k=st.name+'|'+(st.finishing||'');if(seen.has(k))return false;seen.add(k);return true;})
+    .sort((a,b)=>a.name.localeCompare(b.name))
+    .map(st=>{
+      const eta=formatEtaDisplay(st.eta);
+      const img=st.image?`<img class="arriving-card-img" src="${st.image}" alt="${st.name}" loading="lazy">`
+                        :`<div class="arriving-card-img" style="display:flex;align-items:center;justify-content:center;background:rgba(127,127,127,.08);color:var(--surface-dark-text-faint);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px">Photography to follow</div>`;
+      const meta=[st.category,eta?'Est. '+eta:''].filter(Boolean).join(' \u00b7 ')||'In transit';
+      const nm=st.name.replace(/'/g,"\\'");
+      return `
+      <div class="arriving-card" onclick="openTransitStone('${(st.block||'').toString().replace(/'/g,"\\'")}')" style="cursor:pointer">
         <div class="arriving-badge">Arriving Soon</div>
-        <img class="arriving-card-img" src="${c.imgUrl}" alt="${c.name}" loading="lazy">
+        ${img}
         <div class="arriving-card-body">
-          <div class="arriving-stone-name">${c.name}</div>
-          <div class="arriving-meta">${[c.origin,c.eta?'Est. '+c.eta:''].filter(Boolean).join(' · ') || 'In transit'}</div>
-          <button class="arriving-btn" onclick="registerInterest('${c.name.replace(/'/g,"\'")}')">Register Interest</button>
+          <div class="arriving-stone-name">${st.name}</div>
+          <div class="arriving-meta">${meta}</div>
+          <button class="arriving-btn" onclick="event.stopPropagation();registerInterest('${nm}')">Register Interest</button>
         </div>
-      </div>`).join('');
-  } catch(e) {
-    console.warn('Arriving Soon load failed:', e.message);
-    grid.innerHTML = '<div class="arriving-empty">Unable to load incoming collection.</div>';
-  }
+      </div>`;
+    });
+  grid.innerHTML=cards.join('');
+}
+function openTransitStone(block){
+  const st=allStones.find(s=>(s.block||'').toString()===block);
+  if(st)openModal(st);
 }
 
 function registerInterest(stoneName) {
@@ -4466,7 +4468,7 @@ document.querySelectorAll('.nav-links a,.nav-links button').forEach(el=>{
 
 // Script is at end of body so DOM is already ready — call directly
 // loadCMS must complete before loadStock so enabledLocations is set correctly for the location filter
-loadCMS().then(()=>{loadStock();loadArrivingSoon();});
+loadCMS().then(()=>{loadStock();});
 updateShortlistUI();
 updateClientUI();
 </script>
