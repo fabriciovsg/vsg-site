@@ -235,6 +235,10 @@ section{padding:72px 48px;}
 .card-admin-btn:disabled,.card-admin-select:disabled{opacity:.4;cursor:wait;}
 .card-admin-btn.on-hidden{background:rgba(180,40,30,.22);border-color:rgba(180,40,30,.6);color:#e88;}
 .card-admin-btn.on-retake{background:rgba(160,95,0,.22);border-color:rgba(160,95,0,.6);color:#e8a82a;}
+.card-admin-btn.on-star{background:rgba(184,150,60,.25);border-color:var(--gold);color:var(--gold-light);}
+.card-admin-info{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:11px;letter-spacing:.06em;color:var(--surface-dark-text-muted);font-family:'Jost',sans-serif;}
+.card-admin-info span:nth-child(2){color:var(--gold-light);}
+.cai-flag{background:rgba(180,40,30,.2);border:1px solid rgba(180,40,30,.55);color:#e88;font-size:9px;letter-spacing:.12em;padding:2px 6px;border-radius:2px;}
 .card-admin-ok{outline:1px solid var(--gold);outline-offset:1px;}
 .card-hidden-badge{position:absolute;top:0;left:0;z-index:3;background:rgba(180,40,30,.85);color:#fff;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:0 0 6px 0;pointer-events:none;}
 .card-retake-badge{position:absolute;bottom:0;right:0;z-index:3;background:rgba(160,95,0,.9);color:#ffe0a0;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:4px 0 0 0;pointer-events:none;}
@@ -1359,24 +1363,11 @@ function applyColourFilterStyle(){
   });
 }
 
-function renderCategories(){
-  const cats=g('categories');
-  const grid=document.getElementById('catGrid');
-  const hasRealImages=cats.some(c=>normaliseImages(c).length>0);
-  grid.innerHTML=cats.map(c=>{
-    const imgs=normaliseImages(c);
-    const pick=c.closeup&&c.closeup.url?c.closeup:(imgs.length?imgs[Math.floor(Math.random()*imgs.length)]:null);
-    const imgHTML=pick
-      ?`<img src="${pick.url}" alt="${c.name}" loading="lazy" style="object-position:${pick.position||'center center'}">`
-      :`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(200,184,154,.25);font-family:'Cormorant Garamond',serif;font-size:24px">${c.name.charAt(0)}</div>`;
-    return `
-    <a class="cat-card" href="#gallery" onclick="filterCategory('${c.filter}')">
-      ${imgHTML}
-      <div class="cat-overlay"><div><div class="cat-name">${c.name}</div><span class="cat-count">${c.subtitle}</span></div></div>
-    </a>`;
-  }).join('');
-  if(hasRealImages)grid.style.opacity='1';
-}
+// renderCategories() removed 10 Aug 2026 — it rendered category photo tiles
+// into a #catGrid element that no longer exists on this page. The Categories
+// admin tab is NOT dead: its photos/close-ups feed the material tiles on
+// /stones/ (Stone Knowledge), which hydrates them from cms.categories, and
+// the close-ups also feed the generated catalogue's family cards.
 
 function renderWhyGrid(){
   const items=g('whyItems');
@@ -1466,12 +1457,13 @@ async function loadStock(){
   setStatus('loading','Connecting to the gallery…');
   try{
     setStatus('loading','Loading the gallery…');
-    // The report is parsed server-side now. The browser used to download the
-    // raw .xlsx, which carried PRICE2/3/4 (Trade, Bundle, Wholesale) and COST
-    // in every row — readable by any visitor who opened devtools, logged in or
-    // not. /api/stock-rows returns the same row arrays with those columns
-    // blanked; a signed-in client gets their own tier and nobody else's.
-    const resp=clientToken
+    // The report is parsed server-side. The anonymous feed carries NO prices
+    // at all (not even retail — see stock-rows.js); a signed-in client gets
+    // exactly their own tier; a signed-in ADMIN gets all four tiers for the
+    // Browse Stock triage view. Admin outranks client if both are somehow set.
+    const resp=adminToken
+      ? await fetch('/api/stock-rows-admin',{headers:{'Authorization':'Bearer '+adminToken}})
+      : clientToken
       ? await fetch('/api/stock-rows-client',{headers:{'Authorization':'Bearer '+clientToken}})
       : await fetch('/api/stock-rows');
     if(!resp.ok){
@@ -2061,11 +2053,20 @@ function renderColourOverride(stone){
     <div id="colourOverrideStatus" style="font-size:11px;color:rgba(200,184,154,.5);margin-top:6px"></div>
     <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(200,184,154,.12)">
       <div style="font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Admin — Visibility</div>
+      <div class="card-admin-info" style="margin:0 0 10px;flex-wrap:wrap">
+        <span>${parseInt(stone.qty||'0',10)} slab${parseInt(stone.qty||'0',10)!==1?'s':''}</span>
+        ${['price1','price2','price3','price4'].map((k,i)=>{
+          const lbl=['Retail','Trade','Bundle','Whsl'][i];const v=stone[k]||0;
+          return v?`<span title="${lbl}">${lbl} $${v.toLocaleString()}</span>`
+                  :`<span class="cai-flag" title="${lbl} price missing">${lbl} —</span>`;
+        }).join('')}
+      </div>
       <button id="modalHideBtn" class="admin-save-btn" style="padding:8px 14px;font-size:11px;width:100%;${hidden?'background:rgba(192,57,43,.25);border-color:rgba(192,57,43,.5);color:#e88;':''}" onclick="toggleHiddenLotModal('${stone.block}')">${hidden?'⊘ Hidden from site — click to unhide':'Hide lot from website'}</button>
     </div>
     <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(200,184,154,.12)">
       <div style="font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#c8943a;margin-bottom:6px">Admin — Photo</div>
       <button id="modalRetakeBtn" class="admin-save-btn" style="padding:8px 14px;font-size:11px;width:100%;${retake?'background:rgba(160,95,0,.2);border-color:rgba(160,95,0,.5);color:#e8a82a;':''}" onclick="toggleRetakePhotoModal('${stone.block}')">${retake?'📷 Flagged for retake — click to clear':'Flag for photo retake'}</button>
+      <button class="admin-save-btn" style="padding:8px 14px;font-size:11px;width:100%;margin-top:6px;${(cms.catalogueThumbs||{})[stone.name]===String(stone.block)?'background:rgba(184,150,60,.2);border-color:var(--gold);color:var(--gold-light);':''}" onclick="setCatalogueThumb('${stone.name.replace(/'/g,"\\'")}','${stone.block}')">${(cms.catalogueThumbs||{})[stone.name]===String(stone.block)?'&#9733; Catalogue photo for ${stone.name} — click to reset':'Use this lot\'s photo on the catalogue'}</button>
     </div>`;
 }
 async function toggleHiddenLotModal(block){
@@ -2119,6 +2120,22 @@ function findStoneCard(block){
 
 function adminCardControls(stone){
   if(!adminUnlocked||!stone.block)return '';
+  // Info line for stock triage: slab qty + retail (PRICE1) with discrepancy
+  // flags. Shown regardless of the public slabDisplay setting — that setting
+  // governs visitors, not staff. NOTE: only PRICE1 exists in the browser;
+  // trade/bundle/wholesale and COST are blanked server-side for everyone
+  // (including admins) by /api/stock-rows. Surfacing tiers here would need an
+  // admin-authenticated variant of that function.
+  const _q=parseInt(stone.qty||'0',10);
+  const _p=stone.price1||0;
+  // Price judgements only when the admin feed actually delivered prices —
+  // otherwise (fallback to anonymous feed) every lot would scream NO PRICE.
+  const _havePrices=allStones.some(x=>(x.price1||x.price2||x.price3||x.price4)>0);
+  const flags=[];
+  if(_havePrices&&!_p)flags.push('<span class="cai-flag">NO PRICE</span>');
+  if(_havePrices&&_p&&[stone.price2,stone.price3,stone.price4].some(t=>t>0&&t>_p))flags.push('<span class="cai-flag" title="A lower tier is priced above retail">TIER&gt;RETAIL</span>');
+  if(!_q&&stone.status!=='TRANSIT')flags.push('<span class="cai-flag">QTY 0</span>');
+  const infoRow=`<div class="card-admin-info"><span>${_q} slab${_q!==1?'s':''}</span><span>${_p?'$'+_p.toLocaleString():''}</span>${flags.join('')}</div>`;
   const b=String(stone.block).replace(/'/g,"\\'");
   // Distinguish a confirmed tag (colour-cache.json / Gemini) from a name-keyword
   // guess — the guess renders italic and faded so untagged lots stand out.
@@ -2129,10 +2146,11 @@ function adminCardControls(stone){
   const opts=['<option value="">— Colour —</option>']
     .concat(VALID_COLOUR_FAMILIES_JS.map(c=>`<option value="${c}"${shown===c?' selected':''}>${c}</option>`))
     .join('');
-  return `<div class="card-admin-row" data-admin-block="${String(stone.block).replace(/"/g,'&quot;')}">
+  return infoRow+`<div class="card-admin-row" data-admin-block="${String(stone.block).replace(/"/g,'&quot;')}">
     <select class="card-admin-select${explicit?'':' guessed'}" data-admin="colour" title="${explicit?'Colour tag (confirmed)':shown?'Colour guessed from the stone name — pick to confirm':'No colour tag — pick one'}" onchange="saveCardColour('${b}',this)">${opts}</select>
     <button class="card-admin-btn${hidden?' on-hidden':''}" data-admin="hide" title="${hidden?'Hidden from site — click to unhide':'Hide lot from website'}" onclick="toggleHiddenFromCard('${b}',this)">${hidden?'&#8856;':'&#128065;'}</button>
     <button class="card-admin-btn${retake?' on-retake':''}" data-admin="retake" title="${retake?'Flagged for retake — click to clear':'Flag photo for retake'}" onclick="toggleRetakeFromCard('${b}',this)">&#128247;</button>
+    <button class="card-admin-btn${isCatalogueFeatured(stone)?' on-star':''}" data-admin="star" title="${isCatalogueFeatured(stone)?'Featured on the catalogue — click to remove':'Feature on the catalogue page'}" onclick="toggleCatalogueStar('${stone.name.replace(/'/g,"\\'")}',this)">&#9733;</button>
   </div>`;
 }
 
@@ -2227,6 +2245,54 @@ async function toggleRetakeFromCard(block,btn){
     if(currentAdminTab==='missing')renderAdminMissing();
   }else{
     if(wasFlagged)cms.retakePhotos.push(key);else cms.retakePhotos.splice(cms.retakePhotos.indexOf(key),1);
+  }
+}
+
+// ── CATALOGUE CURATION (star + representative lot) ───────────
+// catalogueFeatured: ordered list of stone NAMES (starring order = display
+// order on the catalogue's featured rows; the generator caps at 8 per
+// material). catalogueThumbs: stoneName → lot whose photo represents the
+// stone on catalogue tiles and as the stone page hero. Both live in
+// vsg-site-config.json, so the generator picks them up next build — changes
+// are NOT instant on /catalogue/, same rhythm as everything build-generated.
+function isCatalogueFeatured(stone){return (cms.catalogueFeatured||[]).includes(stone.name);}
+
+async function toggleCatalogueStar(name,btn){
+  if(!cms.catalogueFeatured)cms.catalogueFeatured=[];
+  const idx=cms.catalogueFeatured.indexOf(name);
+  const wasOn=idx>=0;
+  if(wasOn)cms.catalogueFeatured.splice(idx,1);else cms.catalogueFeatured.push(name);
+  if(btn)btn.disabled=true;
+  const ok=await saveCMS();
+  if(btn)btn.disabled=false;
+  if(ok){
+    // repaint the star on every card of this variety (multiple lots share one name)
+    document.querySelectorAll('.stone-card').forEach(card=>{
+      const sb=card.querySelector('[data-admin="star"]');if(!sb)return;
+      const st=allStones.find(x=>String(x.block)===card.dataset.block);
+      if(st&&st.name===name){
+        sb.classList.toggle('on-star',!wasOn);
+        sb.title=!wasOn?'Featured on the catalogue — click to remove':'Feature on the catalogue page';
+      }
+    });
+    showToast(wasOn?name+' removed from catalogue featured':name+' featured on catalogue (next build)');
+  }else{
+    if(wasOn)cms.catalogueFeatured.splice(idx,0,name);else cms.catalogueFeatured.pop();
+  }
+}
+
+async function setCatalogueThumb(name,block){
+  if(!cms.catalogueThumbs)cms.catalogueThumbs={};
+  const cur=cms.catalogueThumbs[name];
+  const clearing=cur===String(block);
+  if(clearing)delete cms.catalogueThumbs[name];else cms.catalogueThumbs[name]=String(block);
+  const ok=await saveCMS();
+  if(ok){
+    showToast(clearing?'Catalogue photo reset to automatic':'Lot '+block+' set as catalogue photo (next build)');
+    if(currentModalStone)renderColourOverride(currentModalStone);
+  }else{
+    if(clearing&&cur)cms.catalogueThumbs[name]=cur;
+    else if(!clearing){if(cur)cms.catalogueThumbs[name]=cur;else delete cms.catalogueThumbs[name];}
   }
 }
 
@@ -2996,9 +3062,9 @@ async function showAdminLogin(){
     adminToken=d.token;
     adminUnlocked=true;
     document.getElementById('adminBar').classList.add('visible');
-    // Repaint the gallery so the inline per-card admin controls appear now,
-    // rather than only after the next filter/search change.
-    if(allStones.length)applyFilter(document.getElementById('stoneSearch')?.value.toLowerCase().trim()||'');
+    // Refetch stock through the admin endpoint so the triage view has all
+    // four price tiers; this also repaints the grid with the admin controls.
+    loadStock();
     openAdminTab('content');
   }catch(e){
     alert('Could not reach the server — check your connection.');
@@ -3041,8 +3107,9 @@ function adminLogout(){
   document.getElementById('adminBar').classList.remove('visible');
   document.getElementById('adminPanel').classList.remove('open');
   currentAdminTab='';
-  // Repaint so the inline admin controls and Hidden/Retake badges come off.
-  if(allStones.length)applyFilter(document.getElementById('stoneSearch')?.value.toLowerCase().trim()||'');
+  // Refetch through the anonymous endpoint: drops all price data from memory
+  // and repaints without the admin controls and badges.
+  loadStock();
 }
 
 function browseStock(){
@@ -3359,7 +3426,7 @@ function renderAdminCategories(){
   document.getElementById('adminPanel').innerHTML=`
     <div class="admin-section">
       <div class="admin-section-title">Stone Categories</div>
-      <p style="font-size:12px;color:rgba(200,184,154,.45);margin-bottom:20px;line-height:1.6">These appear in the gallery filter tiles. Choose up to 5 photos per category from the Slab Images library — a different one shows each time the page loads. The Filter value must match exactly how the category appears in the stock file.</p>
+      <p style="font-size:12px;color:rgba(200,184,154,.45);margin-bottom:20px;line-height:1.6">These photos appear on the <strong>Stone Knowledge</strong> page's material tiles, and the dedicated close-ups also front the catalogue's family cards. Up to 5 photos per category — a different one shows on each page load; a close-up, when set, always wins. The Filter value must match exactly how the category appears in the stock file.</p>
       <div id="adminCatList" style="display:flex;flex-direction:column;gap:20px">${cats.map((c,i)=>{
         const imgs=normaliseImages(c);
         return `

@@ -404,7 +404,9 @@ function stonePage(v, slug, manifest, cms, stamp){
   const showSlabs = cms.slabDisplay !== 'hide';
   const avail = [...v.lots.values()].filter(l=>l.status==='AVAILABLE');
   const lotsWithImg = avail.filter(l=>manifest[l.lot]?.slab).sort((a,b)=>b.slabs-a.slabs);
-  const hero = lotsWithImg[0] ? manifest[lotsWithImg[0].lot] : null;
+  const chosenLot = (cms.catalogueThumbs||{})[v.name];
+  const hero = (chosenLot&&manifest[chosenLot]) ? manifest[chosenLot]
+    : (lotsWithImg[0] ? manifest[lotsWithImg[0].lot] : null);
   const finishes = [...new Set(avail.map(l=>l.fin).filter(Boolean))].sort();
   const ths = [...new Set(avail.map(l=>l.th).filter(Boolean))].sort((a,b)=>a-b);
   const maxw = Math.max(0,...avail.map(l=>l.w)), maxh = Math.max(0,...avail.map(l=>l.h));
@@ -515,18 +517,30 @@ function cataloguePage(entries, cms, stamp){
     const inFam = new Set(famNames.flatMap(f=>famsHere[f].map(e=>e.name)));
     const standalone = list.filter(e=>!inFam.has(e.name));
 
-    // featured: curated list, else auto = most lots among photographed standalones
-    const curated = (FEATURED[m]||[]).map(n=>byName[n]).filter(Boolean);
+    // featured: admin stars first (order of starring, capped at 8, photographed
+    // only — a starred stone with no photo is skipped, not shown broken), then
+    // the repo config list, then auto = most lots among photographed standalones
+    const starred = (cms.catalogueFeatured||[]).map(n=>byName[n]).filter(e=>e&&e.thumb).slice(0,8);
+    const curated = starred.length ? starred
+      : (FEATURED[m]||[]).map(n=>byName[n]).filter(Boolean);
     const featured = curated.length ? curated
       : standalone.filter(e=>e.thumb).sort((a,b)=>b.lotCount-a.lotCount).slice(0,6);
     const featNames = new Set(featured.map(e=>e.name));
     const rest = standalone.filter(e=>!featNames.has(e.name));
 
+    // Family card image: the material's dedicated close-up (curated in the
+    // admin Categories tab, same source as the Stone Knowledge tiles) when one
+    // exists — it's already a texture shot, so it renders un-zoomed. Otherwise
+    // the flagship member's slab photo with the standard zoom-crop.
+    const catCfg = (cms.categories||[]).find(c=>c.name===m||c.filter===m);
+    const closeup = catCfg&&catCfg.closeup&&catCfg.closeup.url ? catCfg.closeup.url : '';
     const famCards = famNames.map(f=>{
       const members = famsHere[f].sort((a,b)=>a.name.localeCompare(b.name));
       const flagship = members.filter(e=>e.thumb).sort((a,b)=>b.lotCount-a.lotCount)[0]||members[0];
       const lots = members.reduce((a,e)=>a+e.lotCount,0);
-      return `<details class="family"><summary class="tile family-card"><span class="tile-img">${flagship.thumb?`<img src="${flagship.thumb}" alt="${esc(f)} family close up" loading="lazy">`:''}</span><div class="tile-name">${esc(f)}</div><div class="tile-sub">${members.length} varieties &middot; ${lots} lots</div></summary><div class="family-members">${members.map(tile).join('')}</div></details>`;
+      const img = closeup ? `<img class="no-zoom" src="${closeup}" alt="${esc(f)} close up" loading="lazy">`
+        : (flagship.thumb?`<img src="${flagship.thumb}" alt="${esc(f)} family close up" loading="lazy">`:'');
+      return `<details class="family"><summary class="tile family-card"><span class="tile-img">${img}</span><div class="tile-name">${esc(f)}</div><div class="tile-sub">${members.length} varieties &middot; ${lots} lots</div></summary><div class="family-members">${members.map(tile).join('')}</div></details>`;
     }).join('\n      ');
 
     const restLinks = rest.length?`<details class="rest"><summary>All other ${m}s (${rest.length})</summary><div class="rest-links">${rest.map(e=>`<a href="/stone/${e.slug}/">${esc(e.name)}</a>`).join('')}</div></details>`:'';
@@ -590,7 +604,9 @@ async function main(){
     written++;
     sitemapUrls.push(`${SITE}/stone/${slug}/`);
     const avail = [...v.lots.values()].filter(l=>l.status==='AVAILABLE');
-    const firstImg = avail.map(l=>manifest[l.lot]?.slab).find(Boolean);
+    const chosen = (cms.catalogueThumbs||{})[v.name];
+    const firstImg = (chosen&&manifest[chosen]?.slab)
+      || avail.map(l=>manifest[l.lot]?.slab).find(Boolean);
     if(firstImg || cms.hideNoPhoto===false)
       catalogueEntries.push({ name:v.name, material:v.material||'Other', slug, lotCount:avail.length, thumb:firstImg||'' });
   }
@@ -671,6 +687,8 @@ main.legacy .intro{margin-top:20px}
 .tile-img{display:block;width:100%;aspect-ratio:4/3;overflow:hidden;background:var(--bg2)}
 .tile-img img{width:100%;height:100%;object-fit:cover;transform:scale(2.2);transform-origin:center 42%;display:block;transition:transform .5s ease}
 .tile:hover .tile-img img{transform:scale(1)}
+.tile-img img.no-zoom{transform:none}
+.tile:hover .tile-img img.no-zoom{transform:none}
 .tile-name{font-family:'Cormorant Garamond',serif;font-size:21px;margin-top:10px}
 .tile-sub{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone-dark)}
 details.family{display:block}
