@@ -2919,6 +2919,24 @@ function openFromQueryParams(){
     setTimeout(()=>openGalleryPresentation(),400);
     return;
   }
+  // ?stone=<slug> — arrive from a /stone/ page filtered to that variety.
+  // Matching is slug-to-slug (not string-contains) so hyphenated and
+  // apostrophe-elided slugs resolve: taj-mahal → "Taj Mahal",
+  // cote-dazur → "Cote D'Azur".
+  const stoneSlug=(p.get('stone')||'').trim().toLowerCase();
+  if(stoneSlug){
+    history.replaceState(null,'',window.location.pathname);
+    const slugOf=n=>n.toLowerCase().replace(/['\u2018\u2019]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+    const hit=allStones.find(st=>slugOf(st.name)===stoneSlug);
+    const sr=document.getElementById('gallery');
+    if(sr)sr.scrollIntoView({behavior:'smooth'});
+    if(hit){
+      const inp=document.getElementById('stoneSearch');
+      if(inp)inp.value=hit.name;
+      applyFilter(hit.name.toLowerCase());
+    }
+    return;
+  }
   const lot=(p.get('block')||p.get('lot')||'').trim();
   if(!lot)return;
   const nameHint=(p.get('name')||'').trim();

@@ -416,7 +416,8 @@ function stonePage(v, slug, manifest, cms, stamp){
     const e = manifest[l.lot];
     const srcset = e.slabSrcset ? ` srcset="${esc(e.slabSrcset)}" sizes="(max-width:700px) 100vw, 33vw"` : '';
     const qty = showSlabs ? `${l.slabs} slab${l.slabs!==1?'s':''} &middot; ` : '';
-    return `<div class="lot-card"><img src="${e.slab}"${srcset} alt="${esc(v.name)} ${esc((v.material||'').toLowerCase())} &mdash; lot ${esc(displayLot(l.lot))}" loading="lazy"><div class="lot-meta"><span>Lot ${esc(displayLot(l.lot))}</span><span>${qty}${l.th}mm ${esc(l.fin)}</span></div></div>`;
+    const deepLink=`/?lot=${encodeURIComponent(l.lot)}&name=${encodeURIComponent(v.name)}#gallery`;
+    return `<a class="lot-card" href="${deepLink}" title="View this lot in the gallery"><img src="${e.slab}"${srcset} alt="${esc(v.name)} ${esc((v.material||'').toLowerCase())} &mdash; lot ${esc(displayLot(l.lot))}" loading="lazy"><div class="lot-meta"><span>Lot ${esc(displayLot(l.lot))}</span><span>${qty}${l.th}mm ${esc(l.fin)}</span></div></a>`;
   }).join('\n    ');
 
   const specs = [
@@ -671,7 +672,10 @@ h2{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(26px,3
 h2 em{font-style:italic;color:var(--stone-dark)}
 .section-sub{color:var(--mid);font-size:13px;margin-bottom:26px}
 .lots{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px}
-.lot-card img{width:100%;aspect-ratio:16/9.5;object-fit:cover;display:block}
+a.lot-card{display:block;text-decoration:none;color:inherit}
+.lot-card img{width:100%;aspect-ratio:16/9.5;object-fit:cover;display:block;transition:opacity .25s}
+a.lot-card:hover img{opacity:.85}
+a.lot-card:hover .lot-meta span:first-child{color:var(--gold-light)}
 .lot-meta{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--stone-dark);padding:9px 2px}
 .cta-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:34px}
 .btn{display:inline-block;padding:14px 30px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;border:1px solid var(--gold)}
