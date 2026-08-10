@@ -3426,7 +3426,7 @@ function renderAdminCategories(){
   document.getElementById('adminPanel').innerHTML=`
     <div class="admin-section">
       <div class="admin-section-title">Stone Categories</div>
-      <p style="font-size:12px;color:rgba(200,184,154,.45);margin-bottom:20px;line-height:1.6">These photos appear on the <strong>Stone Knowledge</strong> page's material tiles, and the dedicated close-ups also front the catalogue's family cards. Up to 5 photos per category — a different one shows on each page load; a close-up, when set, always wins. The Filter value must match exactly how the category appears in the stock file.</p>
+      <p style="font-size:12px;color:rgba(200,184,154,.45);margin-bottom:20px;line-height:1.6">These photos appear on the <strong>Stone Knowledge</strong> page's material tiles. Up to 5 photos per category — a different one shows on each page load; a dedicated close-up, when set, always wins. The Filter value must match exactly how the category appears in the stock file.</p>
       <div id="adminCatList" style="display:flex;flex-direction:column;gap:20px">${cats.map((c,i)=>{
         const imgs=normaliseImages(c);
         return `

@@ -528,18 +528,18 @@ function cataloguePage(entries, cms, stamp){
     const featNames = new Set(featured.map(e=>e.name));
     const rest = standalone.filter(e=>!featNames.has(e.name));
 
-    // Family card image: the material's dedicated close-up (curated in the
-    // admin Categories tab, same source as the Stone Knowledge tiles) when one
-    // exists — it's already a texture shot, so it renders un-zoomed. Otherwise
-    // the flagship member's slab photo with the standard zoom-crop.
-    const catCfg = (cms.categories||[]).find(c=>c.name===m||c.filter===m);
-    const closeup = catCfg&&catCfg.closeup&&catCfg.closeup.url ? catCfg.closeup.url : '';
+    // Family card image: the flagship member's own slab photo (most-stocked
+    // photographed member), zoom-cropped like every other tile — so each
+    // family reads as ITSELF. A material-level close-up was tried here and
+    // reverted: one close-up per material across seven families rendered
+    // seven identical tiles. If per-FAMILY close-ups ever exist (a file per
+    // family name in the Category Close-Ups folder), that is the thing to
+    // wire in — never the material-level image.
     const famCards = famNames.map(f=>{
       const members = famsHere[f].sort((a,b)=>a.name.localeCompare(b.name));
       const flagship = members.filter(e=>e.thumb).sort((a,b)=>b.lotCount-a.lotCount)[0]||members[0];
       const lots = members.reduce((a,e)=>a+e.lotCount,0);
-      const img = closeup ? `<img class="no-zoom" src="${closeup}" alt="${esc(f)} close up" loading="lazy">`
-        : (flagship.thumb?`<img src="${flagship.thumb}" alt="${esc(f)} family close up" loading="lazy">`:'');
+      const img = flagship.thumb?`<img src="${flagship.thumb}" alt="${esc(f)} family close up" loading="lazy">`:'';
       return `<details class="family"><summary class="tile family-card"><span class="tile-img">${img}</span><div class="tile-name">${esc(f)}</div><div class="tile-sub">${members.length} varieties &middot; ${lots} lots</div></summary><div class="family-members">${members.map(tile).join('')}</div></details>`;
     }).join('\n      ');
 
