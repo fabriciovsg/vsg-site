@@ -877,7 +877,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
   <div class="showroom-controls">
     <div class="search-box">
       <span class="search-icon">&#8981;</span>
-      <input type="text" id="stoneSearch" placeholder="Search by name or block number&#8230;" oninput="handleSearch(this.value)">
+      <input type="text" id="stoneSearch" placeholder="Search by name or block number&#8230;" oninput="handleSearch(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();applyFilter();}">
     </div>
     <button class="filter-btn active" onclick="filterCategory('All',this)">All</button>
     <button class="filter-btn" onclick="filterCategory('Marble',this)">Marble</button>
@@ -2575,7 +2575,7 @@ function formatEtaDisplay(raw){
   const part=d2<=10?'Early':d2<=20?'Mid':'Late';
   return `${part} ${months[mo2]} ${y2}`;
 }
-function applyFilter(search=''){
+function applyFilter(search=(document.getElementById('stoneSearch')?.value||'').toLowerCase().trim()){
   const minSlabs=parseInt(document.getElementById('minSlabsInput')?.value||'1')||1;
   const filtered=allStones.filter(s=>{
     if(isLotHidden(s)&&!adminUnlocked)return false;
