@@ -152,6 +152,9 @@ function shell({ title, description, canonical, jsonld, body }){
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/stone/stone-pages.css">
 <link rel="stylesheet" href="/assets/vsg-theme.css">
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-02BVBJPVRQ"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-02BVBJPVRQ");</script>
 ${jsonld?`<script type="application/ld+json">${jsonld}</script>`:''}
 </head>
 <body>
