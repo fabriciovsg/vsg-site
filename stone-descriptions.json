@@ -1,3 +1,29 @@
 {
- "Taj Mahal": "A warm, softly veined quartzite in cream and pale gold — one of the most requested natural stones in the gallery. Hard-wearing enough for kitchens, refined enough for anything, and held here in multiple finishes with every lot photographed individually."
+  "_README": "Entries may be a plain string (legacy — becomes the intro paragraph) or an object. Object fields, all optional: intro, origin, character, applications, care, faqs[{q,a}]. Anything omitted falls back to data-driven text or is simply not rendered. Never write a price, a per-slab claim, or a competitor's trademarked stone name here.",
+
+  "Taj Mahal": {
+    "intro": "A warm, softly veined quartzite in cream and pale gold — one of the most requested natural stones in the gallery. Hard-wearing enough for kitchens, refined enough for anything, and held here in multiple finishes with every lot photographed individually.",
+    "origin": "Taj Mahal is quarried in Espírito Santo in south-eastern Brazil, the region that produces most of the world's exotic quartzites. It reaches Melbourne as full slabs, and we buy at the block so the lots in the gallery share a consistent character rather than being assembled from scattered purchases.",
+    "character": "The background is a soft cream to pale beige, moved through with gentle gold and taupe veining that reads as texture rather than pattern. It is the stone people reach for when they want the calm of a pale marble without the marble. Tone varies between blocks — some lots lean warmer and more golden, others cooler and greyer — which is why the lots on this page are photographed one by one.",
+    "applications": "Kitchen benchtops and islands, splashbacks, bathroom vanities, and feature walls. Its density makes it a practical choice for the surfaces that get used hardest, and it is used outdoors in sheltered applications, though tone can shift with prolonged direct sun.",
+    "care": "Quartzite is dense and comparatively forgiving, but it is still a natural stone and should be sealed on installation and periodically thereafter — your fabricator will advise on the interval for the finish you choose. Wipe spills rather than letting them sit, use a pH-neutral cleaner, and avoid abrasive pads. Our general care and maintenance guide covers this in full.",
+    "faqs": [
+      {
+        "q": "Is Taj Mahal quartzite or marble?",
+        "a": "Quartzite. It is a metamorphic rock formed from sandstone, and its resemblance to a pale marble is exactly why it is so widely specified. The practical difference matters: quartzite is substantially harder than marble and far less reactive to the acidic things that etch a marble benchtop, such as lemon juice, wine and some cleaning products."
+      },
+      {
+        "q": "What are the drawbacks of Taj Mahal quartzite?",
+        "a": "Three worth knowing. It is a natural material, so colour and veining vary block to block and the slab you choose is the slab you get — which is why we photograph every lot. It should be sealed, unlike an engineered surface. And quartzite is hard, which makes fabrication slower and more demanding than for softer stones; use a stonemason who works with quartzite regularly."
+      },
+      {
+        "q": "How does Taj Mahal compare with granite?",
+        "a": "They are comparable on hardness and everyday durability. The difference is aesthetic: granite reads as granular and speckled, where Taj Mahal reads as a soft, veined, marble-like surface. Pricing for exotic quartzites generally sits above standard granites and varies by lot, finish and thickness — contact us with your project and we'll quote against what is actually on the racks."
+      },
+      {
+        "q": "Is Taj Mahal quartzite good for a kitchen benchtop?",
+        "a": "It is one of the most popular quartzites for exactly that. It handles daily kitchen use well, resists etching far better than marble, and is heat tolerant — though trivets are still sensible, as sustained heat can affect any sealed stone. Talk to your fabricator about edge profile and finish before committing."
+      }
+    ]
+  }
 }

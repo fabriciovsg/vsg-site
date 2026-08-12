@@ -155,7 +155,7 @@ function shell({ title, description, canonical, jsonld, body }){
 <!-- Google Analytics (GA4) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-02BVBJPVRQ"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-02BVBJPVRQ");</script>
-${jsonld?`<script type="application/ld+json">${jsonld}</script>`:''}
+${(Array.isArray(jsonld)?jsonld:[jsonld]).filter(Boolean).map(j=>`<script type="application/ld+json">${j}</script>`).join('\n')}
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="vsgLogo" viewBox="0 0 2880 528"><g transform="translate(0.000000,528.000000) scale(0.100000,-0.100000)"
@@ -394,8 +394,89 @@ ${body}
 </html>`;
 }
 
+// ── curated copy ─────────────────────────────────────────────
+// A stone-descriptions.json entry may be EITHER of:
+//   "Name": "one paragraph"                                    ← legacy, still valid
+//   "Name": { intro, origin, character, applications, care,
+//             faqs:[{q,a}, …] }                                ← extended
+// Every field is optional; anything missing falls back to data-driven text.
+// Never put a price, a per-slab claim, or a trademarked name in here.
+function entryFor(name){
+  const d = DESCRIPTIONS[name];
+  if(!d) return {};
+  return typeof d === 'string' ? { intro: d } : d;
+}
+
+// Prose block: only rendered for stones that have curated fields. No invented
+// geology — if Fabricio hasn't written it, the page simply doesn't claim it.
+function proseFor(v, e){
+  const paras = [
+    e.origin       && ['Origin',            e.origin],
+    e.character    && ['Colour and character', e.character],
+    e.applications && ['Where it works',    e.applications],
+    e.care         && ['Care',              e.care],
+  ].filter(Boolean);
+  if(!paras.length) return '';
+  return `
+<section style="padding-top:0">
+  <h2>About <em>${esc(v.name)}</em></h2>
+  <div class="prose">
+    ${paras.map(([h,p])=>`<h3>${esc(h)}</h3><p>${esc(p)}</p>`).join('\n    ')}
+  </div>
+</section>`;
+}
+
+// FAQs: curated entries first, then data-derived ones that don't duplicate a
+// curated question. Auto answers are built only from facts the stock feed
+// actually knows — no pricing, no comparisons, no durability promises.
+function faqsFor(v, e, ctx){
+  const curated = Array.isArray(e.faqs) ? e.faqs.filter(f=>f && f.q && f.a) : [];
+  const mat  = (v.material||'stone').toLowerCase();
+  const seen = new Set(curated.map(f=>f.q.toLowerCase().replace(/[^a-z]/g,'')));
+  const auto = [];
+  const push = (q,a) => {
+    if(!a) return;
+    if(seen.has(q.toLowerCase().replace(/[^a-z]/g,''))) return;
+    auto.push({ q, a });
+  };
+
+  push(`Is ${v.name} in stock in Melbourne?`,
+    ctx.lotCount
+      ? `Yes. ${ctx.lotCount} lot${ctx.lotCount!==1?'s':''} of ${v.name} ${mat} ${ctx.lotCount!==1?'are':'is'} in our Dandenong South gallery as at ${ctx.stamp}${ctx.eta?`, with more en route (${ctx.eta})`:''}. Stock on this page is generated from our live warehouse data, so what you see is what is on the racks.`
+      : '');
+
+  push(`What finishes does ${v.name} come in?`,
+    ctx.finishes.length
+      ? `We currently hold ${v.name} in ${ctx.finishes.map(f=>f.toLowerCase()).join(' and ')} finish${ctx.finishes.length>1?'es':''}. Finish availability changes with each shipment — the lots listed above are what is here now.`
+      : '');
+
+  push(`How big are ${v.name} slabs?`,
+    ctx.maxw
+      ? `Slabs run up to roughly ${(ctx.maxw/1000).toFixed(1)} × ${(ctx.maxh/1000).toFixed(1)} metres${ctx.ths.length?`, in ${ctx.ths.map(t=>t+'mm').join(' and ')} thickness${ctx.ths.length>1?'es':''}`:''}. Natural stone is cut block by block, so dimensions vary between lots — each lot above lists its own.`
+      : '');
+
+  push(`Can I see ${v.name} before I buy it?`,
+    `Yes, and we'd encourage it. ${v.name} is on display at 37–39 Gaine Road, Dandenong South, open Monday to Friday 7:30am–4:30pm and Saturday 8:45am–2pm. Every lot is photographed individually so you can shortlist online first, then view the slabs in person.`);
+
+  push(`Do you supply ${v.name} outside Melbourne?`,
+    `We're a wholesaler supplying Victoria and interstate, and we work with fabricators and stonemasons as well as directly with homeowners, designers and builders. Get in touch with your project details and we'll advise on availability and freight.`);
+
+  return [...curated, ...auto].slice(0, 8);
+}
+
+function faqBlock(faqs){
+  if(!faqs.length) return '';
+  return `
+<section style="padding-top:0">
+  <h2>Common <em>questions</em></h2>
+  <div class="faq">
+    ${faqs.map(f=>`<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('\n    ')}
+  </div>
+</section>`;
+}
+
 function introFor(v, colour){
-  const d = DESCRIPTIONS[v.name];
+  const d = entryFor(v.name).intro;
   if(d) return d;
   const mat = (v.material||'stone').toLowerCase();
   const fins = [...new Set([...v.lots.values()].map(l=>l.fin).filter(Boolean))];
@@ -431,6 +512,11 @@ function stonePage(v, slug, manifest, cms, stamp){
     eta?`<div class="spec"><div class="k">Arriving</div><div class="v">More en route &middot; ${esc(eta)}</div></div>`:'',
   ].filter(Boolean).join('\n  ');
 
+  const entry = entryFor(v.name);
+  const faqs  = faqsFor(v, entry, { lotCount: avail.length, finishes, ths, maxw, maxh, eta, stamp });
+  const prose = proseFor(v, entry);
+  const faqHtml = faqBlock(faqs);
+
   const body = `
 <div class="crumbs"><a href="/">Home</a> &nbsp;/&nbsp; <a href="/catalogue/">Catalogue</a> &nbsp;/&nbsp; ${esc(v.material||'Stone')} &nbsp;/&nbsp; ${esc(v.name)}</div>
 <header class="stone">
@@ -453,6 +539,8 @@ ${hero?`<div class="hero"><img src="${hero.slabFull||hero.slab}" alt="${esc(v.na
     <a class="btn ghost" href="/#contact">Enquire or arrange a viewing</a>
   </div>
 </section>
+${prose}
+${faqHtml}
 <section style="padding-top:0">
   <div class="guide">
     <p><strong>Choosing ${esc((v.material||'natural stone').toLowerCase())}.</strong> Read our guide on selection, sealing and everyday care before you commit.</p>
@@ -460,17 +548,23 @@ ${hero?`<div class="hero"><img src="${hero.slabFull||hero.slab}" alt="${esc(v.na
   </div>
 </section>`;
 
-  const jsonld = JSON.stringify({ '@context':'https://schema.org','@type':'Product',
+  const productLd = JSON.stringify({ '@context':'https://schema.org','@type':'Product',
     name:`${v.name} ${v.material||''}`.trim(),
-    description:`Natural ${v.name} ${(v.material||'stone').toLowerCase()} slabs, available from Victoria Stone Gallery, Melbourne.`,
+    description: entry.intro || `Natural ${v.name} ${(v.material||'stone').toLowerCase()} slabs, available from Victoria Stone Gallery, Melbourne.`,
     ...(hero?{image:SITE+(hero.slabFull||hero.slab)}:{}),
     brand:{'@type':'Brand',name:'Victoria Stone Gallery'},
     offers:{'@type':'AggregateOffer',availability:'https://schema.org/InStock',priceCurrency:'AUD',offerCount:avail.length}});
 
+  // FAQPage no longer earns a rich result for commercial sites, but it still
+  // helps Google and AI answer engines lift the Q&A cleanly. Cheap to emit.
+  const faqLd = faqs.length ? JSON.stringify({ '@context':'https://schema.org','@type':'FAQPage',
+    mainEntity: faqs.map(f=>({'@type':'Question', name:f.q,
+      acceptedAnswer:{'@type':'Answer', text:f.a}})) }) : null;
+
   return shell({
     title:`${v.name} ${v.material||''} Slabs Melbourne | Victoria Stone Gallery`.replace(/\s+/g,' '),
     description:`${v.name} ${(v.material||'stone').toLowerCase()} slabs in Melbourne — ${avail.length} lot${avail.length!==1?'s':''} in the gallery now${finishes.length?`. ${finishes.join(', ')} finishes`:''}. View current lots and arrange a viewing.`,
-    canonical:`${SITE}/stone/${slug}/`, jsonld, body });
+    canonical:`${SITE}/stone/${slug}/`, jsonld:[productLd, faqLd], body });
 }
 
 function legacyPage(entry){
@@ -686,6 +780,17 @@ a.lot-card:hover .lot-meta span:first-child{color:var(--gold-light)}
 .btn.ghost{color:var(--stone)}
 .guide{background:var(--bg2);border:1px solid rgba(200,184,154,.14);padding:30px 34px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
 .guide p{color:var(--stone);font-size:14px;max-width:58ch}
+.prose{max-width:70ch}
+.prose h3{font-family:'Jost',sans-serif;font-weight:400;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin:26px 0 8px}
+.prose h3:first-child{margin-top:14px}
+.prose p{color:var(--stone);font-size:15px}
+.faq{max-width:70ch;margin-top:16px;border-top:1px solid rgba(200,184,154,.14)}
+.faq details{border-bottom:1px solid rgba(200,184,154,.14)}
+.faq summary{cursor:pointer;list-style:none;padding:16px 30px 16px 0;position:relative;font-size:15px;color:var(--cream)}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:'+';position:absolute;right:4px;top:14px;font-size:19px;color:var(--stone-dark);transition:transform .18s}
+.faq details[open] summary::after{content:'\\2212'}
+.faq details p{color:var(--stone);font-size:14px;padding:0 30px 20px 0;max-width:62ch}
 main.legacy{padding:56px 5vw 80px;max-width:820px}
 .status{display:inline-block;margin-top:26px;margin-bottom:6px;padding:8px 16px;border:1px solid rgba(200,184,154,.3);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--stone-dark)}
 main.legacy .intro{margin-top:20px}
