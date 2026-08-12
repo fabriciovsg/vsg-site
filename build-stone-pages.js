@@ -389,7 +389,62 @@ ${body}
   const open=links.classList.toggle('open');
   btn.classList.toggle('open',open);
   document.body.style.overflow=open?'hidden':'';
-}</script>
+}
+// ── GA4 CONVERSION TRACKING ───────────────────────────────────
+// Fires the events Google Ads will later import as conversions. Deliberately
+// delegated at document level rather than bound to specific elements, because
+// several of these links (the stone modal's Enquire button, the shortlist
+// email button) have their href written at runtime and don't exist at load.
+//
+// Events emitted:
+//   generate_lead   contact form submitted successfully  ← primary conversion
+//   stone_enquiry   "Enquire About This Stone" clicked   ← primary conversion
+//   shortlist_email shortlist emailed                    ← primary conversion
+//   phone_click     any tel: link clicked                ← primary conversion
+//   email_click     any other mailto: link clicked       ← secondary
+//
+// gtag() is defined by the GA4 loader in <head>. The guard means a blocked or
+// failed tag degrades to a no-op instead of throwing inside a click handler
+// and swallowing the navigation.
+(function(){
+  function track(name, params){
+    try{ if(typeof gtag==='function') gtag('event', name, params||{}); }
+    catch(e){ /* analytics must never break the page */ }
+  }
+  window.vsgTrack = track;
+
+  document.addEventListener('click', function(e){
+    const a = e.target.closest && e.target.closest('a[href]');
+    if(!a) return;
+    const href = a.getAttribute('href') || '';
+
+    if(href.indexOf('tel:') === 0){
+      track('phone_click', { link_url: href, page_section: sectionOf(a) });
+      return;
+    }
+    if(href.indexOf('mailto:') === 0){
+      if(a.id === 'modalEnquire'){
+        track('stone_enquiry', {
+          stone_name: (document.getElementById('modalName')||{}).textContent || '',
+          page_section: 'stone_modal'
+        });
+      } else if(a.id === 'shortlistEmailBtn'){
+        track('shortlist_email', { page_section: 'shortlist' });
+      } else {
+        track('email_click', { page_section: sectionOf(a) });
+      }
+    }
+  }, true);
+
+  // Which page section the click came from — lets you see in GA4 whether the
+  // footer, the contact block or a stone page is actually producing enquiries.
+  function sectionOf(el){
+    const s = el.closest && el.closest('section[id], footer, nav');
+    if(!s) return 'other';
+    return s.id || s.tagName.toLowerCase();
+  }
+})();
+</script>
 </body>
 </html>`;
 }
