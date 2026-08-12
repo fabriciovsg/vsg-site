@@ -591,7 +591,7 @@ ${hero?`<div class="hero"><img src="${hero.slabFull||hero.slab}" alt="${esc(v.na
   <div class="section-sub">Photography for this stone is on its way. Stock as at ${stamp} &mdash; contact us for current lots and images.</div>`}
   <div class="cta-row">
     <a class="btn primary" href="/?stone=${encodeURIComponent(slugify(v.name))}#gallery">View all lots in the Gallery</a>
-    <a class="btn ghost" href="/#contact">Enquire or arrange a viewing</a>
+    <a class="btn ghost" href="/?enquire=${encodeURIComponent(v.name)}#contact">Enquire or arrange a viewing</a>
   </div>
 </section>
 ${prose}

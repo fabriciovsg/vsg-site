@@ -336,6 +336,15 @@ section{padding:72px 48px;}
 .modal-enquire:hover{background:var(--gold-light);}
 .modal-shortlist-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:transparent;border:1px solid rgba(200,184,154,.25);color:rgba(200,184,154,.7);font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;transition:all .2s;}
 .modal-shortlist-btn:hover,.modal-shortlist-btn.active{background:rgba(184,150,60,.12);border-color:var(--gold);color:var(--gold-light);}
+.modal-enquire-alt{display:block;width:100%;text-align:center;padding:4px 0 0;font-size:11px;letter-spacing:.08em;color:rgba(200,184,154,.5);text-decoration:none;transition:color .2s;}
+.modal-enquire-alt:hover{color:var(--gold-light);text-decoration:underline;}
+.enquiry-chip{display:none;align-items:flex-start;gap:10px;padding:12px 14px;margin-bottom:14px;background:rgba(184,150,60,.1);border-left:2px solid var(--gold);}
+.enquiry-chip.on{display:flex;}
+.enquiry-chip-txt{flex:1;font-size:12px;line-height:1.55;color:var(--cream);}
+.enquiry-chip-txt b{color:var(--gold-light);font-weight:500;}
+.enquiry-chip-lbl{display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(200,184,154,.5);margin-bottom:3px;}
+.enquiry-chip-x{background:none;border:none;color:rgba(200,184,154,.5);font-size:18px;line-height:1;cursor:pointer;padding:0 2px;}
+.enquiry-chip-x:hover{color:var(--gold-light);}
 .modal-note{font-size:11px;color:rgba(200,184,154,.3);margin-top:12px;line-height:1.6;}
 /* SIMILAR STONES */
 .similar-section{margin-top:24px;}
@@ -1039,6 +1048,11 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
       <form class="contact-form" name="contact" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" id="contactForm">
         <input type="hidden" name="form-name" value="contact">
         <input type="hidden" name="bot-field" style="display:none">
+        <input type="hidden" name="stone" id="enquiryStoneField" value="">
+        <div class="enquiry-chip" id="enquiryChip">
+          <div class="enquiry-chip-txt"><span class="enquiry-chip-lbl">Enquiring about</span><b id="enquiryChipName"></b><span id="enquiryChipMeta"></span></div>
+          <button type="button" class="enquiry-chip-x" onclick="clearEnquiryStone()" aria-label="Clear stone">&times;</button>
+        </div>
         <input class="form-input" type="text" name="name" placeholder="Your name" required>
         <input class="form-input" type="email" name="email" placeholder="Email address" required>
         <input class="form-input" type="text" name="phone" placeholder="Phone (optional)">
@@ -1099,7 +1113,8 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
       <div class="modal-divider"></div>
       <div class="modal-actions">
         <button class="modal-present-btn" id="modalPresentBtn" onclick="openStonePresentation()" disabled>&#9654; View Room Scenes</button>
-        <a href="#" class="modal-enquire" id="modalEnquire">Enquire About This Stone</a>
+        <button type="button" class="modal-enquire" id="modalEnquire" onclick="enquireFromModal()">Enquire About This Stone</button>
+        <a href="#" class="modal-enquire-alt" id="modalEnquireEmail">or email us directly</a>
         <button class="modal-shortlist-btn" id="modalShortlistBtn" onclick="toggleShortlistFromModal()">&#9825; Add to Shortlist</button>
         <p class="modal-note">Photos are indicative. Contact us to arrange a personal viewing at our Dandenong South gallery.</p>
       </div>
@@ -2814,8 +2829,10 @@ async function openModal(stone){
   const pBtn=document.getElementById('modalPresentBtn');
   if(pBtn){pBtn.disabled=!stone.block;pBtn.title=stone.block?'':'No room scenes available';}
   slBtn.classList.toggle('active',inList);
-  const enquireLink=`mailto:sales@victoriastonegallery.com.au?subject=${encodeURIComponent('Enquiry: '+stone.name+' Block #'+(stone.block||''))}&body=${encodeURIComponent('Hi VSG team,\n\nI\'m interested in '+stone.name+' (Block #'+(stone.block||'')+').\n\nPlease let me know pricing and availability.\n\nThank you')}`;
-  document.getElementById('modalEnquire').href=enquireLink;
+  // Lot number is the primary identifier — not every stone has a block number.
+  const _ref = stoneRef(stone);
+  const enquireLink=`mailto:sales@victoriastonegallery.com.au?subject=${encodeURIComponent('Enquiry: '+stone.name+(_ref?' ('+_ref+')':''))}&body=${encodeURIComponent("Hi VSG team,\n\nI'm interested in "+stone.name+(_ref?' ('+_ref+')':'')+".\n\nPlease let me know pricing and availability.\n\nThank you")}`;
+  document.getElementById('modalEnquireEmail').href=enquireLink;
   // Gallery setup
   currentGalleryImages=stone.imageFull?[stone.imageFull]:(stone.image?[stone.image]:[]);
   currentGalleryIndex=0;
@@ -4168,7 +4185,9 @@ document.getElementById('contactForm').addEventListener('submit',async function(
     });
     if(resp.ok){
       success.style.display='block';
-      if(window.vsgTrack) vsgTrack('generate_lead', { form_name:'contact' });
+      if(typeof clearEnquiryStone==='function') setTimeout(clearEnquiryStone,0);
+      if(window.vsgTrack) vsgTrack('generate_lead', { form_name:'contact',
+        stone_name:(document.getElementById('enquiryStoneField')||{}).value || '(none)' });
       this.reset();
     }else{
       error.style.display='block';
@@ -4568,6 +4587,83 @@ loadCMS().then(()=>{loadStock();});
 updateShortlistUI();
 updateClientUI();
 
+
+// ── STONE ENQUIRY ─────────────────────────────────────────────
+// "Enquire About This Stone" used to be a bare mailto:, which dead-ends anyone
+// without a desktop mail client configured. It now drops the visitor into the
+// contact form with the stone already attached; the mailto is kept as a
+// secondary option underneath for people who prefer their own client.
+function stoneRef(stone){
+  if(!stone) return '';
+  // Lot is the primary identifier. Block is secondary and often absent.
+  if(stone.lot)   return 'Lot #'+stone.lot;
+  if(stone.block) return 'Block #'+stone.block;
+  return '';
+}
+
+function enquireAboutStone(stone){
+  if(!stone) return;
+  const ref  = stoneRef(stone);
+  const bits = [stone.finishing, stone.thickness].filter(Boolean).join(', ');
+  const label = stone.name + (ref ? ' — ' + ref : '');
+
+  const field = document.getElementById('enquiryStoneField');
+  if(field) field.value = label + (bits ? ' ('+bits+')' : '');
+
+  const chip = document.getElementById('enquiryChip');
+  if(chip){
+    document.getElementById('enquiryChipName').textContent = stone.name;
+    document.getElementById('enquiryChipMeta').textContent =
+      (ref ? '  ·  '+ref : '') + (bits ? '  ·  '+bits : '');
+    chip.classList.add('on');
+  }
+
+  // Only prefill the message if it's empty or still holds a previous auto-fill,
+  // so we never overwrite something the visitor has typed themselves.
+  const msg = document.querySelector('#contactForm textarea[name="message"]');
+  if(msg && (!msg.value.trim() || msg.dataset.autofilled === '1')){
+    msg.value = "I'm interested in " + label + (bits ? ' ('+bits+')' : '')
+      + ". Could you let me know pricing and availability?";
+    msg.dataset.autofilled = '1';
+  }
+
+  if(typeof closeModalBtn === 'function') closeModalBtn();
+  if(typeof window.vsgTrack === 'function')
+    window.vsgTrack('stone_enquiry', { stone_name: stone.name || '', page_section: 'enquiry_form' });
+
+  const contact = document.getElementById('contact');
+  if(contact) contact.scrollIntoView({ behavior:'smooth', block:'start' });
+  // Wait for the smooth scroll before focusing, or the browser jumps the page.
+  setTimeout(function(){
+    const n = document.querySelector('#contactForm input[name="name"]');
+    if(n && !n.value.trim()) n.focus({ preventScroll:true });
+  }, 650);
+}
+
+function enquireFromModal(){
+  if(typeof currentModalStone !== 'undefined' && currentModalStone)
+    enquireAboutStone(currentModalStone);
+}
+
+function clearEnquiryStone(){
+  const field = document.getElementById('enquiryStoneField');
+  if(field) field.value = '';
+  const chip = document.getElementById('enquiryChip');
+  if(chip) chip.classList.remove('on');
+  const msg = document.querySelector('#contactForm textarea[name="message"]');
+  if(msg && msg.dataset.autofilled === '1'){ msg.value=''; delete msg.dataset.autofilled; }
+}
+
+// Deep link from the generated stone pages: /?enquire=Taj%20Mahal#contact
+(function(){
+  try{
+    const q = new URLSearchParams(location.search);
+    const name = q.get('enquire');
+    if(!name) return;
+    enquireAboutStone({ name: name, lot: q.get('lot')||'', finishing: q.get('finish')||'' });
+  }catch(e){}
+})();
+
 // ── GA4 CONVERSION TRACKING ───────────────────────────────────
 // Fires the events Google Ads will later import as conversions. Deliberately
 // delegated at document level rather than bound to specific elements, because
@@ -4601,10 +4697,11 @@ updateClientUI();
       return;
     }
     if(href.indexOf('mailto:') === 0){
-      if(a.id === 'modalEnquire'){
+      if(a.id === 'modalEnquireEmail'){
+        // Secondary "or email us directly" fallback under the enquiry button.
         track('stone_enquiry', {
           stone_name: (document.getElementById('modalName')||{}).textContent || '',
-          page_section: 'stone_modal'
+          page_section: 'stone_modal_mailto'
         });
       } else if(a.id === 'shortlistEmailBtn'){
         track('shortlist_email', { page_section: 'shortlist' });
