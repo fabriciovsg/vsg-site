@@ -4559,11 +4559,20 @@ function bookingEmbedUrl(raw){
 function openBooking(){
   const overlay=document.getElementById('bookingOverlay');
   const content=document.getElementById('bookingContent');
+  const raw=(g('bookingUrl')||'').trim();
+  // calendar.app.google is Google's SHORT share link and sets X-Frame-Options,
+  // so it can never be embedded — it renders "refused to connect" inside the
+  // modal. Send those to a new tab instead of showing a broken frame.
+  if(/calendar\.app\.google/i.test(raw)){ window.open(raw,'_blank','noopener'); return; }
   overlay.style.display='flex';
   document.body.style.overflow='hidden';
-  const url=bookingEmbedUrl(g('bookingUrl'));
+  const url=bookingEmbedUrl(raw);
   if(url){
-    content.innerHTML=`<iframe src="${url}" width="100%" height="100%" frameborder="0" style="min-height:620px;border:0" scrolling="yes"></iframe>`;
+    // Google's booking page paints no background of its own. Without an explicit
+    // white surface the dark modal shows through and Google's dark-on-white text
+    // becomes unreadable (observed 12 Aug 2026).
+    content.style.background='#fff';
+    content.innerHTML=`<iframe src="${url}" width="100%" height="100%" frameborder="0" style="min-height:620px;border:0;background:#fff;display:block" scrolling="yes"></iframe>`;
   }else{
     content.innerHTML=BOOKING_FALLBACK_HTML;
   }
@@ -4571,8 +4580,11 @@ function openBooking(){
 function closeBooking(){
   document.getElementById('bookingOverlay').style.display='none';
   document.body.style.overflow='';
-  // Drop the iframe so the booking flow restarts clean next open
-  document.getElementById('bookingContent').innerHTML=BOOKING_FALLBACK_HTML;
+  // Drop the iframe so the booking flow restarts clean next open, and restore
+  // the dark surface the fallback copy is written for.
+  const c=document.getElementById('bookingContent');
+  c.style.background='';
+  c.innerHTML=BOOKING_FALLBACK_HTML;
 }
 
 // ── MOBILE NAV ────────────────────────────────────────────────
