@@ -475,11 +475,15 @@ section{padding:72px 48px;}
 .contact-grid{display:grid;grid-template-columns:minmax(200px,.75fr) minmax(220px,.85fr) minmax(320px,1.3fr);gap:56px;margin-top:56px;align-items:start;}
 /* Events copy sits on --warm-white here, not the dark surface it used to have,
    so it needs its own light-surface treatment rather than #events' rules. */
-.contact-events{border-left:1px solid rgba(184,150,60,.25);padding-left:32px;}
-.contact-events-title{font-family:'Cormorant Garamond',serif;font-size:26px;line-height:1.25;font-weight:300;color:var(--charcoal);margin-bottom:16px;}
-.contact-events-title em{color:var(--gold);font-style:italic;}
-.contact-events-body{font-size:14px;line-height:1.85;color:var(--charcoal);opacity:.75;margin-bottom:20px;}
-.contact-events-note{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--charcoal);opacity:.45;line-height:1.7;}
+.contact-head{text-align:center;}
+.contact-head .section-label{justify-content:center;}
+.contact-head .section-label::before{content:'';display:block;flex:1;max-width:48px;height:1px;background:var(--gold);}
+.contact-head .section-title{margin-left:auto;margin-right:auto;}
+/* The events column is a peer of the address and hours blocks, on the same
+   uppercase-label rhythm — no second heading hierarchy inside the section. */
+.contact-events-label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;line-height:1.7;}
+.contact-events-body{font-size:14px;line-height:1.85;color:var(--mid);margin-bottom:22px;}
+.contact-events-cta{font-size:14px;line-height:1.8;color:var(--charcoal);margin-bottom:18px;}
 .contact-info-block{margin-bottom:32px;}
 .contact-info-label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
 .contact-info-val{font-size:15px;color:var(--charcoal);line-height:1.7;}
@@ -1034,8 +1038,10 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
 </div>
 <!-- CONTACT -->
 <section id="contact">
-  <div class="section-label">Get in Touch</div>
-  <h2 class="section-title">Visit the<br><em>Gallery</em></h2>
+  <div class="contact-head">
+    <div class="section-label">Get in Touch</div>
+    <h2 class="section-title">Visit the<br><em>Gallery</em></h2>
+  </div>
   <div class="contact-grid">
     <div>
       <div class="contact-info-block"><div class="contact-info-label">Warehouse &amp; Gallery</div><div class="contact-info-val" id="cms-address">37&#8211;39 Gaine Road<br>Dandenong South VIC 3175</div><div style="font-size:12px;color:var(--surface-dark-text-faint);margin-top:6px">Free parking at the door, and 2,000m&#178; you can walk in a morning.</div></div>
@@ -1044,10 +1050,10 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
       <div class="contact-info-block"><div class="contact-info-label">Email</div><div class="contact-info-val"><a href="mailto:sales@victoriastonegallery.com.au" id="cms-email">sales@victoriastonegallery.com.au</a></div></div>
     </div>
     <div class="contact-events" id="events">
-      <div class="contact-info-label">Gallery Visits &amp; Events</div>
-      <div class="contact-events-title" id="cms-events-title">Stone <em>Knowledge</em><br>&amp; Industry Events</div>
+      <div class="contact-events-label" id="cms-events-title">Stone Knowledge &amp; Industry Events</div>
       <p class="contact-events-body" id="cms-events-body">We regularly host architects, interior designers, stonemasons and developers for guided gallery evenings — an opportunity to understand stone beyond the surface. Origin, geology, formation, fabrication considerations and material behaviour: conversations that inform better design decisions. Accompanied, of course, by good food and wine.</p>
-      <p class="contact-events-note">Private viewings available by appointment<br>Monday to Saturday</p>
+      <p class="contact-events-cta">Evenings are put together around the group and what they want to cover, so they start with a conversation. Tell us what you have in mind.</p>
+      <button class="btn-outline-gold" onclick="enquireEvents()">Enquire About Events</button>
     </div>
     <div>
       <p class="section-body" style="margin-bottom:28px" id="cms-contact-body">Send us a message and we'll get back to you shortly — or arrange a visit and see the collection in person.</p>
@@ -1231,7 +1237,7 @@ const CMS_DEFAULTS={
   stat1Num:"30+",stat1Lbl:"Years in Stone",
   stat2Num:"250+",stat2Lbl:"Varieties in Stock",
   stat3Num:"2000",stat3Lbl:"m² Gallery",
-  eventsTitle:"Stone <em>Knowledge</em><br>& Industry Events",
+  eventsTitle:"Stone Knowledge & Industry Events",
   eventsBody:"We regularly host architects, interior designers, stonemasons and developers for guided gallery evenings — an opportunity to understand stone beyond the surface. Origin, geology, formation, fabrication considerations and material behaviour: conversations that inform better design decisions. Accompanied, of course, by good food and wine.",
   address:"37–39 Gaine Road<br>Dandenong South VIC 3175",
   hours:"Monday – Friday: 8:00am – 4:00pm<br>Saturday: 9:00am – 1:00pm",
@@ -1336,7 +1342,14 @@ function applyCMS(){
     se('cms-stat2-lbl','textContent',g('stat2Lbl'));
     se('cms-stat3-num','textContent',g('stat3Num'));
     se('cms-stat3-lbl','textContent',g('stat3Lbl'));
-    se('cms-events-title','innerHTML',g('eventsTitle'));
+    // eventsTitle renders as an uppercase label now — strip stored markup
+    // (<em>, <br>) rather than injecting it into a 10px letter-spaced label.
+    const evT=document.getElementById('cms-events-title');
+    if(evT){const tmp=document.createElement('div');
+      // <br> yields no whitespace in textContent, so swap it for a space first
+      // or the stored title collapses to "Knowledge& Industry".
+      tmp.innerHTML=(g('eventsTitle')||'').replace(/<br\s*\/?>/gi,' ');
+      evT.textContent=(tmp.textContent||'').replace(/\s+/g,' ').trim();}
     se('cms-events-body','textContent',g('eventsBody'));
     // Every booking entry point hides together when no URL is configured,
     // so a visitor can never reach a dead end.
@@ -4580,6 +4593,14 @@ function bookingEmbedUrl(raw){
   if(!url)return '';
   // Tolerate a plain share link being pasted by mistake
   return /[?&]gv=true/.test(url)?url:url+(url.includes('?')?'&':'?')+'gv=true';
+}
+// Events aren't bookable online — they're arranged by conversation. This just
+// moves the visitor to the message form beside the events copy.
+function enquireEvents(){
+  const msg=document.querySelector('#contactForm textarea[name="message"]');
+  const form=document.getElementById('contactForm');
+  (form||document.getElementById('contact')).scrollIntoView({behavior:'smooth',block:'center'});
+  if(msg) setTimeout(()=>{msg.focus({preventScroll:true});},450);
 }
 function openBooking(){
   const overlay=document.getElementById('bookingOverlay');
