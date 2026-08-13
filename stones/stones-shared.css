@@ -46,6 +46,10 @@ nav.scrolled{box-shadow:0 4px 32px rgba(0,0,0,.4);} /* was rgba(26,23,20,.1) —
 .nav-links a.current{color:var(--gold-light);}
 .nav-cta{background:var(--gold);color:white!important;padding:10px 22px;letter-spacing:.12em;font-size:11px;white-space:nowrap;transition:background .2s!important;}
 .nav-cta:hover{background:var(--gold-light)!important;color:white!important;}
+/* Doubled selector for the same reason as .nav-shortlist-btn below: a bare
+   .nav-book loses to .nav-links a on specificity. */
+.nav-book,.nav-links a.nav-book{background:transparent;border:1px solid var(--gold);color:var(--gold-light)!important;padding:9px 20px;letter-spacing:.12em;font-size:11px;white-space:nowrap;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;text-decoration:none;transition:background .2s,color .2s;}
+.nav-book:hover,.nav-links a.nav-book:hover{background:var(--gold);color:#fff!important;}
 /* .nav-shortlist-btn had NO rule in this file at all, so the <button> in the
    header fell back to the browser's default control — the white rounded pill
    with dark text that looked nothing like the rest of the nav. Copied verbatim
@@ -182,7 +186,7 @@ footer{background:var(--surface-dark,#1A1714);padding:64px 48px 32px;}
 @media(max-width:1100px){
   .nav-links{display:none;}
   .nav-burger{display:flex;}
-  .nav-links a,.nav-links .nav-shortlist-btn{font-size:16px;letter-spacing:.14em;}
+  .nav-links a,.nav-links .nav-shortlist-btn,.nav-links a.nav-book{font-size:16px;letter-spacing:.14em;}
 }
 @media(max-width:900px){
   .topbar{display:none;}

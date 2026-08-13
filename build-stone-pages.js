@@ -26,6 +26,12 @@ const SA_EMAIL = process.env.VSG_SERVICE_ACCOUNT_EMAIL;
 const KEY_ID   = process.env.VSG_PRIVATE_KEY_ID;
 const RAW_KEY  = (process.env.VSG_PRIVATE_KEY || '').replace(/\\n/g, '\n');
 const STOCK_FOLDER_ID = '1BtszKasn-t-haVTX7JzUWTPhuriZsCCq';
+// Same file ID the runtime uses (netlify/lib/google.js SITE_CONFIG_FILE_ID).
+// This generator used to resolve the config by NAME inside the Stock folder,
+// which is the same drift that broke the Stone Knowledge hub on 3 Aug: if a
+// second file of that name exists, or the real one lives elsewhere, the build
+// silently reads different config from the live site. Read by ID, like everyone else.
+const SITE_CONFIG_FILE_ID = '1-CM8zoEfnObuVY53OW5chE_3jTJTQE1-';
 const SITE = 'https://victoriastonegallery.com.au';
 const CWD = process.cwd();
 const DEV_DIR = path.join(CWD, 'dev-data');
@@ -72,10 +78,20 @@ async function loadData(){
   if(!list.files?.length){ console.error('Stone pages: no ListedReport in Stock folder'); process.exit(1); }
   console.log(`Stone pages: stock source ${list.files[0].name}`);
   const xls = await driveGetBuffer(`https://www.googleapis.com/drive/v3/files/${list.files[0].id}?alt=media`, token);
-  const cfgList = await driveGet(`https://www.googleapis.com/drive/v3/files?q='${STOCK_FOLDER_ID}'+in+parents+and+name='vsg-site-config.json'+and+trashed=false&fields=files(id)`, token);
-  const cms = cfgList.files?.length
-    ? JSON.parse(await driveGet(`https://www.googleapis.com/drive/v3/files/${cfgList.files[0].id}?alt=media`, token, true))
-    : {};
+  let cms = {};
+  try{
+    cms = JSON.parse(await driveGet(`https://www.googleapis.com/drive/v3/files/${SITE_CONFIG_FILE_ID}?alt=media&supportsAllDrives=true`, token, true));
+    console.log('Stone pages: config read by file ID');
+  }catch(err){
+    console.warn(`Stone pages: config file-ID read failed (${err.message}) — falling back to name lookup`);
+    const cfgList = await driveGet(`https://www.googleapis.com/drive/v3/files?q='${STOCK_FOLDER_ID}'+in+parents+and+name='vsg-site-config.json'+and+trashed=false&fields=files(id)`, token);
+    cms = cfgList.files?.length
+      ? JSON.parse(await driveGet(`https://www.googleapis.com/drive/v3/files/${cfgList.files[0].id}?alt=media`, token, true))
+      : {};
+  }
+  // Printed so a config mismatch shows up in the build log instead of as a
+  // mysteriously wrong nav three pages deep.
+  console.log(`Stone pages: config — bookingUrl:${cms.bookingUrl?'set':'MISSING'} fabricatorsVisible:${cms.fabricatorsVisible} enabledLocations:${(cms.enabledLocations||[]).length} hiddenLots:${(cms.hiddenLots||[]).length}`);
   return { wb: XLSX.read(xls), cms };
 }
 
