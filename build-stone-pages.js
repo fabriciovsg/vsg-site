@@ -364,8 +364,9 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
     <li><a href="/#about">About</a></li>
     <li><a href="/#why">Why VSG</a></li>
     <li><a href="/stones/">Stone Knowledge</a></li>
-    <li><a href="/#fabricators">Fabricators</a></li>
+    ${cms.fabricatorsVisible===false?'':'<li><a href="/#fabricators">Fabricators</a></li>'}
     <li><a href="/#gallery" class="nav-shortlist-btn">&#9825; My Shortlist</a></li>
+    ${cms.bookingUrl?'<li><a href="/?book=1" class="nav-book">Book a Visit</a></li>':''}
     <li><a href="/#contact" class="nav-cta">Contact Us</a></li>
   </ul>
 </nav>
@@ -891,6 +892,8 @@ nav.scrolled{box-shadow:0 4px 32px rgba(0,0,0,.4);}
 .nav-links a:hover,.nav-links a.current{color:var(--gold-light);}
 .nav-cta{background:var(--gold);color:white!important;padding:10px 22px;letter-spacing:.12em;font-size:11px;white-space:nowrap;transition:background .2s!important;}
 .nav-cta:hover{background:var(--gold-light)!important;}
+.nav-book,.nav-links a.nav-book{background:transparent;border:1px solid var(--gold);color:var(--gold-light)!important;padding:9px 20px;letter-spacing:.12em;font-size:11px;white-space:nowrap;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;text-decoration:none;transition:background .2s,color .2s;}
+.nav-book:hover,.nav-links a.nav-book:hover{background:var(--gold);color:#fff!important;}
 /* Selector doubled with .nav-links a… because that rule (0,1,1) outranks a bare
    class (0,1,0) and would otherwise force this link to the stone nav-link colour
    and 12px. The main site's version is a <button>, which .nav-links a never

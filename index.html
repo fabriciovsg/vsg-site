@@ -876,7 +876,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
     <li><a href="#gallery">Gallery</a></li>
     <li><a href="#about">About</a></li>
     <li><a href="#why">Why VSG</a></li>
-    <li><a href="/stones/">Stone Knowledge</a></li><li><a href="#fabricators">Fabricators</a></li>
+    <li><a href="/stones/">Stone Knowledge</a></li><li id="navFabricators"><a href="#fabricators">Fabricators</a></li>
     <li><button class="nav-shortlist-btn" onclick="openShortlist()">&#9825; My Shortlist <span class="shortlist-badge" id="navBadge">0</span></button></li>
     <li><button class="nav-book booking-trigger" style="display:none" onclick="openBooking()">Book a Visit</button></li>
     <li><a href="#contact" class="nav-cta">Contact Us</a></li>
@@ -1031,6 +1031,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
       </div>
       <button onclick="closeBooking()" style="background:transparent;border:none;color:rgba(200,184,154,.5);font-size:24px;cursor:pointer;line-height:1;padding:4px">&#10005;</button>
     </div>
+    <div id="bookingNote" style="display:none;flex-shrink:0;padding:14px 28px;border-bottom:1px solid rgba(200,184,154,.12);font-size:12.5px;line-height:1.7;color:rgba(200,184,154,.72)"></div>
     <div style="flex:1;overflow:auto;-webkit-overflow-scrolling:touch;" id="bookingContent">
       <div style="padding:40px 28px;text-align:center;">
         <p style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--cream);font-weight:300;margin-bottom:16px">Arrange a Visit</p>
@@ -1249,6 +1250,7 @@ const CMS_DEFAULTS={
   contactBody:"Send us a message and we'll get back to you shortly — or arrange a visit and see the collection in person.",
   footerTagline:"Melbourne's destination for rare and exceptional natural stone. Sourced from the world's finest quarries and producers — each slab a singular work of nature.",
   bookingUrl:"",
+  bookingNote:"Booking ahead means we can have the right slabs ready and give you our full attention. If no time suits, call 03 9702 7539 and we'll do our best to accommodate you. Walk-ins are welcome any time during opening hours.",
   slabDisplay:"lowstock", // "count" = show number, "lowstock" = show "Low Stock" under 4, "hide" = hide bar entirely
   hideNoPhoto:true, // hide lots that have no slab photo from the public grid and the live count
   enabledLocations:['VSG','JRD','SUR','AMU'], // default: all locations except SYD
@@ -1389,6 +1391,9 @@ function applyCMS(){
   const fsec=document.getElementById('fabricators');
   if(fsec){
     fsec.style.display=g('fabricatorsVisible')===false?'none':'block';
+    // The nav link has to go with the section, or it scrolls to nothing.
+    const fnav=document.getElementById('navFabricators');
+    if(fnav)fnav.style.display=g('fabricatorsVisible')===false?'none':'';
     const grid=document.getElementById('fabricatorsGrid');
     if(grid){
       const fabs=(g('fabricators')||[]);
@@ -3248,7 +3253,8 @@ function renderAdminContent(){
     <div class="admin-section">
       <div class="admin-section-title">Booking</div>
       <div class="admin-grid">
-        ${af('bookingUrl','Google Appointment Schedule embed URL (ends in ?gv=true) — leave blank to hide the Book a Gallery Visit button',g('bookingUrl'))}
+        ${af('bookingUrl','Booking page embed URL — leave blank to hide every Book a Visit button',g('bookingUrl'))}
+        ${af('bookingNote','Note shown above the calendar (leave blank to hide)',g('bookingNote'),'textarea')}
       </div>
     </div>
     <div class="admin-section">
@@ -3404,7 +3410,7 @@ function renderAdminContent(){
 async function saveAdminContent(){
   ['heroEyebrow','heroH1','heroSub','heroBg','aboutTitle','aboutP1','aboutP2','aboutImg1','aboutImg2',
    'stat1Num','stat1Lbl','stat2Num','stat2Lbl','stat3Num','stat3Lbl',
-   'eventsTitle','eventsBody','bookingUrl','topbarText','phone','email','footerTagline'
+   'eventsTitle','eventsBody','bookingUrl','bookingNote','topbarText','phone','email','footerTagline'
   ].forEach(k=>{const el=document.getElementById('af-'+k);if(el)cms[k]=el.value;});
   // Showroom settings
   const slabEl=document.getElementById('af-slabDisplay');
@@ -3470,6 +3476,9 @@ async function saveAdminContent(){
   const fsec=document.getElementById('fabricators');
   if(fsec){
     fsec.style.display=g('fabricatorsVisible')===false?'none':'block';
+    // The nav link has to go with the section, or it scrolls to nothing.
+    const fnav=document.getElementById('navFabricators');
+    if(fnav)fnav.style.display=g('fabricatorsVisible')===false?'none':'';
     const grid=document.getElementById('fabricatorsGrid');
     if(grid){
       const fabs=(g('fabricators')||[]);
@@ -3487,7 +3496,7 @@ async function saveAdminContent(){
 async function resetAdminContent(){
   ['heroEyebrow','heroH1','heroSub','heroBg','aboutTitle','aboutP1','aboutP2','aboutImg1','aboutImg2',
    'stat1Num','stat1Lbl','stat2Num','stat2Lbl','stat3Num','stat3Lbl',
-   'eventsTitle','eventsBody','bookingUrl','topbarText','phone','email','footerTagline'
+   'eventsTitle','eventsBody','bookingUrl','bookingNote','topbarText','phone','email','footerTagline'
   ].forEach(k=>delete cms[k]);
   const ok=await saveCMS();applyCMS();renderAdminContent();if(ok)showToast('Content reset to defaults');
 }
@@ -4596,7 +4605,11 @@ const BOOKING_FALLBACK_HTML=document.getElementById('bookingContent')?document.g
 function bookingEmbedUrl(raw){
   const url=(raw||'').trim();
   if(!url)return '';
-  // Tolerate a plain share link being pasted by mistake
+  // gv=true is Google's embed flag. Only Google URLs get it — appending it to a
+  // Cal.com or Calendly link would corrupt an otherwise valid booking page.
+  let host=''; try{host=new URL(url).hostname.toLowerCase();}catch(e){return url;}
+  if(host!=='calendar.google.com')return url;
+  // Tolerate a plain Google share link being pasted by mistake
   return /[?&]gv=true/.test(url)?url:url+(url.includes('?')?'&':'?')+'gv=true';
 }
 // Events aren't bookable online — they're arranged by conversation. This just
@@ -4622,6 +4635,9 @@ function openBooking(){
     // Google's booking page paints no background of its own. Without an explicit
     // white surface the dark modal shows through and Google's dark-on-white text
     // becomes unreadable (observed 12 Aug 2026).
+    const note=document.getElementById('bookingNote');
+    if(note){const t=(g('bookingNote')||'').trim();
+      note.textContent=t; note.style.display=t?'block':'none';}
     content.style.background='#fff';
     content.innerHTML=`<iframe src="${url}" width="100%" height="100%" frameborder="0" style="min-height:620px;border:0;background:#fff;display:block" scrolling="yes"></iframe>`;
   }else{
@@ -4633,6 +4649,8 @@ function closeBooking(){
   document.body.style.overflow='';
   // Drop the iframe so the booking flow restarts clean next open, and restore
   // the dark surface the fallback copy is written for.
+  const note=document.getElementById('bookingNote');
+  if(note)note.style.display='none';
   const c=document.getElementById('bookingContent');
   c.style.background='';
   c.innerHTML=BOOKING_FALLBACK_HTML;
@@ -4659,7 +4677,18 @@ document.querySelectorAll('.nav-links a,.nav-links button').forEach(el=>{
 
 // Script is at end of body so DOM is already ready — call directly
 // loadCMS must complete before loadStock so enabledLocations is set correctly for the location filter
-loadCMS().then(()=>{loadStock();});
+loadCMS().then(()=>{
+  loadStock();
+  // /catalogue/ and /stones/ are statically generated and have no booking
+  // modal of their own. Their nav button links to /?book=1 so there stays
+  // exactly one booking implementation, reading one live config value.
+  try{
+    if(new URLSearchParams(location.search).get('book')==='1' && g('bookingUrl')){
+      openBooking();
+      history.replaceState(null,'',location.pathname+location.hash);
+    }
+  }catch(e){}
+});
 updateShortlistUI();
 updateClientUI();
 
