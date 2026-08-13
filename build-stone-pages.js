@@ -136,7 +136,7 @@ function aggregate(wb, cms){
 }
 
 // ── page shell ───────────────────────────────────────────────
-function shell({ title, description, canonical, jsonld, body }){
+function shell({ title, description, canonical, jsonld, body, cms = {} }){
   // Chrome (topbar, nav, footer, logo symbol, hamburger) is lifted VERBATIM
   // from the site's own pages so generated pages are indistinguishable from
   // hand-built ones. If the site nav changes, re-harvest these blocks — they
@@ -620,10 +620,10 @@ ${faqHtml}
   return shell({
     title:`${v.name} ${v.material||''} Slabs Melbourne | Victoria Stone Gallery`.replace(/\s+/g,' '),
     description:`${v.name} ${(v.material||'stone').toLowerCase()} slabs in Melbourne — ${avail.length} lot${avail.length!==1?'s':''} in the gallery now${finishes.length?`. ${finishes.join(', ')} finishes`:''}. View current lots and arrange a viewing.`,
-    canonical:`${SITE}/stone/${slug}/`, jsonld:[productLd, faqLd], body });
+    canonical:`${SITE}/stone/${slug}/`, jsonld:[productLd, faqLd], body, cms });
 }
 
-function legacyPage(entry){
+function legacyPage(entry, cms = {}){
   const { name, material, slug } = entry;
   const matSlug = MAT_SLUG[material]||'';
   const body = `
@@ -641,7 +641,7 @@ function legacyPage(entry){
   return shell({
     title:`${name} ${material} Melbourne | Victoria Stone Gallery`,
     description:`${name} ${material.toLowerCase()} — not currently held in our Melbourne gallery. Register your interest, or explore comparable stones in stock now.`,
-    canonical:`${SITE}/stone/${slug}/`, jsonld:null, body });
+    canonical:`${SITE}/stone/${slug}/`, jsonld:null, body, cms });
 }
 
 function cataloguePage(entries, cms, stamp){
@@ -723,7 +723,7 @@ ${sections}`;
   return shell({
     title:'Natural Stone Catalogue Melbourne | Victoria Stone Gallery',
     description:`Browse ${total} natural stone varieties by name — marble, quartzite, granite, dolomite, travertine and limestone slabs in our Melbourne gallery, updated from live stock.`,
-    canonical:`${SITE}/catalogue/`, jsonld:null, body });
+    canonical:`${SITE}/catalogue/`, jsonld:null, body, cms });
 }
 
 // ── main ─────────────────────────────────────────────────────
@@ -769,7 +769,7 @@ async function main(){
     if(usedSlugs.has(entry.slug)){ console.log(`  legacy "${entry.name}" back in stock — live page wins, legacy skipped`); continue; }
     const dir = path.join(CWD,'stone',entry.slug);
     fs.mkdirSync(dir,{recursive:true});
-    fs.writeFileSync(path.join(dir,'index.html'), legacyPage(entry));
+    fs.writeFileSync(path.join(dir,'index.html'), legacyPage(entry, cms));
     written++;
     sitemapUrls.push(`${SITE}/stone/${entry.slug}/`);
   }
