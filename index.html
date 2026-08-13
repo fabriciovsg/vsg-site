@@ -1032,8 +1032,6 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
 <section id="contact">
   <div class="section-label">Get in Touch</div>
   <h2 class="section-title">Visit the<br><em>Gallery</em></h2>
-  <p class="section-body" id="cms-events-body" style="max-width:860px;margin-bottom:14px">We regularly host architects, interior designers, stonemasons and developers for guided gallery evenings — an opportunity to understand stone beyond the surface. Origin, geology, formation, fabrication considerations and material behaviour: conversations that inform better design decisions. Accompanied, of course, by good food and wine.</p>
-  <p style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--charcoal);opacity:.5;margin-bottom:44px">Private viewings available by appointment — Monday to Saturday</p>
   <div class="contact-grid">
     <div>
       <div class="contact-info-block"><div class="contact-info-label">Warehouse &amp; Gallery</div><div class="contact-info-val" id="cms-address">37&#8211;39 Gaine Road<br>Dandenong South VIC 3175</div><div style="font-size:12px;color:var(--surface-dark-text-faint);margin-top:6px">Free parking at the door, and 2,000m&#178; you can walk in a morning.</div></div>
@@ -1065,6 +1063,14 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
     </div>
   </div>
 </section>
+<!-- STONE KNOWLEDGE & EVENTS -->
+<section id="events">
+  <div class="section-label">Gallery Visits &amp; Events</div>
+  <h2 class="section-title" id="cms-events-title">Stone <em>Knowledge</em><br>&amp; Industry Events</h2>
+  <p class="section-body" id="cms-events-body">We regularly host architects, interior designers, stonemasons and developers for guided gallery evenings — an opportunity to understand stone beyond the surface. Origin, geology, formation, fabrication considerations and material behaviour: conversations that inform better design decisions. Accompanied, of course, by good food and wine.</p>
+  <div class="events-divider"></div>
+  <p style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--surface-dark-text-faint)">Private viewings available by appointment — Monday to Saturday</p>
+</section>
 <!-- FOOTER -->
 <footer>
   <div class="footer-top">
@@ -1072,7 +1078,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
       <svg class="vsg-logo-svg footer-logo-svg" viewBox="0 0 2880 528" role="img" aria-label="Victoria Stone Gallery"><use href="#vsgLogo"/></svg>
       <p class="footer-tagline" id="cms-footer-tagline">Melbourne's destination for rare and exceptional natural stone. Sourced from the world's finest quarries and producers — each slab a singular work of nature.</p>
     </div>
-    <div><div class="footer-col-title">Explore</div><ul class="footer-links"><li><a href="#about">About Us</a></li><li><a href="/catalogue/">Product Catalogue</a></li><li><a href="#gallery">Gallery</a></li><li><a href="/stones/">Stone Knowledge</a></li><li><a href="#why">Why VSG</a></li></ul></div>
+    <div><div class="footer-col-title">Explore</div><ul class="footer-links"><li><a href="#about">About Us</a></li><li><a href="/catalogue/">Product Catalogue</a></li><li><a href="#gallery">Gallery</a></li><li><a href="/stones/">Stone Knowledge</a></li><li><a href="#why">Why VSG</a></li><li><a href="#events">Events</a></li></ul></div>
     <div><div class="footer-col-title">Stone Types</div><ul class="footer-links"><li><a href="#gallery" onclick="filterCategory('Marble')">Marble</a></li><li><a href="#gallery" onclick="filterCategory('Quartzite')">Quartzite</a></li><li><a href="#gallery" onclick="filterCategory('Granite')">Granite</a></li><li><a href="#gallery" onclick="filterCategory('Dolomite')">Dolomite</a></li><li><a href="#gallery" onclick="filterCategory('Limestone')">Limestone</a></li><li><a href="#gallery" onclick="filterCategory('Travertine')">Travertine</a></li></ul></div>
     <div><div class="footer-col-title">Connect</div><ul class="footer-links"><li><a href="https://www.facebook.com/victoriastonegallery" target="_blank">Facebook</a></li><li><a href="https://www.instagram.com/victoriastonegallery/" target="_blank">Instagram</a></li><li><a href="https://www.pinterest.com.au/victoriastonegallery/pins/" target="_blank">Pinterest</a></li><li><a href="https://www.houzz.com.au/professionals/tile-stone-and-benchtops/victoria-stone-gallery-pfvwau-pf~472554601" target="_blank">Houzz</a></li><li><a href="#contact">Contact Us</a></li></ul></div>
   </div>
@@ -3213,9 +3219,10 @@ function renderAdminContent(){
       </div>
     </div>
     <div class="admin-section">
-      <div class="admin-section-title">Events Copy</div>
+      <div class="admin-section-title">Events Section</div>
       <div class="admin-grid">
-        ${af('eventsBody','Body text — shown in the Visit the Gallery section',g('eventsBody'),'textarea')}
+        ${af('eventsTitle','Title (HTML ok)',g('eventsTitle'))}
+        ${af('eventsBody','Body text',g('eventsBody'),'textarea')}
       </div>
     </div>
     <div class="admin-section">
