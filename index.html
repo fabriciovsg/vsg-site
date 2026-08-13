@@ -472,7 +472,7 @@ section{padding:72px 48px;}
 @media(max-width:768px){#arriving{padding:64px 20px;}#arriving .arriving-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}}
 /* CONTACT */
 #contact{background:var(--warm-white);}
-.contact-grid{display:grid;grid-template-columns:minmax(200px,.75fr) minmax(220px,.85fr) minmax(320px,1.3fr);gap:56px;margin-top:56px;align-items:start;}
+.contact-grid{display:grid;grid-template-columns:minmax(200px,.75fr) minmax(220px,.85fr) minmax(320px,1.3fr);gap:56px;margin-top:56px;align-items:stretch;}
 /* Events copy sits on --warm-white here, not the dark surface it used to have,
    so it needs its own light-surface treatment rather than #events' rules. */
 .contact-head{text-align:center;}
@@ -484,6 +484,11 @@ section{padding:72px 48px;}
 .contact-events-label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;line-height:1.7;}
 .contact-events-body{font-size:14px;line-height:1.85;color:var(--mid);margin-bottom:22px;}
 .contact-events-cta{font-size:14px;line-height:1.8;color:var(--charcoal);margin-bottom:18px;}
+.contact-events{display:flex;flex-direction:column;}
+/* Pushes the button to the foot of the column so it lines up with the form's
+   Send buttons. align-self stops it stretching to the full column width. */
+.contact-events .btn-outline-gold{margin-top:auto;align-self:flex-start;}
+@media(max-width:900px){.contact-events .btn-outline-gold{margin-top:8px;}}
 .contact-info-block{margin-bottom:32px;}
 .contact-info-label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
 .contact-info-val{font-size:15px;color:var(--charcoal);line-height:1.7;}
