@@ -201,30 +201,15 @@ body{margin:0;background:var(--surface-dark);color:var(--surface-dark-text);
 
     <section class="nz-hero">
       <div class="nz-eyebrow">Trade access</div>
-      <h1 class="nz-title">Direct to New Zealand</h1>
+      <h1 class="nz-title">Stock for New Zealand</h1>
       <p class="nz-lede">
-        Material shipping direct to New Zealand — landed, on the water, or available to
-        order against the next container. No trans-Tasman freight, and no double handling
-        through Melbourne.
+        Two ways to buy. Our full Melbourne warehouse stock, ready to ship. And material
+        shipping direct to New Zealand — landed, on the water, or available to order
+        against the next container. Shortlist from both and we'll quote them together.
       </p>
     </section>
 
     <div class="nz-filters" id="filters"></div>
-
-    <section class="nz-section" id="secDirect">
-      <div class="nz-section-head">
-        <h2 class="nz-section-title">Direct to New Zealand</h2>
-        <span class="nz-count" id="countDirect"></span>
-      </div>
-      <p class="nz-section-note">
-        Shipped direct to New Zealand. Lead times and freight differ from our Melbourne
-        stock — ask us for landed terms on anything here.
-      </p>
-      <div class="nz-grid" id="gridDirect"></div>
-      <div class="nz-empty" id="emptyDirect" style="display:none">
-        Nothing matching those filters in the direct stock right now.
-      </div>
-    </section>
 
     <section class="nz-section" id="secMel">
       <div class="nz-section-head">
@@ -244,6 +229,21 @@ body{margin:0;background:var(--surface-dark);color:var(--surface-dark-text);
       <div class="nz-grid" id="gridMel"></div>
       <div class="nz-empty" id="emptyMel" style="display:none">
         Nothing matching those filters in the Melbourne stock.
+      </div>
+    </section>
+
+    <section class="nz-section" id="secDirect">
+      <div class="nz-section-head">
+        <h2 class="nz-section-title">Direct to New Zealand</h2>
+        <span class="nz-count" id="countDirect"></span>
+      </div>
+      <p class="nz-section-note">
+        Shipping direct to New Zealand. Lead times and freight work differently to our
+        Melbourne stock — ask us for landed terms on anything here.
+      </p>
+      <div class="nz-grid" id="gridDirect"></div>
+      <div class="nz-empty" id="emptyDirect" style="display:none">
+        Nothing matching those filters in the direct stock right now.
       </div>
     </section>
 
@@ -419,7 +419,7 @@ async function loadMelbourne(){
       if(m.ok) manifest = (await m.json()).manifest || {};
     }catch(e){}
 
-    MEL = (d.rows||[]).map(row => adaptMelbourne(row, manifest)).filter(Boolean);
+    MEL = adaptMelbourne(d.rows || [], manifest);
     melLoaded = true;
     btn.style.display = 'none';
     render();
@@ -429,33 +429,92 @@ async function loadMelbourne(){
   }
 }
 
-/* Melbourne rows use the Vavastone field shape. Mapped into the same object the
-   direct rows use so one renderer and one shortlist serve both. */
-function adaptMelbourne(row, manifest){
-  const lot = String(row.LOT || row.lot || '').trim();
-  if(!lot) return null;
-  const entry = manifest[lot] || {};
-  const tier = (clientInfo && clientInfo.tier) || 'price1';
-  const price = row[tier] || row.price || null;
-  const inTransit = /transit/i.test(String(row.STATUS || row.status || ''));
-  return {
-    source:'melbourne', lot,
-    name: row.MATERIAL || row.material || row.name || '',
-    category: row.CATEGORY || row.category || '',
-    finish: row.FININSHING || row.FINISHING || row.finishing || '',
-    thickness: num(row.THICKNESS || row.thickness),
-    width: num(row.LENGTH || row.width), height: num(row.HEIGHT || row.height),
-    qty: num(row.QTY || row.qty),
-    state: inTransit ? 'mel_transit' : 'mel_stock',
-    availability: inTransit ? 'Arriving Melbourne' : 'In stock — Melbourne',
-    image: entry.slab || null,
-    renders: entry.projects || [],
-    price: hasPricing ? price : null,
-    currency: 'AUD', priceBasis: 'per_m2',
-    area: null, notes:''
+/* Melbourne stock arrives as ARRAY-OF-ARRAYS with a header row at index 0 —
+   not objects. Columns are located by header NAME, so a renamed column fails
+   loudly here rather than silently reading prices out of the wrong cell.
+
+   Note "FININSHING": that typo is Vavastone's own column name and must be
+   matched exactly. */
+function adaptMelbourne(rows, manifest){
+  if(!rows || rows.length < 2) return [];
+  const head = rows[0].map(c => String(c||'').trim().toUpperCase());
+  const ix = name => head.indexOf(name);
+
+  const C = {
+    lot: ix('LOT #'), block: ix('BLOCK'), material: ix('MATERIAL'),
+    category: ix('CATEGORY'), finish: ix('FININSHING'), thickness: ix('THICKNESS'),
+    height: ix('SELL HEIGHT'), width: ix('SELL WIDTH'),
+    status: ix('STATUS'), defective: ix('DEFECTIVE'), available: ix('AVAILABLE'),
+    location: ix('LOCATION'),
   };
+  if(C.lot < 0 || C.material < 0) return [];
+
+  const tierIx = ix(String((clientInfo && clientInfo.tier) || 'price1').toUpperCase());
+
+  /* The report is ONE ROW PER SLAB. Grouping into lots is not cosmetic — an
+     ungrouped render would be thousands of near-identical cards. Key mirrors
+     the main site's: block + material + finish + thickness. */
+  const groups = new Map();
+
+  for(let r = 1; r < rows.length; r++){
+    const row = rows[r];
+    if(!row || !row.length) continue;
+
+    const cell = i => i >= 0 ? String(row[i] ?? '').trim() : '';
+    const lot = cell(C.lot) || cell(C.block);
+    if(!lot) continue;
+
+    const status = cell(C.status).toUpperCase();
+    const inTransit = /TRANSIT/.test(status);
+    // Anything sold, assigned or out is not for sale — exclude it.
+    if(!inTransit && status && status !== 'AVAILABLE') continue;
+    if(/DEFECT|BAD/i.test(cell(C.defective))) continue;
+
+    /* inTransit is part of the key: a lot with some slabs landed and some still
+       arriving must not merge, or the in-stock count would include slabs that
+       are not here yet. */
+    const key = [cell(C.block), cell(C.material), cell(C.finish),
+                 cell(C.thickness), inTransit ? 'T' : 'S'].join('||');
+    let g = groups.get(key);
+    if(!g){
+      /* SELL HEIGHT / SELL WIDTH are in CENTIMETRES (191 x 297), unlike the NZ
+         sheet which is mm. Converted here so both sources display the same
+         units — otherwise a 3000mm NZ slab sits beside a "297" Melbourne one. */
+      const h = num(cell(C.height)), w = num(cell(C.width));
+      g = {
+        source: 'melbourne', lot,
+        name: cell(C.material),
+        category: cell(C.category),
+        finish: cell(C.finish),
+        thickness: num(cell(C.thickness)),
+        width: w ? Math.round(w * 10) : null,
+        height: h ? Math.round(h * 10) : null,
+        qty: 0,
+        state: inTransit ? 'mel_transit' : 'mel_stock',
+        availability: inTransit ? 'Arriving Melbourne' : 'In stock — Melbourne',
+        currency: 'AUD', priceBasis: 'per_m2',
+        notes: '', eta: null, renders: [], image: null,
+        _price: tierIx >= 0 ? num(cell(tierIx)) : null,
+      };
+      g.area = (g.width && g.height) ? +((g.width * g.height) / 1e6).toFixed(2) : null;
+
+      const entry = manifest[lot] || manifest[cell(C.block)] || {};
+      g.image = entry.slab || null;
+      g.renders = Array.isArray(entry.projects) ? entry.projects : [];
+
+      groups.set(key, g);
+    }
+    g.qty++;
+  }
+
+  return [...groups.values()].map(g => {
+    const { _price, ...pub } = g;
+    // Prices only when the signed-in client is entitled — same rule as direct.
+    if(hasPricing && _price) pub.price = _price;
+    return pub;
+  }).sort((a,b) => a.name.localeCompare(b.name));
 }
-const num = v => { const n = Number(v); return isFinite(n) && n ? n : null; };
+const num = v => { const n = Number(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(n) && n ? n : null; };
 
 /* ── Filters, applied across BOTH sections ────────────────── */
 function buildFilters(){
