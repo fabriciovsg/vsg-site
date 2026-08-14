@@ -345,7 +345,11 @@ body{margin:0;background:var(--surface-dark);color:var(--surface-dark-text);
    It is NOT authentication — prices come only from a signed login, checked
    server-side. A URL sitting in a forwarded email must never expose terms.   */
 
-const SLUG = location.pathname.replace(/^\/+|\/+$/g,'');
+/* URL is /nz/<slug>. Take the LAST path segment: the splat must follow a path
+   separator, so the customer token cannot live mid-segment as /nz-<slug>.
+   /nz/ on its own yields "nz", which no client matches — correctly showing the
+   invalid-link screen, since without a slug there is no customer. */
+const SLUG = location.pathname.split('/').filter(Boolean).pop() || '';
 
 let DIRECT = [];          // NZ direct stock
 let MEL = [];             // Melbourne warehouse stock

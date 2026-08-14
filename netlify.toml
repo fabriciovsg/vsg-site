@@ -51,28 +51,27 @@
 # secrets (the credential is an env var), but there is no reason to serve them.
 
 # ── NZ direct stock: per-customer trade links ─────────────────
-# /nz-trendstone-4k2p and friends all serve the one page, which reads its slug
-# from location.pathname and validates it server-side via /api/direct-stock.
+# /nz/trendstone-4k2p and friends all serve the one page, which reads its slug
+# from the last path segment and validates it server-side via /api/direct-stock.
 # One page, one deploy, no per-customer builds.
 #
-# Must sit ABOVE the diagnostics 404 rules below — Netlify applies redirects in
-# file order and the first match wins.
+# The splat MUST follow a path separator. "/nz-*" puts the wildcard mid-segment
+# after a hyphen and matches nothing at all — it deploys without error and then
+# 404s every request, which is a slow thing to diagnose. "/nz/*" is a real
+# segment splat and works.
+#
+# /nz/ itself still serves index.html directly (a real file shadows a 200
+# rewrite), which correctly shows the invalid-link screen: no slug, no customer.
 [[redirects]]
-  from   = "/nz-*"
+  from   = "/nz/*"
   to     = "/nz/index.html"
   status = 200
 
 # Deliberately NOT in robots.txt: that file is public, so a Disallow line would
-# advertise the very address it is meant to keep unlisted. These headers keep it
+# advertise the very address it is meant to keep unlisted. This header keeps it
 # out of search results without publishing it.
 [[headers]]
   for = "/nz/*"
-  [headers.values]
-    X-Robots-Tag   = "noindex, nofollow"
-    Referrer-Policy = "no-referrer"
-
-[[headers]]
-  for = "/nz-*"
   [headers.values]
     X-Robots-Tag   = "noindex, nofollow"
     Referrer-Policy = "no-referrer"
