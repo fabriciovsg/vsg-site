@@ -151,14 +151,22 @@ function headerIndex(headerRow) {
     for (const a of [label, ...aliases]) if (a in idx) return idx[a];
     return -1;
   };
+  // Read the UNIT from the header rather than assuming one. Slab dimensions are
+  // entered in centimetres to match the Vavastone report (which uses SELL
+  // HEIGHT / SELL WIDTH in cm), and everything downstream works in mm so both
+  // sources render identically. If the header ever says (mm), this parses it
+  // correctly instead of silently multiplying by ten.
+  const dimScale = Object.keys(idx).some(k => /^(width|height)\s*\(mm\)$/.test(k)) ? 1 : 10;
+
   return {
+    dimScale,
     lot:       need('lot'),
     name:      need('stone name'),
     category:  need('category', 'material'),
     finish:    need('finish'),
     thickness: need('thickness (mm)'),
-    width:     need('width (mm)'),
-    height:    need('height (mm)'),
+    width:     need('width (cm)', 'width (mm)', 'width'),
+    height:    need('height (cm)', 'height (mm)', 'height'),
     qty:       need('qty (slabs)'),
     status:    need('status'),
     eta:       need('eta (dd-mm-yyyy)', 'eta (yyyy-mm-dd)', 'eta'),
@@ -220,8 +228,12 @@ export function parseRows(values) {
     if (avail.flag === 'on_water_no_eta') warnings.push(`${lot}: On Water with no ETA`);
     if (avail.flag === 'to_order_has_eta') warnings.push(`${lot}: Available to Order but ETA is filled`);
 
-    const width = num(row[col.width]);
-    const height = num(row[col.height]);
+    // Stored in cm, held in mm — see dimScale above. Thickness stays mm, as it
+    // is in Vavastone.
+    const rawW = num(row[col.width]);
+    const rawH = num(row[col.height]);
+    const width = rawW ? Math.round(rawW * col.dimScale) : null;
+    const height = rawH ? Math.round(rawH * col.dimScale) : null;
 
     stones.push({
       lot,
