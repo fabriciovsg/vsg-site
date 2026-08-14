@@ -101,11 +101,18 @@ async function main() {
   for (const [lot, entry] of Object.entries(manifest)) {
     const r = results[lot] || {};
     const slabId = entry.slab ? extractFileId(entry.slab) : null;
-    const slab800  = slabId && cache[slabId]?.path800;
-    const slab1600 = slabId && (cache[slabId]?.path1600 || cache[slabId]?.path1200);
+    const sc = slabId ? cache[slabId] : null;
+    const slab800  = sc && sc.path800 ? ver(sc, sc.path800) : null;
+    const slab1600 = sc && (sc.path1600 || sc.path1200)
+      ? ver(sc, sc.path1600 || sc.path1200) : null;
     const projects = (entry.projects || []).map((url, i) => {
       const id = extractFileId(url);
-      return { thumb: cache[id]?.path800 || null, full: cache[id]?.path1600 || cache[id]?.path1200 || cache[id]?.path800 || null };
+      const c = cache[id];
+      if (!c || !c.path800) return { thumb: null, full: null };
+      return {
+        thumb: ver(c, c.path800),
+        full:  ver(c, c.path1600 || c.path1200 || c.path800),
+      };
     }).filter(p => p.thumb);
     if (slab800 || projects.length) {
       cdnManifest[lot] = {
@@ -154,9 +161,27 @@ function recordResult(results, item, paths) {
   else results[item.lot].projects[item.idx] = paths.path800;
 }
 
-function buildSrcset(paths) {
-  if (!paths) return null;
-  return WIDTHS.map(w => paths[`path${w}`] ? `${paths[`path${w}`]} ${w}w` : null).filter(Boolean).join(', ');
+function buildSrcset(entry) {
+  if (!entry) return null;
+  return WIDTHS.map(w => entry[`path${w}`] ? `${ver(entry, entry[`path${w}`])} ${w}w` : null)
+    .filter(Boolean).join(', ');
+}
+
+// Cache-busting version marker, derived from the source image's md5.
+//
+// /img/* is served immutable with a one-year max-age. Output filenames are built
+// from the LOT, not the source filename, so replacing a photo in Drive
+// regenerates the SAME path — and every browser holding the old copy keeps it
+// for a year. Renaming the Drive file does not help: the lot names the output.
+//
+// Appending ?v=<md5> makes the URL change whenever the bytes change, which is
+// what "immutable" is supposed to mean. Applied ONLY when writing the CDN
+// manifest: the cache keeps clean paths, because cachedOutputsExist() resolves
+// them with fs.existsSync() and a query string would make every build a cold one.
+function ver(entry, p) {
+  if (!p) return p;
+  const md5 = entry && entry.md5;
+  return md5 ? `${p}?v=${String(md5).slice(0, 8)}` : p;
 }
 
 async function generateWebP(tmpPath, item, sharp) {
