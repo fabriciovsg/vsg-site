@@ -19,10 +19,17 @@ export const NZ_RENDERS_FOLDER_ID = '1aIqrTCIdC258sRDRXJpMZZvxx4m8Q4E_';
 const SHEET_TAB = 'Stock';
 const SHEET_RANGE = `${SHEET_TAB}!A:M`;
 
-// A lot is NZ followed by digits — NO hyphen. The hyphen rule is not cosmetic:
-// render folders are matched by splitting the folder name on '-' and testing
-// segment membership, so a lot containing a hyphen can never match.
-export const LOT_RE = /^NZ\d+$/i;
+// A lot is NZ followed by digits, optionally with a -N bundle suffix:
+// NZ82925 or NZ82925-1. One lot number can cover several bundles, which is how
+// the stone is actually numbered, so the suffix has to be supported.
+//
+// Matching therefore CANNOT split names on '-' and test segment membership —
+// "NZ82925-1" would split into "nz82925" and "1" and never match. Everything
+// below searches for this pattern within the name instead.
+export const LOT_RE = /^NZ\d+(?:-\d+)?$/i;
+
+// Same pattern, unanchored, for pulling a lot out of a filename or folder name.
+const LOT_IN_NAME = /NZ\d+(?:-\d+)?/i;
 
 // Rows in these states never reach the browser at all — not hidden client-side.
 const OFF_SITE = new Set(['sold', 'hidden']);
@@ -255,10 +262,8 @@ export function parseRows(values) {
 
 export function lotFromFilename(filename) {
   const base = String(filename).replace(/\.[^.]+$/, '');
-  for (const seg of base.split('-')) {
-    if (LOT_RE.test(seg)) return seg.toUpperCase();
-  }
-  return null;
+  const m = base.match(LOT_IN_NAME);
+  return m ? m[0].toUpperCase() : null;
 }
 
 const IMAGE_EXT = /\.(jpe?g|png|webp)$/i;
@@ -301,9 +306,7 @@ export async function renderMap() {
   await Promise.all(folders.map(async (folder) => {
     // Folder may be the bare lot (NZ1001) or follow the StoneName-Lot-VSG
     // convention StoneRender writes for Melbourne stock. Accept both.
-    const lot = LOT_RE.test(folder.name.trim())
-      ? folder.name.trim().toUpperCase()
-      : lotFromFilename(folder.name);
+    const lot = lotFromFilename(folder.name);
     if (!lot) return;
     const kids = await driveList(folder.id);
     const imgs = kids.filter(k => IMAGE_EXT.test(k.name))
