@@ -211,25 +211,18 @@ body{margin:0;background:var(--surface-dark);color:var(--surface-dark-text);
 
     <div class="nz-filters" id="filters"></div>
 
-    <section class="nz-section" id="secMel">
+    <section class="nz-section">
       <div class="nz-section-head">
         <h2 class="nz-section-title">Melbourne warehouse stock</h2>
-        <span class="nz-count" id="countMel"></span>
       </div>
       <p class="nz-section-note">
-        Held in Dandenong South and shipped from Melbourne. Some lots are in transit to
-        Melbourne — those show their own arrival date, which is separate from the direct
-        shipments above.
+        Our full Melbourne range — held in Dandenong South and shipped from Melbourne.
+        Browse it on the main site with your usual trade login.
       </p>
-      <!-- Lazy: several hundred cards should not load ahead of the dozens the
-           customer actually came for. -->
-      <button class="nz-expander" id="melToggle" onclick="loadMelbourne()">
-        Browse Melbourne warehouse stock →
-      </button>
-      <div class="nz-grid" id="gridMel"></div>
-      <div class="nz-empty" id="emptyMel" style="display:none">
-        Nothing matching those filters in the Melbourne stock.
-      </div>
+      <a class="nz-expander" style="display:block;text-align:center;text-decoration:none"
+         href="https://vsgallery.com.au/#gallery" target="_blank" rel="noopener">
+        Browse Melbourne warehouse stock &rarr;
+      </a>
     </section>
 
     <section class="nz-section" id="secDirect">
@@ -280,9 +273,7 @@ body{margin:0;background:var(--surface-dark);color:var(--surface-dark-text);
   <div class="nz-drawer">
     <button class="nz-close" style="position:static;float:right" onclick="closeDrawer()">&times;</button>
     <h2 style="font-family:Georgia,serif;font-weight:400;margin:0 0 4px;color:var(--cream)">Your shortlist</h2>
-    <p style="color:var(--surface-dark-text-faint);font-size:12.5px;margin:0 0 8px">
-      Direct and Melbourne slabs can be enquired about together.
-    </p>
+
     <div id="slList"></div>
 
     <div id="slEmpty" class="nz-empty">Nothing shortlisted yet.</div>
@@ -352,8 +343,6 @@ body{margin:0;background:var(--surface-dark);color:var(--surface-dark-text);
 const SLUG = location.pathname.split('/').filter(Boolean).pop() || '';
 
 let DIRECT = [];          // NZ direct stock
-let MEL = [];             // Melbourne warehouse stock
-let melLoaded = false;
 let clientToken = null;   // in memory only — matches the main site's behaviour
 let clientInfo = null;
 let hasPricing = false;
@@ -402,118 +391,6 @@ async function boot(){
   }
 }
 
-/* ── Melbourne stock, on demand ───────────────────────────── */
-async function loadMelbourne(){
-  if(melLoaded) return;
-  const btn = $('melToggle');
-  btn.textContent = 'Loading…'; btn.disabled = true;
-  try{
-    const url = clientToken ? '/api/stock-rows-client' : '/api/stock-rows';
-    const r = await fetch(url, clientToken
-      ? { headers:{ Authorization:'Bearer ' + clientToken } } : {});
-    if(!r.ok) throw new Error('stock');
-    const d = await r.json();
-    let manifest = {};
-    try{
-      const m = await fetch('/image-manifest-cdn.json');
-      if(m.ok) manifest = (await m.json()).manifest || {};
-    }catch(e){}
-
-    MEL = adaptMelbourne(d.rows || [], manifest);
-    melLoaded = true;
-    btn.style.display = 'none';
-    render();
-  }catch(e){
-    btn.textContent = 'Could not load Melbourne stock — tap to retry';
-    btn.disabled = false;
-  }
-}
-
-/* Melbourne stock arrives as ARRAY-OF-ARRAYS with a header row at index 0 —
-   not objects. Columns are located by header NAME, so a renamed column fails
-   loudly here rather than silently reading prices out of the wrong cell.
-
-   Note "FININSHING": that typo is Vavastone's own column name and must be
-   matched exactly. */
-function adaptMelbourne(rows, manifest){
-  if(!rows || rows.length < 2) return [];
-  const head = rows[0].map(c => String(c||'').trim().toUpperCase());
-  const ix = name => head.indexOf(name);
-
-  const C = {
-    lot: ix('LOT #'), block: ix('BLOCK'), material: ix('MATERIAL'),
-    category: ix('CATEGORY'), finish: ix('FININSHING'), thickness: ix('THICKNESS'),
-    height: ix('SELL HEIGHT'), width: ix('SELL WIDTH'),
-    status: ix('STATUS'), defective: ix('DEFECTIVE'), available: ix('AVAILABLE'),
-    location: ix('LOCATION'),
-  };
-  if(C.lot < 0 || C.material < 0) return [];
-
-  const tierIx = ix(String((clientInfo && clientInfo.tier) || 'price1').toUpperCase());
-
-  /* The report is ONE ROW PER SLAB. Grouping into lots is not cosmetic — an
-     ungrouped render would be thousands of near-identical cards. Key mirrors
-     the main site's: block + material + finish + thickness. */
-  const groups = new Map();
-
-  for(let r = 1; r < rows.length; r++){
-    const row = rows[r];
-    if(!row || !row.length) continue;
-
-    const cell = i => i >= 0 ? String(row[i] ?? '').trim() : '';
-    const lot = cell(C.lot) || cell(C.block);
-    if(!lot) continue;
-
-    const status = cell(C.status).toUpperCase();
-    const inTransit = /TRANSIT/.test(status);
-    // Anything sold, assigned or out is not for sale — exclude it.
-    if(!inTransit && status && status !== 'AVAILABLE') continue;
-    if(/DEFECT|BAD/i.test(cell(C.defective))) continue;
-
-    /* inTransit is part of the key: a lot with some slabs landed and some still
-       arriving must not merge, or the in-stock count would include slabs that
-       are not here yet. */
-    const key = [cell(C.block), cell(C.material), cell(C.finish),
-                 cell(C.thickness), inTransit ? 'T' : 'S'].join('||');
-    let g = groups.get(key);
-    if(!g){
-      /* SELL HEIGHT / SELL WIDTH are in CENTIMETRES (191 x 297), unlike the NZ
-         sheet which is mm. Converted here so both sources display the same
-         units — otherwise a 3000mm NZ slab sits beside a "297" Melbourne one. */
-      const h = num(cell(C.height)), w = num(cell(C.width));
-      g = {
-        source: 'melbourne', lot,
-        name: cell(C.material),
-        category: cell(C.category),
-        finish: cell(C.finish),
-        thickness: num(cell(C.thickness)),
-        width: w ? Math.round(w * 10) : null,
-        height: h ? Math.round(h * 10) : null,
-        qty: 0,
-        state: inTransit ? 'mel_transit' : 'mel_stock',
-        availability: inTransit ? 'Arriving Melbourne' : 'In stock — Melbourne',
-        currency: 'AUD', priceBasis: 'per_m2',
-        notes: '', eta: null, renders: [], image: null,
-        _price: tierIx >= 0 ? num(cell(tierIx)) : null,
-      };
-      g.area = (g.width && g.height) ? +((g.width * g.height) / 1e6).toFixed(2) : null;
-
-      const entry = manifest[lot] || manifest[cell(C.block)] || {};
-      g.image = entry.slab || null;
-      g.renders = Array.isArray(entry.projects) ? entry.projects : [];
-
-      groups.set(key, g);
-    }
-    g.qty++;
-  }
-
-  return [...groups.values()].map(g => {
-    const { _price, ...pub } = g;
-    // Prices only when the signed-in client is entitled — same rule as direct.
-    if(hasPricing && _price) pub.price = _price;
-    return pub;
-  }).sort((a,b) => a.name.localeCompare(b.name));
-}
 const num = v => { const n = Number(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(n) && n ? n : null; };
 
 /* ── Filters, applied across BOTH sections ────────────────── */
@@ -591,14 +468,9 @@ function render(){
   $('countDirect').textContent = d.length
     ? `${d.length} lot${d.length>1?'s':''}` : '';
 
-  const m = MEL.filter(match);
-  $('gridMel').innerHTML = m.map(card).join('');
-  $('emptyMel').style.display = (melLoaded && !m.length) ? 'block' : 'none';
-  $('countMel').textContent = melLoaded && m.length
-    ? `${m.length} lot${m.length>1?'s':''}` : '';
 }
 
-const find = key => [...DIRECT, ...MEL].find(s => (s.source+':'+s.lot) === key);
+const find = key => DIRECT.find(s => (s.source+':'+s.lot) === key);
 
 /* ── Modal ────────────────────────────────────────────────── */
 function openModal(key){
@@ -672,7 +544,7 @@ function updateShortlistUI(){
   $('bar').classList.toggle('show', n > 0);
 }
 function openDrawer(){
-  const groups = { direct: [], melbourne: [] };
+  const groups = { direct: [] };
   shortlist.forEach(x => groups[x.source] && groups[x.source].push(x));
 
   let h = '';
@@ -686,7 +558,6 @@ function openDrawer(){
     </div>`).join('') : '';
 
   h += block(groups.direct, 'Direct to New Zealand');
-  h += block(groups.melbourne, 'Melbourne warehouse');
   $('slList').innerHTML = h;
 
   const any = shortlist.length > 0;
@@ -771,7 +642,6 @@ async function doLogin(){
       DIRECT = (sd.rows||[]).map(x => Object.assign({source:'direct'}, x));
       hasPricing = Boolean(sd.pricing);
     }
-    if(melLoaded){ melLoaded = false; MEL = []; $('melToggle').style.display='block'; await loadMelbourne(); }
 
     $('signInBtn').style.display = 'none';
     $('signOutBtn').style.display = 'inline-block';
@@ -791,7 +661,6 @@ async function signOut(){
   /* Reload from the anonymous feed so tiered prices leave memory, rather than
      merely being hidden from view. */
   await boot();
-  if(melLoaded){ melLoaded = false; MEL = []; $('melToggle').style.display = 'block'; }
   render();
 }
 
