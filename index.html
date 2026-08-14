@@ -1505,7 +1505,7 @@ async function driveList(folderId,resourceKey,extraQuery=''){
 }
 
 // ── STOCK ─────────────────────────────────────────────────────
-let allStones=[],filteredStones=[],displayedCount=0,_rawStockRows=null;
+let allStones=[],filteredStones=[],displayedCount=0,_rawStockRows=null,_stockModifiedAt=null;
 const PAGE_SIZE=24;
 let activeCategory='All',activeSort='gallery';
 let accessToken2=null;
@@ -1534,6 +1534,10 @@ async function loadStock(){
       await tryLoadStockSnapshot();return;
     }
     const data=await resp.json();
+    // Drive modified time of the ListedReport — i.e. when vsg-sync.sh last
+    // landed a fresh report. All three stock endpoints (public, client, admin)
+    // return it as `modified`. Null if an old cached function response omits it.
+    _stockModifiedAt=(data&&data.modified)?(Date.parse(data.modified)||null):null;
     _rawStockRows=data&&data.rows;
     if(!_rawStockRows||_rawStockRows.length<2){await tryLoadStockSnapshot();return;}
     parseStockRows(_rawStockRows,g('enabledLocations')||['VSG']);
@@ -1662,12 +1666,13 @@ function parseStockRows(rows,enabledLocations){
   calcPriceThresholds();
   buildFinishingFilter();
   // (snapshot write removed — /api/stock caches server-side instead)
-  // Freshness line replaces the old "Live inventory" label. Stock is fetched at
-  // page load (through /api/stock's short CDN cache), so time-since-load is the
-  // honest measure — it starts at "just now" and ticks up while the tab sits
-  // open, prompting long-idle visitors to refresh rather than implying a page
-  // from this morning is still current.
-  stockLoadedAt=Date.now();
+  // Freshness line replaces the old "Live inventory" label. The time shown is
+  // the Drive modified time of the stock report — when the data was actually
+  // refreshed — NOT when this page loaded. Page-load time meant every visit
+  // read "Stock as at <right now>", which is a claim rather than a fact, and
+  // read as live even when the sync had been dead for days. Falls back to load
+  // time only if `modified` is missing, so the line never disappears.
+  stockLoadedAt=_stockModifiedAt||Date.now();
   setStatus('live',freshnessLabel());
   startFreshnessTicker();
   const pendingFilter=sessionStorage.getItem('vsg-pending-filter');
@@ -2786,16 +2791,36 @@ function loadMore(){
 // Exact minutes for the first hour; a clock time after that (a stale figure
 // like "Updated 4 hours ago" says "refresh me" better than a big minute count).
 let stockLoadedAt=null,_freshnessTimer=null;
-// Clock time, not relative wording. "Just now" was vague enough to read as a
-// claim; a stated time is a fact the visitor can judge for themselves — and it
-// ages honestly in a stale tab ("Stock as at 9:02 am" read at 3pm speaks for
-// itself). The ticker only matters across midnight, when the weekday appears.
+// Clock time, not relative wording. The value is the report's own timestamp
+// (see _stockModifiedAt), so it ages honestly both in a stale tab and across a
+// dead sync — "Stock as at 4:28 pm AEST Friday" on a Monday says what it needs
+// to. The ticker only matters across midnight, when the weekday appears.
+//
+// Always Melbourne, never the visitor's device clock. The time refers to a
+// warehouse in Dandenong South; rendering it in Perth, Auckland or London local
+// time answered a question nobody asked and quietly shifted the stated hour.
+// The zone abbreviation comes from Intl rather than a hardcoded string, so it
+// flips AEST/AEDT with daylight saving on its own. The same-day test is done in
+// Melbourne too — otherwise a late-evening overseas visitor gets the weekday
+// appended to a report that is, in Melbourne, from today.
+const MELB_TZ='Australia/Melbourne';
+function melbTime(d){
+  try{return d.toLocaleTimeString('en-AU',{timeZone:MELB_TZ,hour:'numeric',minute:'2-digit',timeZoneName:'short'});}
+  catch(e){return d.toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit'});}
+}
+function melbDayKey(d){
+  try{return d.toLocaleDateString('en-AU',{timeZone:MELB_TZ});}
+  catch(e){return d.toDateString();}
+}
+function melbWeekday(d){
+  try{return d.toLocaleDateString('en-AU',{timeZone:MELB_TZ,weekday:'long'});}
+  catch(e){return d.toLocaleDateString('en-AU',{weekday:'long'});}
+}
 function freshnessLabel(){
   if(!stockLoadedAt)return '';
   const d=new Date(stockLoadedAt);
-  const t=d.toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit'});
-  const sameDay=new Date().toDateString()===d.toDateString();
-  return sameDay?'Stock as at '+t:'Stock as at '+t+' '+d.toLocaleDateString('en-AU',{weekday:'long'});
+  const sameDay=melbDayKey(new Date())===melbDayKey(d);
+  return sameDay?'Stock as at '+melbTime(d):'Stock as at '+melbTime(d)+' '+melbWeekday(d);
 }
 function startFreshnessTicker(){
   clearInterval(_freshnessTimer);
@@ -3845,6 +3870,11 @@ function renderAdminMissing(){
   const retakeBlocks=cms.retakePhotos||[];
   const retakeStones=allStones.filter(s=>retakeBlocks.includes((s.block||'').toString())).sort((a,b)=>a.name.localeCompare(b.name));
   document.getElementById('adminPanel').innerHTML=`
+    <div style="margin-bottom:22px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <button onclick="downloadMissingListAdmin()" class="admin-save-btn" style="padding:8px 20px;font-size:10px">Download Photo List (CSV)</button>
+      <button onclick="copyMissingListAdmin()" class="admin-reset-btn" style="padding:8px 20px;font-size:10px">Copy (TSV)</button>
+      <span style="font-size:11px;color:rgba(200,184,154,.4)">${missing.length} missing &middot; ${retakeStones.length} retake &mdash; one list, with a Status column</span>
+    </div>
     ${retakeStones.length?`<div class="admin-section">
       <div class="admin-section-title" style="color:#c8943a">Needs Photo Retake <span style="font-size:14px;color:rgba(200,150,58,.6);font-family:'Jost',sans-serif;font-weight:300">(${retakeStones.length} lot${retakeStones.length!==1?'s':''} flagged)</span></div>
       <p style="font-size:12px;color:rgba(200,184,154,.45);line-height:1.7;margin-bottom:20px">These lots have a photo but it's been flagged for replacement. Once the new photo is uploaded to Drive, clear the flag from each lot below or from the stone's modal.</p>
@@ -3865,9 +3895,6 @@ function renderAdminMissing(){
       <div class="admin-section-title">Missing Slab Images <span style="font-size:14px;color:var(--stone-dark);font-family:'Jost',sans-serif;font-weight:300">(${missing.length} stones hidden from public)</span></div>
       <p style="font-size:12px;color:rgba(200,184,154,.45);line-height:1.7;margin-bottom:20px">Add a photo to the Slab Images folder in Google Drive. The filename must match the format below. Each stone will appear in the gallery automatically on next page load.</p>
       <p style="font-size:11px;color:rgba(200,184,154,.3);margin-bottom:12px;font-family:monospace">Format: StoneName-Finish-BlockNumber-VSG.jpg</p>
-      <div style="margin-bottom:16px;display:flex;gap:10px">
-        <button onclick="copyMissingListAdmin()" class="admin-save-btn" style="padding:8px 20px;font-size:10px">Copy Full List (TSV)</button>
-      </div>
       <div class="admin-missing-grid">
         ${missing.map(s=>{
           const suggested=[s.name.replace(/\s+/g,'-'),s.finishing||'Honed',cleanBlockNum(s.block,s.finishing),'VSG'].join('-')+'.jpg';
@@ -3884,11 +3911,64 @@ function renderAdminMissing(){
   `;
 }
 function copyAdminText(text,el){navigator.clipboard.writeText(text).then(()=>{const o=el.style.color;el.style.color='var(--gold)';setTimeout(()=>el.style.color=o,1200);});}
+// ── PHOTO TO-DO EXPORT ───────────────────────────────────────
+// One list for whoever is shooting: lots with no photo at all AND lots whose
+// existing photo has been flagged for replacement. They are two problems on
+// screen but the same trip round the warehouse, so they ship as one report
+// with a Status column rather than two exports to reconcile by hand.
+function buildPhotoTodoRows(){
+  const retakeBlocks=cms.retakePhotos||[];
+  const rows=allStones
+    .filter(s=>s.noImage===true||retakeBlocks.includes((s.block||'').toString()))
+    .map(s=>{
+      const isMissing=s.noImage===true;
+      const isRetake=retakeBlocks.includes((s.block||'').toString());
+      return{
+        // A lot can be both — flagged for retake and with no photo currently
+        // on file. Saying so is more useful than picking one label.
+        status:(isMissing&&isRetake)?'Missing + Retake':(isMissing?'Missing':'Retake'),
+        category:s.category||'',
+        name:s.name||'',
+        block:'Block #'+(s.block||''),
+        finishing:s.finishing||'',
+        size:(s.width&&s.height)?s.width+'×'+s.height+'mm':'',
+        qty:parseInt(s.qty||0),
+        filename:[String(s.name||'').replace(/\s+/g,'-'),s.finishing||'Honed',cleanBlockNum(s.block,s.finishing),'VSG'].join('-')+'.jpg'
+      };
+    });
+  // Missing first — those lots are hidden from the public site entirely, so
+  // they cost enquiries in a way a merely dated photo does not. Then most
+  // slabs first, so the biggest lots get shot first within each group.
+  const order={'Missing':0,'Missing + Retake':0,'Retake':1};
+  rows.sort((a,b)=>(order[a.status]-order[b.status])||(b.qty-a.qty)||a.category.localeCompare(b.category)||a.name.localeCompare(b.name));
+  return rows;
+}
+const PHOTO_TODO_HEADERS=['Status','Category','Name','Block','Finishing','Size','Slabs in Stock','Suggested Filename'];
+function photoTodoValues(r){return[r.status,r.category,r.name,r.block,r.finishing,r.size,r.qty,r.filename];}
+
 function copyMissingListAdmin(){
-  const missing=allStones.filter(s=>s.noImage===true).sort((a,b)=>(parseInt(b.qty||0)-parseInt(a.qty||0))||(a.category||'').localeCompare(b.category||'')||a.name.localeCompare(b.name));
-  const rows=missing.map(s=>[s.category,s.name,'Block #'+s.block,s.finishing,s.width&&s.height?s.width+'×'+s.height+'mm':'',parseInt(s.qty||0),
-    [s.name.replace(/\s+/g,'-'),s.finishing||'Honed',cleanBlockNum(s.block,s.finishing),'VSG'].join('-')+'.jpg'].join('\t'));
-  navigator.clipboard.writeText('Category\tName\tBlock\tFinishing\tSize\tSlabs in Stock\tSuggested Filename\n'+rows.join('\n')).then(()=>showToast(`Copied ${missing.length} rows`));
+  const rows=buildPhotoTodoRows();
+  const tsv=[PHOTO_TODO_HEADERS.join('\t')].concat(rows.map(r=>photoTodoValues(r).join('\t'))).join('\n');
+  navigator.clipboard.writeText(tsv).then(()=>showToast(`Copied ${rows.length} rows`));
+}
+
+// A real .csv file — opens straight in Excel, no paste step. Fields are quoted
+// because stone names and finishes can carry commas, and a BOM is prepended so
+// Excel reads the × in the size column as UTF-8 rather than mojibake.
+function downloadMissingListAdmin(){
+  const rows=buildPhotoTodoRows();
+  if(!rows.length){showToast('Nothing to export — no missing or retake lots');return;}
+  const q=v=>{const t=String(v==null?'':v);return /[",\n\r]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t;};
+  const csv=[PHOTO_TODO_HEADERS.map(q).join(',')]
+    .concat(rows.map(r=>photoTodoValues(r).map(q).join(','))).join('\r\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='vsg-photo-todo-'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  showToast(`Downloaded ${rows.length} rows`);
 }
 
 async function renderAdminCoverage(){
