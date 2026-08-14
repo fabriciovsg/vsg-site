@@ -59,10 +59,30 @@ export default guardPost(async (req, body) => {
   }
 
   clearFailures(key);
+
+  // NZ direct-stock capability travels in the SIGNED token, never as something
+  // the caller can assert. Flags describe what a client may see, not where they
+  // are: NZ customers also buy Melbourne stock, and direct access is granted
+  // per client rather than implied by region.
+  //   directAccess  — may view direct/in-transit stock
+  //   directPricing — may see prices on it
+  //   directTier    — price tier for direct stock (defaults to their Melbourne tier)
+  // email is included so /api/direct-stock can confirm the signed-in client is
+  // the one the slug belongs to; without it, any trade login would unlock
+  // prices on another customer's link.
   return json(req, {
     name: match.name,
     tier: match.tier,
-    token: issueToken('client', { tier: match.tier, name: match.name }),
+    directAccess: Boolean(match.directAccess),
+    directPricing: Boolean(match.directPricing),
+    token: issueToken('client', {
+      tier: match.tier,
+      name: match.name,
+      email,
+      directAccess: Boolean(match.directAccess),
+      directPricing: Boolean(match.directPricing),
+      directTier: match.directTier || match.tier || null,
+    }),
     expiresIn: 2 * 60 * 60,
   });
 });

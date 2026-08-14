@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direct Stock — Victoria Stone Gallery</title>
+
+<!-- Private trade surface. The X-Robots-Tag header in netlify.toml is the real
+     control; this is belt and braces. The path is deliberately NOT in robots.txt
+     — that file is public, so a Disallow line would advertise the address. -->
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+
+<!-- Theme first (palette + every body[data-theme] variant), then the shared
+     chrome (nav, footer, buttons, typography). Between them this page inherits
+     everything except the stock grid itself, which is why it can be a separate
+     document without drifting from the main site. -->
+<link rel="stylesheet" href="/assets/vsg-theme.css">
+<link rel="stylesheet" href="/stones/stones-shared.css">
+<script>try{document.body&&document.body.setAttribute('data-theme',localStorage.getItem('vsg-site-theme')||'dark')}catch(e){}</script>
+
+<style>
+/* Every colour routes through a var. A literal hex here could not be themed —
+   the one thing vsg-theme.css explicitly warns about. */
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface-dark);color:var(--surface-dark-text);
+     font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+
+.nz-wrap{max-width:1400px;margin:0 auto;padding:0 24px}
+.nz-hero{padding:120px 0 40px}
+.nz-eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+            color:var(--gold);margin-bottom:14px}
+.nz-title{font-family:Georgia,'Times New Roman',serif;font-weight:400;
+          font-size:clamp(32px,5vw,52px);margin:0 0 14px;line-height:1.1}
+.nz-lede{color:var(--surface-dark-text-secondary);max-width:60ch;line-height:1.7;margin:0}
+
+.nz-section{padding:48px 0 8px;scroll-margin-top:90px}
+.nz-section-head{display:flex;align-items:baseline;justify-content:space-between;
+                 gap:16px;flex-wrap:wrap;border-bottom:1px solid rgba(184,150,60,.25);
+                 padding-bottom:12px;margin-bottom:8px}
+.nz-section-title{font-family:Georgia,serif;font-size:26px;margin:0;font-weight:400}
+.nz-section-note{color:var(--surface-dark-text-muted);font-size:14px;margin:10px 0 22px;
+                 max-width:70ch;line-height:1.6}
+.nz-count{color:var(--surface-dark-text-faint);font-size:13px}
+
+.nz-filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 22px}
+.nz-chip{background:transparent;border:1px solid rgba(200,184,154,.28);
+         color:var(--surface-dark-text-secondary);padding:7px 15px;border-radius:2px;
+         font-size:12.5px;letter-spacing:.04em;cursor:pointer;transition:.18s}
+.nz-chip:hover{border-color:var(--gold);color:var(--gold-light)}
+.nz-chip[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);
+                              color:var(--black);font-weight:600}
+
+.nz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+         gap:14px;margin-bottom:8px}
+.nz-card{background:var(--surface-card-dark);border:1px solid transparent;
+         cursor:pointer;transition:.2s;display:flex;flex-direction:column}
+.nz-card:hover{background:var(--surface-card-dark-hover);border-color:rgba(184,150,60,.4);
+               transform:translateY(-2px)}
+.nz-card-img{aspect-ratio:3/2;background:var(--surface-card-img-dark);overflow:hidden;
+             position:relative;display:flex;align-items:center;justify-content:center}
+.nz-card-img img{width:100%;height:100%;object-fit:cover;display:block}
+.nz-noimg{color:var(--surface-dark-text-faint);font-size:11px;letter-spacing:.1em;
+          text-transform:uppercase;text-align:center;padding:0 12px}
+.nz-badge{position:absolute;top:10px;left:10px;font-size:10.5px;letter-spacing:.08em;
+          text-transform:uppercase;padding:5px 9px;border-radius:2px;font-weight:600;
+          background:var(--surface-overlay-deep);color:var(--gold-light);
+          border:1px solid rgba(184,150,60,.45)}
+.nz-badge.in_stock{background:var(--gold);color:var(--black);border-color:var(--gold)}
+.nz-badge.mel{background:var(--surface-overlay-alt);color:var(--surface-dark-text-secondary);
+              border-color:rgba(200,184,154,.3)}
+.nz-star{position:absolute;top:8px;right:8px;background:var(--surface-overlay-deep);
+         border:1px solid rgba(200,184,154,.3);color:var(--surface-dark-text-faint);
+         width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;
+         display:flex;align-items:center;justify-content:center;transition:.15s}
+.nz-star:hover{color:var(--gold-light);border-color:var(--gold)}
+.nz-star[aria-pressed="true"]{color:var(--gold);border-color:var(--gold)}
+.nz-card-body{padding:13px 14px 15px}
+.nz-card-name{font-family:Georgia,serif;font-size:16px;margin:0 0 4px;line-height:1.25}
+.nz-card-meta{color:var(--surface-dark-text-faint);font-size:12px;margin:0 0 8px}
+.nz-card-avail{font-size:11.5px;letter-spacing:.05em;color:var(--gold-light);margin:0}
+.nz-card-price{font-size:14px;color:var(--surface-dark-text);margin:8px 0 0;font-weight:600}
+.nz-card-price small{font-weight:400;color:var(--surface-dark-text-faint);font-size:11px}
+.nz-signin-hint{font-size:11.5px;color:var(--surface-dark-text-faint);margin:8px 0 0}
+.nz-signin-hint button{background:none;border:none;color:var(--gold-light);
+                       cursor:pointer;padding:0;font:inherit;text-decoration:underline}
+
+.nz-expander{width:100%;background:transparent;border:1px solid rgba(200,184,154,.28);
+             color:var(--surface-dark-text-secondary);padding:16px;cursor:pointer;
+             font-size:14px;letter-spacing:.05em;transition:.18s;margin:8px 0 32px}
+.nz-expander:hover{border-color:var(--gold);color:var(--gold-light)}
+
+.nz-empty{color:var(--surface-dark-text-faint);padding:40px 0;text-align:center;font-size:14px}
+
+/* Overlay chrome deliberately uses --surface-overlay-*, which no light theme
+   remaps — cream text on a cream panel is the failure mode that group exists
+   to prevent. */
+.nz-modal,.nz-drawer-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);
+                        z-index:900;display:none;align-items:center;justify-content:center;padding:24px}
+.nz-modal.open,.nz-drawer-bg.open{display:flex}
+.nz-modal-box{background:var(--surface-overlay);max-width:1000px;width:100%;
+              max-height:88vh;overflow-y:auto;position:relative;padding:0}
+.nz-modal-img{background:var(--surface-overlay-deep);aspect-ratio:16/9;
+              display:flex;align-items:center;justify-content:center}
+.nz-modal-img img{width:100%;height:100%;object-fit:contain}
+.nz-modal-body{padding:24px 28px 30px}
+.nz-modal-name{font-family:Georgia,serif;font-size:26px;margin:0 0 6px;color:var(--cream)}
+.nz-specs{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+          gap:14px;margin:20px 0}
+.nz-spec-l{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+           color:var(--stone-dark);margin:0 0 3px}
+.nz-spec-v{font-size:15px;color:var(--cream);margin:0}
+.nz-thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.nz-thumbs img{width:78px;height:52px;object-fit:cover;cursor:pointer;
+               border:1px solid transparent;transition:.15s}
+.nz-thumbs img:hover{border-color:var(--gold)}
+.nz-close{position:absolute;top:12px;right:14px;background:var(--surface-overlay-deep);
+          border:1px solid rgba(200,184,154,.3);color:var(--cream);width:34px;height:34px;
+          border-radius:50%;cursor:pointer;font-size:18px;line-height:1;z-index:2}
+
+.nz-drawer{background:var(--surface-overlay);max-width:520px;width:100%;height:100%;
+           margin-left:auto;overflow-y:auto;padding:26px 24px}
+.nz-drawer-bg{align-items:stretch;justify-content:flex-end;padding:0}
+.nz-sl-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(200,184,154,.14)}
+.nz-sl-item img{width:74px;height:50px;object-fit:cover;background:var(--surface-overlay-alt)}
+.nz-sl-group{font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+             color:var(--gold);margin:22px 0 4px}
+.nz-sl-x{background:none;border:none;color:var(--surface-dark-text-faint);cursor:pointer;
+         font-size:16px;margin-left:auto;padding:0 4px}
+.nz-sl-x:hover{color:var(--gold-light)}
+
+.nz-form input,.nz-form textarea{width:100%;background:var(--surface-overlay-alt);
+  border:1px solid rgba(200,184,154,.22);color:var(--cream);padding:11px 13px;
+  margin-bottom:11px;font-family:inherit;font-size:14px;border-radius:2px}
+.nz-form input:focus,.nz-form textarea:focus{outline:none;border-color:var(--gold)}
+.nz-btn{background:var(--gold);color:var(--black);border:none;padding:13px 26px;
+        font-size:13px;letter-spacing:.09em;text-transform:uppercase;cursor:pointer;
+        font-weight:600;transition:.18s;border-radius:2px}
+.nz-btn:hover{background:var(--gold-light)}
+.nz-btn:disabled{opacity:.5;cursor:not-allowed}
+.nz-btn-ghost{background:transparent;border:1px solid var(--gold);color:var(--gold-light)}
+.nz-btn-ghost:hover{background:rgba(184,150,60,.12)}
+
+.nz-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface-nav);
+        border-top:1px solid rgba(184,150,60,.35);padding:13px 24px;display:none;
+        align-items:center;justify-content:space-between;gap:16px;z-index:700;
+        backdrop-filter:blur(8px)}
+.nz-bar.show{display:flex}
+.nz-bar-txt{font-size:13.5px;color:var(--surface-dark-text-secondary)}
+
+.nz-topbar{position:fixed;top:0;left:0;right:0;background:var(--surface-nav);
+           padding:14px 24px;display:flex;align-items:center;justify-content:space-between;
+           z-index:800;backdrop-filter:blur(8px);
+           border-bottom:1px solid rgba(200,184,154,.12)}
+.nz-topbar-name{font-family:Georgia,serif;font-size:15px;color:var(--cream)}
+.nz-topbar-name span{color:var(--gold);font-size:11px;letter-spacing:.14em;
+                     text-transform:uppercase;display:block;font-family:inherit}
+.nz-topbar-acts{display:flex;gap:10px;align-items:center}
+.nz-link{background:none;border:none;color:var(--surface-dark-text-secondary);
+         cursor:pointer;font-size:12.5px;letter-spacing:.05em;padding:8px 12px;font-family:inherit}
+.nz-link:hover{color:var(--gold-light)}
+
+.nz-gate{max-width:520px;margin:180px auto;text-align:center;padding:0 24px}
+.nz-note{background:rgba(184,150,60,.08);border-left:2px solid var(--gold);
+         padding:12px 16px;font-size:13px;color:var(--surface-dark-text-secondary);
+         margin:0 0 22px;line-height:1.6}
+.nz-err{color:#d9776a;font-size:13px;margin:0 0 10px;min-height:16px}
+@media(max-width:640px){.nz-hero{padding:100px 0 30px}.nz-modal-body{padding:18px}}
+</style>
+</head>
+
+<body data-theme="dark">
+
+<!-- Invalid or revoked slug. One message for every rejection: distinguishing
+     "no such link" from "revoked" would let someone probe the customer list. -->
+<div id="gate" class="nz-gate" style="display:none">
+  <div class="nz-eyebrow">Victoria Stone Gallery</div>
+  <h1 class="nz-title" style="font-size:30px">This link is not valid</h1>
+  <p class="nz-lede" style="margin:0 auto">
+    It may have expired or been replaced. Please get in touch and we'll send you a current one.
+  </p>
+  <p style="margin-top:26px">
+    <a class="nz-btn" style="text-decoration:none;display:inline-block"
+       href="mailto:sales@victoriastonegallery.com.au?subject=Direct%20stock%20access">Contact us</a>
+  </p>
+</div>
+
+<div id="app" style="display:none">
+
+  <header class="nz-topbar">
+    <div class="nz-topbar-name"><span>Direct Stock</span><b id="clientName">Victoria Stone Gallery</b></div>
+    <div class="nz-topbar-acts">
+      <button class="nz-link" id="signInBtn" onclick="openLogin()">Sign in for pricing</button>
+      <button class="nz-link" id="signOutBtn" onclick="signOut()" style="display:none">Sign out</button>
+      <button class="nz-btn nz-btn-ghost" onclick="openDrawer()" id="slBtn"
+              style="padding:8px 16px">Shortlist (<span id="slCount">0</span>)</button>
+    </div>
+  </header>
+
+  <div class="nz-wrap">
+
+    <section class="nz-hero">
+      <div class="nz-eyebrow">Trade access</div>
+      <h1 class="nz-title">Direct to New Zealand</h1>
+      <p class="nz-lede">
+        Material shipping direct to New Zealand — landed, on the water, or available to
+        order against the next container. No trans-Tasman freight, and no double handling
+        through Melbourne.
+      </p>
+    </section>
+
+    <div class="nz-filters" id="filters"></div>
+
+    <section class="nz-section" id="secDirect">
+      <div class="nz-section-head">
+        <h2 class="nz-section-title">Direct to New Zealand</h2>
+        <span class="nz-count" id="countDirect"></span>
+      </div>
+      <p class="nz-section-note">
+        Shipped direct to New Zealand. Lead times and freight differ from our Melbourne
+        stock — ask us for landed terms on anything here.
+      </p>
+      <div class="nz-grid" id="gridDirect"></div>
+      <div class="nz-empty" id="emptyDirect" style="display:none">
+        Nothing matching those filters in the direct stock right now.
+      </div>
+    </section>
+
+    <section class="nz-section" id="secMel">
+      <div class="nz-section-head">
+        <h2 class="nz-section-title">Melbourne warehouse stock</h2>
+        <span class="nz-count" id="countMel"></span>
+      </div>
+      <p class="nz-section-note">
+        Held in Dandenong South and shipped from Melbourne. Some lots are in transit to
+        Melbourne — those show their own arrival date, which is separate from the direct
+        shipments above.
+      </p>
+      <!-- Lazy: several hundred cards should not load ahead of the dozens the
+           customer actually came for. -->
+      <button class="nz-expander" id="melToggle" onclick="loadMelbourne()">
+        Browse Melbourne warehouse stock →
+      </button>
+      <div class="nz-grid" id="gridMel"></div>
+      <div class="nz-empty" id="emptyMel" style="display:none">
+        Nothing matching those filters in the Melbourne stock.
+      </div>
+    </section>
+
+    <div style="height:120px"></div>
+  </div>
+
+  <div class="nz-bar" id="bar">
+    <div class="nz-bar-txt"><b id="barCount">0</b> slabs shortlisted</div>
+    <button class="nz-btn" onclick="openDrawer()">Send enquiry</button>
+  </div>
+</div>
+
+<!-- Stone modal -->
+<div class="nz-modal" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="nz-modal-box">
+    <button class="nz-close" onclick="closeModal()">&times;</button>
+    <div class="nz-modal-img"><img id="mImg" alt=""></div>
+    <div class="nz-modal-body">
+      <h2 class="nz-modal-name" id="mName"></h2>
+      <p class="nz-card-avail" id="mAvail"></p>
+      <div class="nz-specs" id="mSpecs"></div>
+      <div class="nz-thumbs" id="mThumbs"></div>
+      <p id="mNotes" style="color:var(--surface-dark-text-secondary);font-size:13.5px;
+         line-height:1.65;margin:18px 0 0"></p>
+      <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="nz-btn" id="mStar" onclick="toggleFromModal()">Add to shortlist</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Shortlist drawer + enquiry -->
+<div class="nz-drawer-bg" id="drawerBg" onclick="if(event.target===this)closeDrawer()">
+  <div class="nz-drawer">
+    <button class="nz-close" style="position:static;float:right" onclick="closeDrawer()">&times;</button>
+    <h2 style="font-family:Georgia,serif;font-weight:400;margin:0 0 4px;color:var(--cream)">Your shortlist</h2>
+    <p style="color:var(--surface-dark-text-faint);font-size:12.5px;margin:0 0 8px">
+      Direct and Melbourne slabs can be enquired about together.
+    </p>
+    <div id="slList"></div>
+
+    <div id="slEmpty" class="nz-empty">Nothing shortlisted yet.</div>
+
+    <div id="slForm" style="display:none;margin-top:26px">
+      <p class="nz-note" id="mixedNote" style="display:none">
+        Your shortlist mixes currencies, so no total is shown — we'll quote each
+        line in its own currency.
+      </p>
+      <!-- Netlify Forms, same mechanism as the main contact form. A distinct
+           form name keeps trade enquiries out of the public contact inbox. -->
+      <form class="nz-form" name="nz-enquiry" method="POST" data-netlify="true"
+            data-netlify-honeypot="bot-field" id="enqForm">
+        <input type="hidden" name="form-name" value="nz-enquiry">
+        <input type="hidden" name="bot-field">
+        <input type="hidden" name="slabs" id="slabsField">
+        <input type="hidden" name="account" id="accountField">
+        <input class="form-input" type="text" name="name" placeholder="Your name" required>
+        <input class="form-input" type="email" name="email" placeholder="Email" required>
+        <input class="form-input" type="tel" name="phone" placeholder="Phone (optional)">
+        <textarea name="message" rows="3" placeholder="Anything we should know?"></textarea>
+        <p class="nz-err" id="enqErr"></p>
+        <button class="nz-btn" type="submit" style="width:100%">Send enquiry</button>
+      </form>
+      <p style="text-align:center;margin:14px 0 0;font-size:12.5px">
+        <a id="mailtoFallback" href="#" style="color:var(--gold-light)">or email us directly</a>
+      </p>
+      <p id="enqOk" style="display:none;color:var(--gold-light);text-align:center;
+         margin-top:16px;line-height:1.6">
+        Thank you — we'll come back to you shortly.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Client login -->
+<div class="nz-modal" id="login" onclick="if(event.target===this)closeLogin()">
+  <div class="nz-modal-box" style="max-width:400px">
+    <div class="nz-modal-body">
+      <button class="nz-close" onclick="closeLogin()">&times;</button>
+      <h2 class="nz-modal-name" style="font-size:22px">Sign in for pricing</h2>
+      <p style="color:var(--surface-dark-text-faint);font-size:13px;line-height:1.6;margin:0 0 18px">
+        Your existing trade login — the same one you use for our Melbourne stock.
+      </p>
+      <div class="nz-form">
+        <input type="email" id="liEmail" placeholder="Email" autocomplete="username">
+        <input type="password" id="liPass" placeholder="Password" autocomplete="current-password">
+        <p class="nz-err" id="liErr"></p>
+        <button class="nz-btn" style="width:100%" id="liBtn" onclick="doLogin()">Sign in</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── VSG NZ Direct Stock ───────────────────────────────────────
+   Two data sources, two sections, one shortlist.
+
+   The slug in the URL grants access to the stock LIST and names the customer.
+   It is NOT authentication — prices come only from a signed login, checked
+   server-side. A URL sitting in a forwarded email must never expose terms.   */
+
+const SLUG = location.pathname.replace(/^\/+|\/+$/g,'');
+
+let DIRECT = [];          // NZ direct stock
+let MEL = [];             // Melbourne warehouse stock
+let melLoaded = false;
+let clientToken = null;   // in memory only — matches the main site's behaviour
+let clientInfo = null;
+let hasPricing = false;
+let filterCat = 'all';
+let filterState = 'all';
+let modalStone = null;
+
+/* Shortlist lives in sessionStorage: UI state, not a data source, and losing it
+   on every scroll-back would make the page useless. */
+const SL_KEY = 'vsg-nz-shortlist';
+let shortlist = [];
+try { shortlist = JSON.parse(sessionStorage.getItem(SL_KEY) || '[]'); } catch(e) {}
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,
+  c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* GA4 — namespaced. The main site's generate_lead and shortlist_email feed
+   Google Ads conversion imports; a private page seen by six known customers
+   must not inflate the counts those campaigns optimise against. */
+function track(name, params){
+  try { if(window.gtag) gtag('event', name, Object.assign({page_section:'nz_direct'}, params||{})); }
+  catch(e){}
+}
+
+/* ── Boot ─────────────────────────────────────────────────── */
+async function boot(){
+  try{
+    const r = await fetch('/api/direct-stock?slug=' + encodeURIComponent(SLUG));
+    if(!r.ok){ $('gate').style.display='block'; return; }
+    const d = await r.json();
+    DIRECT = (d.rows||[]).map(s => Object.assign({source:'direct'}, s));
+    clientInfo = d.client || null;
+    hasPricing = Boolean(d.pricing);
+    $('app').style.display='block';
+    if(clientInfo && clientInfo.name){
+      $('clientName').textContent = clientInfo.name;
+      document.title = 'Direct Stock — ' + clientInfo.name;
+    }
+    buildFilters();
+    render();
+    updateShortlistUI();
+    track('nz_page_view', { slabs: DIRECT.length });
+  }catch(e){
+    $('gate').style.display='block';
+  }
+}
+
+/* ── Melbourne stock, on demand ───────────────────────────── */
+async function loadMelbourne(){
+  if(melLoaded) return;
+  const btn = $('melToggle');
+  btn.textContent = 'Loading…'; btn.disabled = true;
+  try{
+    const url = clientToken ? '/api/stock-rows-client' : '/api/stock-rows';
+    const r = await fetch(url, clientToken
+      ? { headers:{ Authorization:'Bearer ' + clientToken } } : {});
+    if(!r.ok) throw new Error('stock');
+    const d = await r.json();
+    let manifest = {};
+    try{
+      const m = await fetch('/image-manifest-cdn.json');
+      if(m.ok) manifest = (await m.json()).manifest || {};
+    }catch(e){}
+
+    MEL = (d.rows||[]).map(row => adaptMelbourne(row, manifest)).filter(Boolean);
+    melLoaded = true;
+    btn.style.display = 'none';
+    render();
+  }catch(e){
+    btn.textContent = 'Could not load Melbourne stock — tap to retry';
+    btn.disabled = false;
+  }
+}
+
+/* Melbourne rows use the Vavastone field shape. Mapped into the same object the
+   direct rows use so one renderer and one shortlist serve both. */
+function adaptMelbourne(row, manifest){
+  const lot = String(row.LOT || row.lot || '').trim();
+  if(!lot) return null;
+  const entry = manifest[lot] || {};
+  const tier = (clientInfo && clientInfo.tier) || 'price1';
+  const price = row[tier] || row.price || null;
+  const inTransit = /transit/i.test(String(row.STATUS || row.status || ''));
+  return {
+    source:'melbourne', lot,
+    name: row.MATERIAL || row.material || row.name || '',
+    category: row.CATEGORY || row.category || '',
+    finish: row.FININSHING || row.FINISHING || row.finishing || '',
+    thickness: num(row.THICKNESS || row.thickness),
+    width: num(row.LENGTH || row.width), height: num(row.HEIGHT || row.height),
+    qty: num(row.QTY || row.qty),
+    state: inTransit ? 'mel_transit' : 'mel_stock',
+    availability: inTransit ? 'Arriving Melbourne' : 'In stock — Melbourne',
+    image: entry.slab || null,
+    renders: entry.projects || [],
+    price: hasPricing ? price : null,
+    currency: 'AUD', priceBasis: 'per_m2',
+    area: null, notes:''
+  };
+}
+const num = v => { const n = Number(v); return isFinite(n) && n ? n : null; };
+
+/* ── Filters, applied across BOTH sections ────────────────── */
+function buildFilters(){
+  const cats = [...new Set(DIRECT.map(s => s.category).filter(Boolean))].sort();
+  const states = [
+    ['all','All'], ['in_stock','In stock NZ'],
+    ['on_water','On the water'], ['to_order','To order']
+  ];
+  let h = '<button class="nz-chip" aria-pressed="true" onclick="setCat(\'all\')">All materials</button>';
+  cats.forEach(c => h += `<button class="nz-chip" onclick="setCat('${esc(c)}')">${esc(c)}</button>`);
+  h += '<span style="width:16px"></span>';
+  states.forEach(([v,l]) => h +=
+    `<button class="nz-chip" data-state="${v}" aria-pressed="${v==='all'}"
+             onclick="setState('${v}')">${l}</button>`);
+  $('filters').innerHTML = h;
+}
+function setCat(c){
+  filterCat = c;
+  [...$('filters').querySelectorAll('.nz-chip:not([data-state])')].forEach(b =>
+    b.setAttribute('aria-pressed', b.textContent === (c==='all'?'All materials':c)));
+  render();
+}
+function setState(s){
+  filterState = s;
+  [...$('filters').querySelectorAll('.nz-chip[data-state]')].forEach(b =>
+    b.setAttribute('aria-pressed', b.dataset.state === s));
+  render();
+}
+function match(s){
+  if(filterCat !== 'all' && s.category !== filterCat) return false;
+  if(filterState !== 'all' && s.source === 'direct' && s.state !== filterState) return false;
+  return true;
+}
+
+/* ── Rendering ────────────────────────────────────────────── */
+function card(s){
+  const key = s.source + ':' + s.lot;
+  const starred = shortlist.some(x => x.key === key);
+  const badgeCls = s.source === 'melbourne' ? 'mel' : s.state;
+
+  let price = '';
+  if(s.price){
+    const cur = s.currency === 'AUD' ? 'A$' : 'NZ$';
+    price = `<p class="nz-card-price">${cur}${Number(s.price).toLocaleString()}
+             <small>/m²</small></p>`;
+  } else if(!hasPricing){
+    price = `<p class="nz-signin-hint"><button onclick="event.stopPropagation();openLogin()">
+             Sign in for pricing</button></p>`;
+  }
+
+  const dims = [s.width && s.height ? `${s.width} × ${s.height}` : '',
+                s.thickness ? `${s.thickness}mm` : '',
+                s.qty ? `${s.qty} slab${s.qty>1?'s':''}` : ''].filter(Boolean).join(' · ');
+
+  return `<div class="nz-card" onclick="openModal('${key}')">
+    <div class="nz-card-img">
+      ${s.image ? `<img loading="lazy" src="${esc(s.image)}" alt="${esc(s.name)}">`
+                : `<div class="nz-noimg">Photo to come</div>`}
+      <span class="nz-badge ${badgeCls}">${esc(s.availability)}</span>
+      <button class="nz-star" aria-pressed="${starred}" title="Shortlist"
+              onclick="event.stopPropagation();toggleStar('${key}')">${starred?'★':'☆'}</button>
+    </div>
+    <div class="nz-card-body">
+      <h3 class="nz-card-name">${esc(s.name)}</h3>
+      <p class="nz-card-meta">${esc(s.finish)}${dims?' · '+esc(dims):''} · Lot ${esc(s.lot)}</p>
+      ${price}
+    </div></div>`;
+}
+
+function render(){
+  const d = DIRECT.filter(match);
+  $('gridDirect').innerHTML = d.map(card).join('');
+  $('emptyDirect').style.display = d.length ? 'none' : 'block';
+  $('countDirect').textContent = d.length
+    ? `${d.length} lot${d.length>1?'s':''}` : '';
+
+  const m = MEL.filter(match);
+  $('gridMel').innerHTML = m.map(card).join('');
+  $('emptyMel').style.display = (melLoaded && !m.length) ? 'block' : 'none';
+  $('countMel').textContent = melLoaded && m.length
+    ? `${m.length} lot${m.length>1?'s':''}` : '';
+}
+
+const find = key => [...DIRECT, ...MEL].find(s => (s.source+':'+s.lot) === key);
+
+/* ── Modal ────────────────────────────────────────────────── */
+function openModal(key){
+  const s = find(key); if(!s) return;
+  modalStone = s;
+  $('mImg').src = s.image || '';
+  $('mImg').style.display = s.image ? 'block' : 'none';
+  $('mName').textContent = s.name;
+  $('mAvail').textContent = s.availability;
+
+  const specs = [
+    ['Lot', s.lot], ['Material', s.category], ['Finish', s.finish],
+    ['Size', s.width && s.height ? `${s.width} × ${s.height} mm` : null],
+    ['Thickness', s.thickness ? s.thickness + ' mm' : null],
+    ['Available', s.qty ? s.qty + ' slabs' : null],
+    ['Area', s.area ? s.area + ' m² each' : null],
+  ];
+  if(s.price){
+    const cur = s.currency === 'AUD' ? 'A$' : 'NZ$';
+    specs.push(['Price', `${cur}${Number(s.price).toLocaleString()} /m²`]);
+    if(s.slabPrice) specs.push(['Per slab', `${cur}${Number(s.slabPrice).toLocaleString()}`]);
+  }
+  $('mSpecs').innerHTML = specs.filter(x => x[1])
+    .map(([l,v]) => `<div><p class="nz-spec-l">${esc(l)}</p><p class="nz-spec-v">${esc(v)}</p></div>`)
+    .join('');
+
+  const imgs = [s.image, ...(s.renders||[])].filter(Boolean);
+  $('mThumbs').innerHTML = imgs.length > 1
+    ? imgs.map(u => `<img src="${esc(u)}" onclick="document.getElementById('mImg').src='${esc(u)}'" alt="">`).join('')
+    : '';
+  $('mNotes').textContent = s.notes || '';
+  updateModalStar();
+  $('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  track('nz_stone_view', { stone_name: s.name, lot: s.lot, source: s.source });
+}
+function closeModal(){
+  $('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function updateModalStar(){
+  if(!modalStone) return;
+  const key = modalStone.source + ':' + modalStone.lot;
+  const on = shortlist.some(x => x.key === key);
+  $('mStar').textContent = on ? 'Remove from shortlist' : 'Add to shortlist';
+}
+function toggleFromModal(){
+  if(!modalStone) return;
+  toggleStar(modalStone.source + ':' + modalStone.lot);
+  updateModalStar();
+}
+
+/* ── Shortlist, spanning both sources ─────────────────────── */
+function toggleStar(key){
+  const s = find(key); if(!s) return;
+  const i = shortlist.findIndex(x => x.key === key);
+  if(i >= 0) shortlist.splice(i, 1);
+  else shortlist.push({
+    key, lot: s.lot, name: s.name, finish: s.finish, source: s.source,
+    image: s.image, currency: s.currency,
+    size: s.width && s.height ? `${s.width} × ${s.height}` : ''
+  });
+  try { sessionStorage.setItem(SL_KEY, JSON.stringify(shortlist)); } catch(e){}
+  updateShortlistUI();
+  render();
+}
+function updateShortlistUI(){
+  const n = shortlist.length;
+  $('slCount').textContent = n;
+  $('barCount').textContent = n;
+  $('bar').classList.toggle('show', n > 0);
+}
+function openDrawer(){
+  const groups = { direct: [], melbourne: [] };
+  shortlist.forEach(x => groups[x.source] && groups[x.source].push(x));
+
+  let h = '';
+  const block = (list, label) => list.length ? `<p class="nz-sl-group">${label}</p>` +
+    list.map(x => `<div class="nz-sl-item">
+      ${x.image ? `<img src="${esc(x.image)}" alt="">` : '<div style="width:74px"></div>'}
+      <div><b style="font-family:Georgia,serif;color:var(--cream)">${esc(x.name)}</b>
+        <div style="font-size:12px;color:var(--surface-dark-text-faint)">
+          ${esc(x.finish)} · Lot ${esc(x.lot)}${x.size ? ' · ' + esc(x.size) : ''}</div></div>
+      <button class="nz-sl-x" onclick="toggleStar('${x.key}');openDrawer()">&times;</button>
+    </div>`).join('') : '';
+
+  h += block(groups.direct, 'Direct to New Zealand');
+  h += block(groups.melbourne, 'Melbourne warehouse');
+  $('slList').innerHTML = h;
+
+  const any = shortlist.length > 0;
+  $('slEmpty').style.display = any ? 'none' : 'block';
+  $('slForm').style.display = any ? 'block' : 'none';
+
+  /* Currency is per row. Totalling across AUD and NZD would be meaningless, so
+     it is never attempted — the note explains the absence rather than leaving
+     the customer wondering. */
+  const curs = [...new Set(shortlist.map(x => x.currency).filter(Boolean))];
+  $('mixedNote').style.display = curs.length > 1 ? 'block' : 'none';
+
+  /* Prices are deliberately NOT written into the enquiry. The customer already
+     has them, and there is no reason to push commercial terms into form storage
+     and an email chain. */
+  const lines = shortlist.map(x =>
+    `${x.source === 'direct' ? '[NZ Direct]' : '[Melbourne]'} ${x.name} — ${x.finish} — Lot ${x.lot}${x.size ? ' — ' + x.size : ''}`);
+  $('slabsField').value = lines.join('\n');
+  $('accountField').value = (clientInfo && clientInfo.name) || SLUG;
+  $('mailtoFallback').href = 'mailto:sales@victoriastonegallery.com.au'
+    + '?subject=' + encodeURIComponent('Direct stock enquiry — ' + ((clientInfo && clientInfo.name) || ''))
+    + '&body=' + encodeURIComponent(lines.join('\n') + '\n\n');
+
+  $('drawerBg').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer(){
+  $('drawerBg').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+$('enqForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const btn = this.querySelector('button[type=submit]');
+  const label = btn.textContent;
+  btn.textContent = 'Sending…'; btn.disabled = true;
+  $('enqErr').textContent = '';
+  try{
+    const r = await fetch('/', {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body: new URLSearchParams(new FormData(this)).toString()
+    });
+    if(!r.ok) throw new Error('post');
+    this.style.display = 'none';
+    $('enqOk').style.display = 'block';
+    track('nz_enquiry', { slabs: shortlist.length });
+    shortlist = [];
+    try { sessionStorage.removeItem(SL_KEY); } catch(e){}
+    updateShortlistUI(); render();
+  }catch(err){
+    $('enqErr').textContent = 'Could not send — please try the email link below.';
+  }finally{
+    btn.textContent = label; btn.disabled = false;
+  }
+});
+
+/* ── Client login ─────────────────────────────────────────── */
+function openLogin(){ $('login').classList.add('open'); $('liEmail').focus(); }
+function closeLogin(){ $('login').classList.remove('open'); $('liErr').textContent=''; }
+
+async function doLogin(){
+  const btn = $('liBtn'); btn.disabled = true; btn.textContent = 'Signing in…';
+  $('liErr').textContent = '';
+  try{
+    const r = await fetch('/api/client-login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email: $('liEmail').value.trim(), password: $('liPass').value })
+    });
+    const d = await r.json();
+    if(!r.ok){ $('liErr').textContent = d.error || 'Incorrect email or password.'; return; }
+
+    clientToken = d.token;
+    closeLogin();
+
+    /* Re-fetch with the token: prices are simply not present in the anonymous
+       response, so there is nothing in memory to reveal. */
+    const s = await fetch('/api/direct-stock?slug=' + encodeURIComponent(SLUG),
+      { headers:{ Authorization:'Bearer ' + clientToken } });
+    if(s.ok){
+      const sd = await s.json();
+      DIRECT = (sd.rows||[]).map(x => Object.assign({source:'direct'}, x));
+      hasPricing = Boolean(sd.pricing);
+    }
+    if(melLoaded){ melLoaded = false; MEL = []; $('melToggle').style.display='block'; await loadMelbourne(); }
+
+    $('signInBtn').style.display = 'none';
+    $('signOutBtn').style.display = 'inline-block';
+    render();
+    track('nz_sign_in', {});
+  }catch(e){
+    $('liErr').textContent = 'Could not reach the server — please try again.';
+  }finally{
+    btn.disabled = false; btn.textContent = 'Sign in';
+  }
+}
+
+async function signOut(){
+  clientToken = null; hasPricing = false;
+  $('signInBtn').style.display = 'inline-block';
+  $('signOutBtn').style.display = 'none';
+  /* Reload from the anonymous feed so tiered prices leave memory, rather than
+     merely being hidden from view. */
+  await boot();
+  if(melLoaded){ melLoaded = false; MEL = []; $('melToggle').style.display = 'block'; }
+  render();
+}
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){ closeModal(); closeDrawer(); closeLogin(); }
+});
+
+boot();
+</script>
+</body>
+</html>
