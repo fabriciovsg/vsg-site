@@ -1,5 +1,5 @@
 [build]
-  command = "npm install && node build-images.js && node build-stone-pages.js"
+  command = "npm install && node build-images.js && node build-category-images.js && node build-stone-pages.js"
   publish = "."
 
 [build.environment]
@@ -25,13 +25,30 @@
 [[plugins]]
   package = "netlify-plugin-cache"
   [plugins.inputs]
-    paths = ["img", ".image-cache.json"]
+    paths = ["img", ".image-cache.json", "category-images"]
 
 # ── Headers ────────────────────────────────────────────────────
 [[headers]]
   for = "/img/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Article imagery is pulled from Drive at build time under a STABLE filename,
+# so it cannot use the immutable policy above — the name never changes, only the
+# bytes do. Short TTL plus ETag revalidation means a photo swapped in Drive
+# reaches browsers on the next build, at the cost of a 304 every few minutes on
+# nine small files.
+[[headers]]
+  for = "/category-images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300, must-revalidate"
+
+# Build artefact, not source — no reason to serve the script or its cache file.
+[[redirects]]
+  from   = "/build-category-images.js"
+  to     = "/"
+  status = 404
+  force  = true
 
 [[headers]]
   for = "/image-manifest-cdn.json"
@@ -106,5 +123,5 @@
 
 # ── Branch: develop = staging ──────────────────────────────────
 [context.develop]
-  command = "npm install && node build-images.js && node build-stone-pages.js"
+  command = "npm install && node build-images.js && node build-category-images.js && node build-stone-pages.js"
   publish = "."

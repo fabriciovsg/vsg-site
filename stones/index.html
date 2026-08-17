@@ -317,27 +317,27 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
   </div>
   <div class="stone-hub-grid" id="stoneHubGrid" style="min-height:200px;opacity:0;transition:opacity .4s">
     <a href="/stones/marble.html" class="stone-hub-card">
-      <img src="/assets/images/Calacatta-1617_21-Victoria-Stone-Gallery-scaled.jpg" alt="Marble">
+      <img src="/category-images/marble.webp" alt="Close-up of a marble slab surface">
       <div class="stone-hub-card-body"><div class="stone-hub-card-tag">Metamorphic Stone</div><div class="stone-hub-card-name">Marble</div><div class="stone-hub-card-sub">Formation, veining, hardness & care for Carrara, Calacatta and beyond</div></div>
     </a>
     <a href="/stones/quartzite.html" class="stone-hub-card">
-      <img src="/assets/images/Calacatta-1617_21-Victoria-Stone-Gallery-scaled.jpg" alt="Quartzite">
+      <img src="/category-images/quartzite.webp" alt="Close-up of a quartzite slab surface">
       <div class="stone-hub-card-body"><div class="stone-hub-card-tag">Metamorphic Stone</div><div class="stone-hub-card-name">Quartzite</div><div class="stone-hub-card-sub">The marble look with granite-level durability</div></div>
     </a>
     <a href="/stones/granite.html" class="stone-hub-card">
-      <img src="/assets/images/Blue-Antico-32232-Victoria-Stone-Gallery.jpg" alt="Granite">
+      <img src="/category-images/granite.webp" alt="Close-up of a granite slab surface">
       <div class="stone-hub-card-body"><div class="stone-hub-card-tag">Igneous Stone</div><div class="stone-hub-card-name">Granite</div><div class="stone-hub-card-sub">Formed from magma — the benchmark for durability</div></div>
     </a>
     <a href="/stones/dolomite.html" class="stone-hub-card">
-      <img src="/assets/images/Calacatta-1617_21-Victoria-Stone-Gallery-scaled.jpg" alt="Dolomite">
+      <img src="/category-images/dolomite.webp" alt="Close-up of a dolomite slab surface">
       <div class="stone-hub-card-body"><div class="stone-hub-card-tag">Sedimentary Stone</div><div class="stone-hub-card-name">Dolomite</div><div class="stone-hub-card-sub">Marble-like beauty with added resilience</div></div>
     </a>
     <a href="/stones/travertine.html" class="stone-hub-card">
-      <img src="/assets/images/Travertine-Classico-Romano.webp" alt="Travertine">
+      <img src="/category-images/travertine.webp" alt="Close-up of a travertine slab surface">
       <div class="stone-hub-card-body"><div class="stone-hub-card-tag">Sedimentary Stone</div><div class="stone-hub-card-name">Travertine</div><div class="stone-hub-card-sub">Hot-spring formed, with timeless European character</div></div>
     </a>
     <a href="/stones/limestone.html" class="stone-hub-card">
-      <img src="/assets/images/Sea-Grass-KM1-Victoria-Stone-Gallery-scaled.jpg" alt="Limestone">
+      <img src="/category-images/limestone.webp" alt="Close-up of a limestone slab surface">
       <div class="stone-hub-card-body"><div class="stone-hub-card-tag">Sedimentary Stone</div><div class="stone-hub-card-name">Limestone</div><div class="stone-hub-card-sub">Subtle, fossil-rich and quietly sophisticated</div></div>
     </a>
   </div>
@@ -423,7 +423,7 @@ function _hRender(cats){
   if(!grid)return;
   setTimeout(()=>grid.style.opacity='1', 50);
   const defs=[
-    {href:'/stones/marble.html',tag:'Metamorphic Stone',name:'Marble',sub:'Formation, veining, hardness & care for Carrara, Calacatta and beyond',fallback:'/assets/images/Calacatta-1617_21-Victoria-Stone-Gallery-scaled.jpg'},{href:'/stones/quartzite.html',tag:'Metamorphic Stone',name:'Quartzite',sub:'The marble look with granite-level durability',fallback:'/assets/images/Calacatta-1617_21-Victoria-Stone-Gallery-scaled.jpg'},{href:'/stones/granite.html',tag:'Igneous Stone',name:'Granite',sub:'Formed from magma — the benchmark for durability',fallback:'/assets/images/Blue-Antico-32232-Victoria-Stone-Gallery.jpg'},{href:'/stones/dolomite.html',tag:'Sedimentary Stone',name:'Dolomite',sub:'Marble-like beauty with added resilience',fallback:'/assets/images/Calacatta-1617_21-Victoria-Stone-Gallery-scaled.jpg'},{href:'/stones/travertine.html',tag:'Sedimentary Stone',name:'Travertine',sub:'Hot-spring formed, with timeless European character',fallback:'/assets/images/Travertine-Classico-Romano.webp'},{href:'/stones/limestone.html',tag:'Sedimentary Stone',name:'Limestone',sub:'Subtle, fossil-rich and quietly sophisticated',fallback:'/assets/images/Sea-Grass-KM1-Victoria-Stone-Gallery-scaled.jpg'}
+    {href:'/stones/marble.html',tag:'Metamorphic Stone',name:'Marble',sub:'Formation, veining, hardness & care for Carrara, Calacatta and beyond',fallback:'/category-images/marble.webp'},{href:'/stones/quartzite.html',tag:'Metamorphic Stone',name:'Quartzite',sub:'The marble look with granite-level durability',fallback:'/category-images/quartzite.webp'},{href:'/stones/granite.html',tag:'Igneous Stone',name:'Granite',sub:'Formed from magma — the benchmark for durability',fallback:'/category-images/granite.webp'},{href:'/stones/dolomite.html',tag:'Sedimentary Stone',name:'Dolomite',sub:'Marble-like beauty with added resilience',fallback:'/category-images/dolomite.webp'},{href:'/stones/travertine.html',tag:'Sedimentary Stone',name:'Travertine',sub:'Hot-spring formed, with timeless European character',fallback:'/category-images/travertine.webp'},{href:'/stones/limestone.html',tag:'Sedimentary Stone',name:'Limestone',sub:'Subtle, fossil-rich and quietly sophisticated',fallback:'/category-images/limestone.webp'}
   ];
   grid.innerHTML=defs.map(d=>{
     const cat=cats?cats.find(c=>(c.filter||c.name||'').toLowerCase()===d.name.toLowerCase()):null;
