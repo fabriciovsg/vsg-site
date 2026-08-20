@@ -7,6 +7,9 @@
 //
 // Read paths request drive.readonly. The write scope is deliberately NOT
 // available from this module; admin writes get their own function in Phase 2.
+//
+// getAccessToken() also accepts an optional `sub` — a Workspace user to
+// impersonate through domain-wide delegation. Only lib/gmail.js uses it.
 
 import crypto from 'node:crypto';
 
@@ -26,6 +29,11 @@ export const SITE_CONFIG_FILE_ID      = '1-CM8zoEfnObuVY53OW5chE_3jTJTQE1-';
 export const READONLY_SCOPE = 'https://www.googleapis.com/auth/drive.readonly';
 export const WRITE_SCOPE    = 'https://www.googleapis.com/auth/drive';
 
+// Gmail send, used only by lib/gmail.js. Unlike the Drive scopes this one is
+// useless without domain-wide delegation AND an impersonated mailbox, so the
+// service account cannot send anything on its own even if this leaks.
+export const GMAIL_SEND_SCOPE = 'https://www.googleapis.com/auth/gmail.send';
+
 function b64url(data) {
   const buf = typeof data === 'string' ? Buffer.from(data) : data;
   return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
@@ -35,19 +43,25 @@ function b64url(data) {
 // of the same function instance. Keyed by scope: the read functions must never
 // be handed a write-capable token just because an admin call warmed the same
 // instance.
-const _tokens = new Map(); // scope -> { token, expiry }
+const _tokens = new Map(); // scope|sub -> { token, expiry }
 
-export async function getAccessToken(scope = READONLY_SCOPE) {
+export async function getAccessToken(scope = READONLY_SCOPE, sub = null) {
   if (!SA_EMAIL || !RAW_KEY) {
     throw new Error('Missing VSG_SERVICE_ACCOUNT_EMAIL or VSG_PRIVATE_KEY — check the variable Scopes include Functions');
   }
-  const hit = _tokens.get(scope);
+  // `sub` is the Workspace user being impersonated (domain-wide delegation).
+  // It MUST be part of the cache key: a token minted for one mailbox is a
+  // token that can send as that mailbox, and handing it to a later call for a
+  // different sender would be a real impersonation bug, not a caching one.
+  const key = sub ? `${scope}|${sub}` : scope;
+  const hit = _tokens.get(key);
   if (hit && Date.now() < hit.expiry - 60_000) return hit.token;
 
   const now = Math.floor(Date.now() / 1000);
   const header = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT', kid: KEY_ID }));
   const claim  = b64url(JSON.stringify({
     iss: SA_EMAIL,
+    ...(sub ? { sub } : {}),
     scope,
     aud: 'https://oauth2.googleapis.com/token',
     iat: now,
@@ -66,7 +80,7 @@ export async function getAccessToken(scope = READONLY_SCOPE) {
     // Do not echo the response body — it can contain credential detail.
     throw new Error(`Token exchange failed (${resp.status})`);
   }
-  _tokens.set(scope, {
+  _tokens.set(key, {
     token: data.access_token,
     expiry: Date.now() + (data.expires_in || 3600) * 1000,
   });

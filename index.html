@@ -1259,6 +1259,12 @@ const CMS_DEFAULTS={
   address:"37–39 Gaine Road<br>Dandenong South VIC 3175",
   hours:"Monday – Friday: 8:00am – 4:00pm<br>Saturday: 9:00am – 1:00pm",
   contactBody:"Send us a message and we'll get back to you shortly — or arrange a visit and see the collection in person.",
+  // Confirmation email sent to the customer after they submit the contact form
+  // (netlify/functions/enquiry-confirmation.js). Read from this config at send
+  // time; the function falls back to identical built-in text if Drive is down.
+  emailConfirmOpening:"Thank you for getting in touch. Your enquiry has reached our team and we’ll come back to you shortly — usually within one business day.",
+  emailConfirmClosing:"If any of this looks wrong, simply reply to this email — it comes straight back to us.",
+  emailConfirmVisit:"You’re also very welcome to visit the gallery and see the slabs in person. Every slab is unique, and photographs only go so far.",
   footerTagline:"Melbourne's destination for rare and exceptional natural stone. Sourced from the world's finest quarries and producers — each slab a singular work of nature.",
   bookingUrl:"",
   bookingNote:"Booking ahead means we can have the right slabs ready and give you our full attention. If no time suits, call 03 9702 7539 and we'll do our best to accommodate you. Walk-ins are welcome any time during opening hours.",
@@ -3869,15 +3875,23 @@ function renderAdminContact(){
         ${af('contactBody','Contact Section Body',g('contactBody'),'textarea')}
       </div>
     </div>
+    <div class="admin-section">
+      <div class="admin-section-title">Enquiry Confirmation Email</div>
+      <div class="admin-grid">
+        ${af('emailConfirmOpening','Opening line',g('emailConfirmOpening'),'textarea')}
+        ${af('emailConfirmClosing','Closing line',g('emailConfirmClosing'),'textarea')}
+        ${af('emailConfirmVisit','Invitation to visit',g('emailConfirmVisit'),'textarea')}
+      </div>
+    </div>
     <button class="admin-save-btn" onclick="saveAdminContact()">Save</button>
     <button class="admin-reset-btn" onclick="resetAdminContact()">Reset to Defaults</button>
   `;
 }
 async function saveAdminContact(){
-  ['address','hours','contactBody'].forEach(k=>{const el=document.getElementById('af-'+k);if(el)cms[k]=el.value;});
+  ['address','hours','contactBody','emailConfirmOpening','emailConfirmClosing','emailConfirmVisit'].forEach(k=>{const el=document.getElementById('af-'+k);if(el)cms[k]=el.value;});
   const ok=await saveCMS();applyCMS();if(ok)showToast('Contact details saved');
 }
-async function resetAdminContact(){['address','hours','contactBody'].forEach(k=>delete cms[k]);const ok=await saveCMS();applyCMS();renderAdminContact();if(ok)showToast('Contact reset');}
+async function resetAdminContact(){['address','hours','contactBody','emailConfirmOpening','emailConfirmClosing','emailConfirmVisit'].forEach(k=>delete cms[k]);const ok=await saveCMS();applyCMS();renderAdminContact();if(ok)showToast('Contact reset');}
 
 function renderAdminMissing(){
   const missing=allStones.filter(s=>s.noImage===true).sort((a,b)=>(parseInt(b.qty||0)-parseInt(a.qty||0))||(a.category||'').localeCompare(b.category||'')||a.name.localeCompare(b.name));
