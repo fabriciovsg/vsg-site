@@ -1,3 +1,59 @@
+# Victoria Stone Gallery — robots.txt
+#
+# Default: open. Search engines and AI assistants are the point — organic
+# search and AI-assistant referrals are both live acquisition channels, so
+# Googlebot, Bingbot, GPTBot, ClaudeBot, PerplexityBot etc. are all welcome
+# and are deliberately NOT listed below.
+#
+# The blocks below are commercial SEO/backlink crawlers only. They index the
+# site to resell competitor-analysis data; they send no traffic and return
+# nothing. Blocking them costs no visibility.
+#
+# NOTE: /nz/ is intentionally absent from this file. It is kept out of search
+# results via the X-Robots-Tag header in netlify.toml — a Disallow line here
+# would publish the very path it is meant to keep unlisted.
+
+# ── Commercial SEO / backlink crawlers ─────────────────────────
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: AhrefsSiteAudit
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: SemrushBot-SA
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: rogerbot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: SeekportBot
+Disallow: /
+
+User-agent: serpstatbot
+Disallow: /
+
+User-agent: ZoominfoBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+# ── Everyone else ──────────────────────────────────────────────
 User-agent: *
 Allow: /
 
