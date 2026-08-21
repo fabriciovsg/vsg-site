@@ -1,2 +1,5 @@
 .DS_Store
 category-images/
+.env
+.env.*
+!.env.example
