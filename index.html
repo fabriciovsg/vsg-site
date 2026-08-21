@@ -1219,7 +1219,8 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
   <button class="admin-bar-btn" id="adminTabCoverage" onclick="openAdminTab('coverage')">Coverage</button>
   <button class="admin-bar-btn" id="adminTabClients" onclick="openAdminTab('clients')">Clients</button>
   <button class="admin-bar-btn" id="adminTabFabricators" onclick="openAdminTab('fabricators')">Fabricators</button>
-  <button class="admin-bar-btn" onclick="browseStock()" style="margin-left:auto;border-color:rgba(200,184,154,.35)">&#8595; Browse Stock</button>
+  <button class="admin-bar-btn" id="adminPublishBtn" onclick="publishNow()" style="margin-left:auto;border-color:rgba(200,184,154,.35)">&#8635; Publish Now</button>
+  <button class="admin-bar-btn" onclick="browseStock()" style="border-color:rgba(200,184,154,.35)">&#8595; Browse Stock</button>
   <button class="admin-bar-btn danger" onclick="adminLogout()">Sign Out</button>
 </div>
 <div class="admin-panel" id="adminPanel"></div>
@@ -3218,6 +3219,131 @@ async function adminPost(payload){
     return null;
   }
 }
+
+// ── PUBLISH NOW ───────────────────────────────────────────────
+// Rebuilds the image manifest, then fires a Netlify build. Two stages
+// because the manifest rebuild takes ~67s and a Function cannot wait that
+// long — so the waiting happens here, in the tab.
+//
+// Order is not cosmetic: build-images.js reads image-manifest.json, so
+// building before the manifest has seen new Drive photos publishes a deploy
+// that is quietly missing them.
+let publishing=false;
+let publishPoll=null;
+
+function setPublishBtn(label,disabled){
+  const b=document.getElementById('adminPublishBtn');
+  if(!b)return;
+  b.innerHTML=label;
+  b.disabled=!!disabled;
+  b.style.opacity=disabled?'.6':'';
+  b.style.cursor=disabled?'default':'';
+}
+
+async function publishApi(method,body){
+  if(!adminToken){showToast('Session expired — sign in again');adminUnlocked=false;return null;}
+  try{
+    const r=await fetch('/api/publish',{
+      method:method,
+      headers:Object.assign({'Authorization':'Bearer '+adminToken},
+        body?{'Content-Type':'application/json'}:{}),
+      body:body?JSON.stringify(body):undefined
+    });
+    if(r.status===401){
+      adminToken=null;adminUnlocked=false;
+      showToast('Session expired — sign in again');
+      return null;
+    }
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){showToast('⚠ '+(d.error||'Publish failed'));return null;}
+    return d;
+  }catch(e){
+    showToast('⚠ Publish failed — check connection');
+    return null;
+  }
+}
+
+async function publishNow(){
+  if(publishing)return;
+
+  // Don't start on top of a build that's already running — the server
+  // refuses anyway, but checking first gives an honest message instead of
+  // a press that appears to do nothing.
+  const pre=await publishApi('GET');
+  if(!pre)return;
+  if(pre.deploy&&pre.deploy.busy){
+    showToast('A build is already running — watching it instead');
+    publishing=true;
+    watchDeploy();
+    return;
+  }
+
+  if(!confirm('Publish now?\n\nRebuilds the image index, then the site. Takes about 12 minutes. New slab photos and any merged code changes go live.\n\nStock numbers are already current — they do not need this.'))return;
+
+  publishing=true;
+  setPublishBtn('⏳ Rebuilding image index…',true);
+
+  const m=await publishApi('POST',{stage:'manifest'});
+  if(!m){publishing=false;setPublishBtn('↻ Publish Now',false);return;}
+
+  // Fixed wait: Apps Script gives us no progress signal, and the measured
+  // rebuild is ~67s. 90s is that plus headroom.
+  let left=90;
+  const countdown=setInterval(()=>{
+    left-=1;
+    if(left>0)setPublishBtn('⏳ Rebuilding image index… '+left+'s',true);
+  },1000);
+
+  setTimeout(async()=>{
+    clearInterval(countdown);
+    setPublishBtn('⏳ Starting build…',true);
+
+    const b=await publishApi('POST',{stage:'build'});
+    if(!b){publishing=false;setPublishBtn('↻ Publish Now',false);return;}
+
+    if(b.skipped){
+      showToast(b.message||'Build already running');
+      watchDeploy();
+      return;
+    }
+    showToast('Build started — live in about 10 minutes');
+    watchDeploy();
+  },90000);
+}
+
+/** Poll deploy state until it settles, so the button reflects reality. */
+function watchDeploy(){
+  if(publishPoll)clearInterval(publishPoll);
+  setPublishBtn('⏳ Building…',true);
+
+  publishPoll=setInterval(async()=>{
+    const d=await publishApi('GET');
+    if(!d){clearInterval(publishPoll);publishPoll=null;publishing=false;setPublishBtn('↻ Publish Now',false);return;}
+
+    const dep=d.deploy;
+    if(!dep){   // no API token configured — can't track, so stop pretending
+      clearInterval(publishPoll);publishPoll=null;publishing=false;
+      setPublishBtn('↻ Publish Now',false);
+      return;
+    }
+    if(dep.busy)return;
+
+    clearInterval(publishPoll);publishPoll=null;publishing=false;
+
+    if(dep.state==='ready'){
+      setPublishBtn('✓ Published',true);
+      showToast('✓ Site published — hard-refresh to see it');
+      setTimeout(()=>setPublishBtn('↻ Publish Now',false),8000);
+    }else if(dep.state==='error'){
+      setPublishBtn('↻ Publish Now',false);
+      showToast('⚠ Build failed — check Netlify: '+(dep.errorMessage||dep.state));
+    }else{
+      setPublishBtn('↻ Publish Now',false);
+      showToast('Build finished: '+dep.state);
+    }
+  },20000);
+}
+
 function toggleAdminBar(){
   const bar=document.getElementById('adminBar');
   bar.classList.toggle('visible');
