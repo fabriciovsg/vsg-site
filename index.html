@@ -93,14 +93,14 @@
 <script src="/assets/vsg-theme.js" defer></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
+html{scroll-behavior:smooth;scroll-padding-top:96px;}
 body{font-family:'Jost',sans-serif;background:var(--warm-white);color:var(--charcoal);font-weight:300;overflow-x:hidden;}
 /* TOPBAR */
 .topbar{background:var(--black);color:var(--stone);font-size:12.5px;letter-spacing:.01em;font-weight:300;display:flex;justify-content:space-between;align-items:center;padding:9px 48px;}
 .topbar a{color:var(--stone);text-decoration:none;}.topbar a:hover{color:var(--gold-light);}
 .topbar-right{display:flex;gap:20px;align-items:center;}
 /* NAV */
-nav{position:sticky;top:0;z-index:200;background:var(--surface-nav);backdrop-filter:blur(12px);border-bottom:1px solid rgba(200,184,154,.12);display:flex;align-items:center;justify-content:space-between;gap:32px;padding:0 48px;height:72px;transition:box-shadow .3s;}
+nav{position:sticky;top:0;z-index:200;background:var(--surface-nav);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid rgba(200,184,154,.12);display:flex;align-items:center;justify-content:space-between;gap:32px;padding:0 48px;height:72px;transition:box-shadow .3s;}
 nav.scrolled{box-shadow:0 4px 32px rgba(0,0,0,.4);}
 .nav-hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;position:relative;z-index:601;-webkit-tap-highlight-color:transparent;}
 .nav-hamburger span{display:block;width:24px;height:1.5px;background:var(--surface-dark-text);transition:all .3s;}
@@ -557,12 +557,23 @@ footer{background:var(--surface-dark);padding:64px 48px 32px;}
 .cip-pick-item.selected::after{content:'✓';position:absolute;top:4px;right:4px;background:var(--gold);color:#fff;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;}
 .cip-modal-empty{padding:40px 24px;text-align:center;color:rgba(200,184,154,.4);font-size:13px;}
 @media(max-width:1024px){
+  html{scroll-padding-top:76px;}
   .nav-hamburger{display:flex;}
-  .nav-links{display:none;position:fixed;inset:0;padding-top:56px;background:rgba(15,13,11,.97);flex-direction:column;align-items:center;justify-content:center;gap:28px;z-index:500;padding:80px 20px 40px;}
+  /* While the drawer is open the nav must NOT carry a backdrop-filter. A filter
+     of any kind makes the element a containing block for position:fixed
+     descendants, which collapsed this full-screen overlay down to the 60px nav
+     box: the backdrop shrank to its own padding and the links overflowed
+     unreadably over the page, with the first three clipped off the top. */
+  nav.menu-open{-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom-color:transparent;}
+  .nav-logo{position:relative;z-index:601;}
+  .nav-links{display:none;position:fixed;top:0;left:0;right:0;height:100vh;height:100dvh;background:#0f0d0b;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;z-index:500;padding:calc(78px + env(safe-area-inset-top,0px)) 20px calc(40px + env(safe-area-inset-bottom,0px));overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
   .nav-links.open{display:flex!important;}
-  .nav-links a,.nav-links button{font-size:16px;letter-spacing:.14em;}
-  .nav-cta{display:none;}
-  .nav-book{display:inline-block;padding:14px 30px;font-size:13px;}
+  .nav-links li{width:100%;max-width:340px;display:flex;justify-content:center;}
+  .nav-links li+li{border-top:1px solid rgba(200,184,154,.10);}
+  .nav-links a,.nav-links button{font-size:15px;letter-spacing:.14em;display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;text-align:center;}
+  .nav-cta{display:flex;margin:14px 0 0;padding:16px 24px;font-size:13px;}
+  .nav-links li:has(.nav-cta){border-top:none;}
+  .nav-book{display:flex;padding:14px 24px;font-size:13px;}
   nav{height:56px;padding:0 16px;z-index:600;}.cip-modal-grid{grid-template-columns:repeat(3,1fr);}}
 textarea.admin-input{resize:vertical;min-height:80px;line-height:1.6;}
 .admin-save-btn{background:var(--gold);border:none;color:white;padding:10px 28px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;transition:background .2s;margin-top:8px;}
@@ -596,6 +607,8 @@ textarea.admin-input{resize:vertical;min-height:80px;line-height:1.6;}
   .why-grid{grid-template-columns:1fr;gap:32px;}
   .contact-grid{grid-template-columns:1fr;gap:40px;}
   .contact-events{border-left:none;padding-left:0;border-top:1px solid rgba(184,150,60,.25);padding-top:28px;}
+  .hero-overlay{background:linear-gradient(to top,rgba(26,23,20,.92) 0%,rgba(26,23,20,.74) 42%,rgba(26,23,20,.46) 72%,rgba(26,23,20,.28) 100%);}
+  .hero-bg{opacity:.62;}
   .footer-top{grid-template-columns:1fr 1fr;}
   .modal{grid-template-columns:1fr;}
   .modal-gallery-main{aspect-ratio:16/9;}
@@ -4545,8 +4558,8 @@ function registerInterest(stoneName) {
   const nameEl = document.querySelector('#contactForm input[name="name"]');
   const msgEl  = document.querySelector('#contactForm textarea[name="message"]');
   if(msgEl) msgEl.value = `I'd like to register my interest in ${stoneName} (arriving soon). Please keep me updated on its arrival.`;
-  const contact = document.getElementById('contact');
-  if(contact) contact.scrollIntoView({behavior:'smooth'});
+  const target = document.getElementById('contactForm') || document.getElementById('contact');
+  if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
   setTimeout(()=>{ if(nameEl) nameEl.focus(); }, 500);
 }
 
@@ -4896,17 +4909,31 @@ function toggleMobileNav(){
   const btn=document.getElementById('navHamburger');
   const open=links.classList.toggle('open');
   btn.classList.toggle('open',open);
+  // nav.menu-open drops the backdrop-filter. Without that the nav is a
+  // containing block for the fixed overlay and the drawer collapses to the
+  // height of the nav bar.
+  document.getElementById('nav').classList.toggle('menu-open',open);
   document.body.style.overflow=open?'hidden':'';
 }
-function closeMobileNav(){
+// keepLock: a menu *button* (shortlist, booking) has already opened its own
+// overlay and set overflow:hidden itself. Clearing it here would unlock the
+// page behind that overlay.
+function closeMobileNav(keepLock){
   const l=document.getElementById('navLinks');
   const b=document.getElementById('navHamburger');
+  const n=document.getElementById('nav');
   if(l)l.classList.remove('open');
   if(b)b.classList.remove('open');
-  document.body.style.overflow='';
+  if(n)n.classList.remove('menu-open');
+  if(!keepLock)document.body.style.overflow='';
 }
-document.querySelectorAll('.nav-links a,.nav-links button').forEach(el=>{
-  el.addEventListener('click',()=>setTimeout(closeMobileNav,100));
+// Anchors close synchronously, before the browser performs the fragment jump,
+// so the page is scrollable at the moment the jump happens.
+document.querySelectorAll('.nav-links a').forEach(el=>{
+  el.addEventListener('click',()=>closeMobileNav(false));
+});
+document.querySelectorAll('.nav-links button').forEach(el=>{
+  el.addEventListener('click',()=>closeMobileNav(true));
 });
 
 // Script is at end of body so DOM is already ready — call directly
@@ -4966,8 +4993,11 @@ function applyEnquiry(o){
   if(typeof window.vsgTrack === 'function')
     window.vsgTrack('stone_enquiry', { stone_name:o.track||o.title||'', page_section:o.section||'enquiry_form' });
 
-  const contact = document.getElementById('contact');
-  if(contact) contact.scrollIntoView({ behavior:'smooth', block:'start' });
+  const target = document.getElementById('contactForm') || document.getElementById('contact');
+  // rAF: let the modal/drawer teardown paint before measuring the target.
+  if(target) requestAnimationFrame(function(){
+    target.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
   // Wait for the smooth scroll before focusing, or the browser jumps the page.
   setTimeout(function(){
     const n = document.querySelector('#contactForm input[name="name"]');
