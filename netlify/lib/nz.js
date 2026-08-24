@@ -182,6 +182,31 @@ const num = v => {
   return isFinite(n) ? n : null;
 };
 
+// The header says (mm), but this sheet is hand-maintained by staff whose daily
+// habit is Vavastone's centimetres — where ~30 lots are already entered in cm.
+// A bare 2 or 3 is cm. Same rule as build-stone-pages.js, so a 30mm slab reads
+// identically whether it came from Vavastone or from here.
+const normThickness = t => {
+  const n = Number(t) || 0;
+  if (!(n > 0)) return 0;
+  return n < 10 ? Math.round(n * 10) : Math.round(n);
+};
+
+// "Icebreaker 3cm" and "Icebreaker" are one variety; thickness is a spec, not
+// part of the name. Splitting them halves the search signal for both and buries
+// the 30mm lots. Identical regex to build-stone-pages.js.
+const cleanVarietyName = n =>
+  String(n || '').trim().replace(/\s+\d+\s*(?:cm|mm)$/i, '').trim();
+
+// Recovers thickness from a name suffix when the column was left blank, so
+// stripping the name never loses the only thickness the row carried.
+const thicknessFromName = n => {
+  const m = String(n || '').trim().match(/\s+(\d+)\s*(cm|mm)$/i);
+  if (!m) return 0;
+  const v = Number(m[1]);
+  return /cm/i.test(m[2]) ? Math.round(v * 10) : Math.round(v);
+};
+
 /**
  * Turn raw sheet values into stock objects. Never returns Sold, Hidden, or
  * unrecognised-status rows. `warnings` is for the operator, not the customer.
@@ -235,12 +260,20 @@ export function parseRows(values) {
     const width = rawW ? Math.round(rawW * col.dimScale) : null;
     const height = rawH ? Math.round(rawH * col.dimScale) : null;
 
+    const rawName = String(row[col.name] ?? '').trim();
+    const rawTh = num(row[col.thickness]);
+    if (rawTh !== null && rawTh > 0 && rawTh < 10)
+      warnings.push(`${lot}: thickness entered in cm (${rawTh}) — shown as ${Math.round(rawTh * 10)}mm`);
+    if (cleanVarietyName(rawName) !== rawName)
+      warnings.push(`${lot}: thickness stripped from stone name "${rawName}" — put it in the Thickness column`);
+    const thickness = normThickness(rawTh) || thicknessFromName(rawName) || null;
+
     stones.push({
       lot,
-      name: String(row[col.name] ?? '').trim(),
+      name: cleanVarietyName(rawName) || rawName,
       category: String(row[col.category] ?? '').trim(),
       finish: String(row[col.finish] ?? '').trim(),
-      thickness: num(row[col.thickness]),
+      thickness,
       width, height,
       qty: num(row[col.qty]),
       area: width && height ? +((width * height) / 1e6).toFixed(2) : null,

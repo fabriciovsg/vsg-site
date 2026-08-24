@@ -442,8 +442,11 @@ function card(s){
              Sign in for pricing</button></p>`;
   }
 
-  const dims = [s.width && s.height ? `${s.width} × ${s.height}` : '',
-                s.thickness ? `${s.thickness}mm` : '',
+  // Thickness reads as the third dimension, matching the Melbourne gallery.
+  const size = s.width && s.height
+    ? `${s.width} × ${s.height}${s.thickness ? ' × ' + s.thickness : ''} mm`
+    : (s.thickness ? `${s.thickness} mm thick` : '');
+  const dims = [size,
                 s.qty ? `${s.qty} slab${s.qty>1?'s':''}` : ''].filter(Boolean).join(' · ');
 
   return `<div class="nz-card" onclick="openModal('${key}')">

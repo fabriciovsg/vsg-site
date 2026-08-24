@@ -1587,6 +1587,15 @@ function sanitiseFinish(val){
   return t.charAt(0).toUpperCase()+t.slice(1);
 }
 
+// Thickness + variety-name normalisation. Vavastone mixes cm and mm in the
+// THICKNESS column, and some stock names carry a trailing thickness token
+// ("Icebreaker 3cm") which split one variety into two gallery listings and two
+// sets of search signals. Both are normalised here using exactly the same rules
+// as build-stone-pages.js, so gallery names and /stone/<slug>/ pages agree.
+const cleanVarietyName=n=>String(n||'').trim().replace(/\s+\d+\s*(?:cm|mm)$/i,'').trim();
+function normThickness(t){const n=parseFloat(t)||0;if(!(n>0))return 0;return n<10?Math.round(n*10):Math.round(n);}
+function thicknessFromName(n){const m=String(n||'').trim().match(/\s+(\d+)\s*(cm|mm)$/i);if(!m)return 0;const v=parseFloat(m[1]);return /cm/i.test(m[2])?Math.round(v*10):Math.round(v);}
+
 function parseStockRows(rows,enabledLocations){
   enabledLocations=enabledLocations||['VSG'];
   if(!rows.length){loadStaticFallback();return;}
@@ -1634,8 +1643,10 @@ function parseStockRows(rows,enabledLocations){
   for(let i=headerRow+1;i<rows.length;i++){
     const r=rows[i];
     if(!r||!r[colMap.material])continue;
-    const mat=String(r[colMap.material]||'').trim();
-    if(!mat)continue;
+    const rawMat=String(r[colMap.material]||'').trim();
+    if(!rawMat)continue;
+    // "Icebreaker 3cm" and "Icebreaker" are one variety; thickness is a spec, not a name.
+    const mat=cleanVarietyName(rawMat)||rawMat;
     if(colMap.location!==undefined){
       const loc=String(r[colMap.location]||'').trim();
       if(loc&&!enabledLocations.includes(loc))continue;
@@ -1643,7 +1654,8 @@ function parseStockRows(rows,enabledLocations){
     const lot=String(r[colMap.lot]||'').trim();
     const block=String(r[colMap.block]||'').trim();
     const finishing=sanitiseFinish(String(r[colMap.finishing]||'').trim());
-    const thickness=r[colMap.thickness]?String(r[colMap.thickness]).trim():'';
+    const thMm=normThickness(r[colMap.thickness])||thicknessFromName(rawMat);
+    const thickness=thMm?thMm+'mm':'';
     const status=colMap.status!==undefined?String(r[colMap.status]||'').toUpperCase().trim():'';
     // Any status other than AVAILABLE/TRANSIT is excluded entirely — unknown
     // statuses (e.g. sold, on hold) shouldn't surface anywhere on the site.
@@ -1658,7 +1670,7 @@ function parseStockRows(rows,enabledLocations){
         category:String(r[colMap.category]||'').trim(),
         block:lot||block,
         lot:lot,
-        thickness:thickness?thickness+' mm':'',
+        thickness:thickness,thicknessMm:thMm,
         finishing:finishing,
         maxW:0,maxH:0,qty:0,
         status:status||'AVAILABLE',
@@ -1684,7 +1696,7 @@ function parseStockRows(rows,enabledLocations){
       name:g.name,category:g.category,block:g.block,lot:g.lot,
       width:g.maxW>0?Math.round(g.maxW*10).toString():'',
       height:g.maxH>0?Math.round(g.maxH*10).toString():'',
-      thickness:g.thickness,finishing:g.finishing,
+      thickness:g.thickness,thicknessMm:g.thicknessMm||0,finishing:g.finishing,
       qty:String(g.qty),
       status:g.status,eta:g.eta,
       price1:g.price1,price2:g.price2,price3:g.price3,price4:g.price4,
@@ -2737,7 +2749,10 @@ function renderGrid(reset=false){
     const card=document.createElement('div');
     card.className='stone-card';card.style.animationDelay=(i*.04)+'s';
     if(stone.block)card.dataset.block=stone.block;
-    const dims=(stone.width&&stone.height)?`Approx. ${stone.width} × ${stone.height} mm`:'';
+    const thMm=stone.thicknessMm||parseInt(stone.thickness,10)||0;
+    const dims=(stone.width&&stone.height)
+      ?`Approx. ${stone.width} × ${stone.height}${thMm?' × '+thMm:''} mm`
+      :(thMm?`${thMm} mm thick`:'');
     const imgInner=stone.image
       ?`<img class="stone-card-img" src="${stone.image}" alt="${stone.name}" loading="lazy" decoding="async" onload="this.classList.add(\'loaded\')">`
       :`<div class="stone-card-img-placeholder">
@@ -3162,7 +3177,7 @@ function updateShortlistUI(){
     items.innerHTML='';
     shortlist.forEach((stone,i)=>{
       const el=document.createElement('div');el.className='shortlist-item';
-      el.innerHTML=`${stone.image?`<img class="shortlist-item-img" src="${stone.image}" alt="${stone.name}">`:`<div class="shortlist-item-img-placeholder">${stone.name.charAt(0)}</div>`}<div class="shortlist-item-info"><div class="shortlist-item-name">${stone.name}</div><div class="shortlist-item-sub">Lot #${stone.block}${stone.finishing?' · '+stone.finishing:''}</div></div><button class="shortlist-remove-btn" onclick="removeFromShortlist(${i})">✕</button>`;
+      el.innerHTML=`${stone.image?`<img class="shortlist-item-img" src="${stone.image}" alt="${stone.name}">`:`<div class="shortlist-item-img-placeholder">${stone.name.charAt(0)}</div>`}<div class="shortlist-item-info"><div class="shortlist-item-name">${stone.name}</div><div class="shortlist-item-sub">Lot #${stone.block}${stone.finishing?' · '+stone.finishing:''}${stone.thickness?' · '+stone.thickness:''}</div></div><button class="shortlist-remove-btn" onclick="removeFromShortlist(${i})">✕</button>`;
       items.appendChild(el);
     });
     const subj=encodeURIComponent(`Stone Shortlist Enquiry — ${count} stone${count===1?'':'s'}`);
