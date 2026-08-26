@@ -16,14 +16,21 @@
 // silence it. A failed run loses nothing — the next one picks the same items up.
 
 import { sendMail, isEmail, MAIL_SENDER } from '../lib/gmail.js';
+import { getStore } from '@netlify/blobs';
 
 const SITE_ID  = process.env.VSG_NETLIFY_SITE_ID || '4276ebb9-7b6e-4889-aad7-c200ccc357e6';
 const FORM     = process.env.VSG_FORM_NAME || 'contact';
 const API      = 'https://api.netlify.com/api/v1';
 const DIGEST_TO = process.env.VSG_DIGEST_TO || MAIL_SENDER;
 
-// How far back to look. Older than this and the lead is cold anyway.
+// How far back to look when calculating a hard age cutoff.
+// In practice the "seen IDs" store means we only email NEW arrivals; this
+// is a backstop so truly ancient items never surface even if the store is reset.
 const WINDOW_DAYS = 30;
+
+// Netlify Blobs store name. Scoped to this site automatically.
+const BLOB_STORE  = 'spam-digest';
+const SEEN_KEY    = 'seen-ids';
 
 // ── Scoring ─────────────────────────────────────────────────────────────────
 // Tuned to over-include. A false positive here costs one glance at an email;
@@ -191,6 +198,27 @@ export default async () => {
     return;
   }
 
+  // ── Load the set of submission IDs we have already reported ──────────────
+  // Netlify Blobs is available in scheduled functions without any extra setup.
+  // The store is scoped to this site, so no key collisions across projects.
+  // On a cold start (first ever run, or after a manual reset) the key won't
+  // exist — we treat that as an empty set and baseline silently: nothing in
+  // the current spam list is reported on this run, but everything that arrives
+  // after it will be. That is the right behaviour when the list is clean.
+  let store, seenIds = new Set();
+  try {
+    store = getStore(BLOB_STORE);
+    const raw = await store.get(SEEN_KEY);
+    if (raw) seenIds = new Set(JSON.parse(raw));
+    console.log(`[spam-digest] loaded ${seenIds.size} seen IDs`);
+  } catch (err) {
+    // Blobs unavailable (local dev, permissions issue). Degrade gracefully:
+    // run without state, which means we may re-report items, but we never
+    // silently drop a new lead.
+    console.warn('[spam-digest] Blobs unavailable, running stateless:', err && err.message);
+    store = null;
+  }
+
   const cutoff = Date.now() - WINDOW_DAYS * 86400_000;
   let raw;
   try {
@@ -201,16 +229,33 @@ export default async () => {
   }
 
   const rows = raw.map(flatten).filter(r => new Date(r.created).getTime() > cutoff);
+
+  // Split into new (not seen before) and already-reported.
+  const newRows = rows.filter(r => !seenIds.has(r.id));
+  console.log(`[spam-digest] ${rows.length} in spam (${newRows.length} new since last run)`);
+
   const likely = [], borderline = [];
-  for (const r of rows) {
+  for (const r of newRows) {
     const { s, why } = score(r);
     if (s >= 3) { likely.push(r); console.log(`[spam-digest] likely genuine: ${r.email} (${s}: ${why.join(', ')})`); }
     else if (s >= 1) borderline.push(r);
   }
 
-  // Silence is the normal case. Only mail when there is something to act on.
+  // Persist the updated seen-ID set regardless of whether we email.
+  // Include ALL current spam IDs (not just new ones) so that items which were
+  // in a previous failed run and never reported are still tracked.
+  const allIds = rows.map(r => r.id);
+  if (store) {
+    try {
+      await store.set(SEEN_KEY, JSON.stringify([...new Set([...seenIds, ...allIds])]));
+    } catch (err) {
+      console.warn('[spam-digest] could not persist seen IDs:', err && err.message);
+    }
+  }
+
+  // Silence is the normal case. Only mail when there is something new to act on.
   if (!likely.length) {
-    console.log(`[spam-digest] ${rows.length} in spam, none look genuine — no email sent`);
+    console.log(`[spam-digest] nothing new looks genuine — no email sent`);
     return;
   }
 
