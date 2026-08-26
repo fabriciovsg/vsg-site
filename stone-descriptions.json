@@ -1,6 +1,5 @@
 {
   "_README": "Entries may be a plain string (legacy — becomes the intro paragraph) or an object. Object fields, all optional: intro, origin, character, applications, care, faqs[{q,a}]. Anything omitted falls back to data-driven text or is simply not rendered. Never write a price, a per-slab claim, or a competitor's trademarked stone name here.",
-
   "Taj Mahal": {
     "intro": "A warm, softly veined quartzite in cream and pale gold — one of the most requested natural stones in the gallery. Hard-wearing enough for kitchens, refined enough for anything, and held here in multiple finishes with every lot photographed individually.",
     "origin": "Taj Mahal is quarried in Espírito Santo in south-eastern Brazil, the region that produces most of the world's exotic quartzites. It reaches Melbourne as full slabs, and we buy at the block so the lots in the gallery share a consistent character rather than being assembled from scattered purchases.",
@@ -23,6 +22,156 @@
       {
         "q": "Is Taj Mahal quartzite good for a kitchen benchtop?",
         "a": "It is one of the most popular quartzites for exactly that. It handles daily kitchen use well, resists etching far better than marble, and is heat tolerant — though trivets are still sensible, as sustained heat can affect any sealed stone. Talk to your fabricator about edge profile and finish before committing."
+      }
+    ]
+  },
+  "Calacatta Matarazzo": {
+    "intro": "A Brazilian dolomite with a bright white ground and soft grey veining — the Calacatta look, in a stone that copes better with daily kitchen life than a classic Italian marble. Held here in depth, with every lot photographed individually.",
+    "origin": "Quarried in Brazil, where the Matarazzo material is worked as a dolomite rather than a true marble, and shipped to Melbourne as full slabs. Dolomite sits between marble and quartzite in hardness — chemically it is a carbonate, like marble, but denser and less reactive — which is why it is so often specified by people who want a Calacatta appearance without a marble's day-to-day fragility.",
+    "character": "A clean white to off-white background with grey veining that ranges from fine and linear through to broader, more sweeping movement, occasionally warmed by a thread of gold or taupe. Blocks vary — some lots read quiet and almost Carrara-like, others are far more graphic. The lots on this page are photographed one by one so you can choose the movement rather than the name.",
+    "applications": "Kitchen benchtops and islands, splashbacks, bathroom vanities, feature walls and fireplace surrounds. Its density makes it a more practical white than a soft marble for the surfaces that get used hardest.",
+    "care": "Dolomite is denser and less absorbent than marble, but it is still a natural stone: seal on installation and periodically thereafter, wipe spills rather than letting them sit, use a pH-neutral cleaner, and avoid abrasive pads. Our general care and maintenance guide covers this in full.",
+    "faqs": [
+      {
+        "q": "Is Calacatta Matarazzo a marble or a dolomite?",
+        "a": "A dolomite. Dolomite is a carbonate stone closely related to marble, but with a mineral composition that makes it harder and less porous. In practice it looks very much like a Calacatta marble and behaves like a more forgiving one."
+      },
+      {
+        "q": "How does it compare with Italian Calacatta marble?",
+        "a": "Aesthetically they are close — a white ground with grey and occasionally gold veining. The difference is how they behave. The dolomite is harder and less reactive than a calcite marble, though still a carbonate stone — spills should be wiped rather than left, but it copes with everyday kitchen use more comfortably than a soft Italian white."
+      },
+      {
+        "q": "Is Calacatta Matarazzo good for a kitchen benchtop?",
+        "a": "Yes — it is one of the main reasons people ask for it. Seal it, use a pH-neutral cleaner, and treat it as natural stone rather than an engineered surface. Talk to your fabricator about edge profile and finish before committing."
+      },
+      {
+        "q": "Does it need sealing?",
+        "a": "Yes. Any natural stone benchtop should be sealed on installation and re-sealed at an interval that depends on the finish and how hard the surface is worked. Your fabricator will advise for the lot you choose."
+      }
+    ]
+  },
+  "Mont Blanc": {
+    "intro": "A quiet white-to-pale-grey quartzite with fine, restrained veining — the calm end of the range, and one of the most specified whites for kitchens that need to stay understated.",
+    "origin": "Quarried in Brazil and shipped to Melbourne as full slabs. Mont Blanc belongs to the group of Brazilian quartzites that reached the Australian market as alternatives to pale marble, and it has stayed popular because it reads softer than most. Bianco Superiore, also held here, comes from a neighbouring quarry — the same family of stone, with slightly different character.",
+    "character": "A white to light grey background moved through with fine grey veining, generally linear and understated rather than dramatic. Tone varies between blocks: some lots are almost uniform and cloud-like, others carry more defined grey banding.",
+    "applications": "Kitchen benchtops and islands, splashbacks, bathroom vanities, and full-height feature walls where a calm background is wanted. Its restraint makes it a common pairing with timber and with strongly figured joinery.",
+    "care": "Mont Blanc is a little more open in structure than the very densest quartzites, so sealing is worth doing properly: seal on installation, and have cut edges sealed on site around sinks, tap holes and seams. After that, wipe spills rather than letting them sit, use a pH-neutral cleaner and avoid abrasive pads. Your fabricator will advise on the re-sealing interval for the finish you choose.",
+    "faqs": [
+      {
+        "q": "Is Mont Blanc a quartzite or a marble?",
+        "a": "A quartzite. It is a metamorphic rock formed from sandstone, which makes it substantially harder than marble and far less reactive to the acids that etch a marble benchtop — lemon juice, wine and some cleaning products."
+      },
+      {
+        "q": "How does Mont Blanc compare with Taj Mahal?",
+        "a": "Both are pale Brazilian quartzites chosen for a marble-like look. Taj Mahal is the warmer of the two, running cream to gold; Mont Blanc is cooler, running white to grey. The choice is usually settled by the surrounding palette rather than by how the stones perform."
+      },
+      {
+        "q": "Is Mont Blanc good for a kitchen benchtop?",
+        "a": "It is one of the more popular white quartzites for exactly that. It handles daily kitchen use well and resists etching far better than marble. Discuss finish and edge profile with your fabricator, and seal it on installation."
+      },
+      {
+        "q": "Does Mont Blanc need more sealing than other quartzites?",
+        "a": "It is slightly more open in structure than the densest quartzites, so it takes sealer readily and benefits from being sealed thoroughly at installation — cut edges included. That is a fabrication detail rather than a drawback: sealed properly, it behaves as a quartzite should."
+      }
+    ]
+  },
+  "Negresco": {
+    "intro": "A charcoal-to-black quartzite crossed with white and grey veining — the dark stone people reach for when a black granite reads too flat and a black marble feels too fragile.",
+    "origin": "Quarried in Brazil, in the region that produces most of the world's exotic quartzites, and shipped to Melbourne as full slabs.",
+    "character": "A deep charcoal to near-black background carrying white, grey and occasionally gold veining, from fine threading through to bold branching movement. Block variation is significant on this stone — some lots are quiet and almost uniformly dark, others are highly graphic. It is a stone to choose from the photograph rather than from the name.",
+    "applications": "Islands and benchtops where a dark statement surface is wanted, splashbacks, bathroom vanities, bar tops, feature walls and fireplace surrounds. It is frequently specified as the dark counterpoint to pale joinery.",
+    "care": "Seal on installation and periodically thereafter. Dark stone shows water marks and residue more readily than pale stone, so a pH-neutral cleaner and a dry buff make a visible difference. Avoid abrasive pads, which will dull a polished surface.",
+    "faqs": [
+      {
+        "q": "Is Negresco a granite?",
+        "a": "No — it is a quartzite, formed from sandstone under heat and pressure. It gets compared to black granite because of the colour, but the surface reads quite differently: granite is speckled and granular, where Negresco carries flowing white veins across a dark ground."
+      },
+      {
+        "q": "Does Negresco show fingerprints and water marks?",
+        "a": "Dark polished stone of any kind shows water spotting and oils more than pale stone does. A honed or leathered finish hides marks considerably better than a polish, so it is worth deciding on finish at the same time as colour."
+      },
+      {
+        "q": "How much does the pattern vary between slabs?",
+        "a": "Considerably — Negresco is one of the more variable stones in the gallery, which is why every lot here is photographed individually. If your project needs slabs that match across a run, tell us early so we can look at what is available from the same block."
+      },
+      {
+        "q": "Is Negresco suitable for a kitchen island?",
+        "a": "Yes. As a quartzite it is hard and resists etching far better than a dark marble, which is the usual alternative for this look. Seal it on installation and use a pH-neutral cleaner."
+      }
+    ]
+  },
+  "Aurora Gold": {
+    "intro": "A warm quartzite in cream and white shot through with gold and amber — brighter and more energetic than the quieter Brazilian whites, and held here in depth.",
+    "origin": "Quarried in Brazil and shipped to Melbourne as full slabs, from the same south-eastern quartzite belt that produces most of the exotic pale stone on the market.",
+    "character": "A pale cream to white base carrying gold, amber and honey veining, generally with more movement and more colour contrast than a Taj Mahal or a Mont Blanc. Some lots lean bright and clearly golden, others softer and more beige. Tone shifts noticeably between blocks, so the lots on this page are photographed one by one.",
+    "applications": "Kitchen benchtops and islands, splashbacks, bathroom vanities and feature walls — particularly where brass, bronze or warm timber finishes are already in the scheme. It is used outdoors in sheltered applications, though tone can shift with prolonged direct sun.",
+    "care": "Quartzite is dense and comparatively forgiving, but it is still natural stone: seal on installation and periodically thereafter, wipe spills rather than letting them sit, use a pH-neutral cleaner and avoid abrasive pads. Our general care and maintenance guide covers this in full.",
+    "faqs": [
+      {
+        "q": "How does Aurora Gold compare with Taj Mahal?",
+        "a": "Both are warm Brazilian quartzites. Taj Mahal is the quieter of the two — gentle gold and taupe veining on a cream ground. Aurora Gold carries more colour and more contrast, with the gold drawn more clearly. If Taj Mahal is the calm choice, Aurora Gold is the one that becomes the feature of the room."
+      },
+      {
+        "q": "Is Aurora Gold a quartzite?",
+        "a": "Yes — a metamorphic rock formed from sandstone. That makes it substantially harder than marble and far less reactive to the acidic things that etch a marble benchtop, such as lemon juice, wine and some cleaning products."
+      },
+      {
+        "q": "Will the gold veining fade over time?",
+        "a": "Not in normal interior use. True quartzite is generally UV-stable. Some natural stones do shift tone under years of direct sun — worth weighing for outdoor applications or a surface under a very large north-facing window, and worth asking your fabricator about for the specific lot."
+      },
+      {
+        "q": "Is it suitable for a kitchen benchtop?",
+        "a": "Yes. It handles daily kitchen use well and is heat tolerant, though trivets remain sensible since sustained heat can affect any sealed stone. Talk to your fabricator about finish and edge profile before committing."
+      }
+    ]
+  },
+  "Crystallo": {
+    "intro": "A translucent white quartzite with visible crystal in the surface — one of the hardest stones in the gallery, and the one most often specified where a slab needs to be lit from behind.",
+    "origin": "Quarried in Brazil. Crystallo is unusually crystalline even by quartzite standards, which is where both its name and its translucency come from. It reaches Melbourne as full slabs.",
+    "character": "A white to pale grey ground with a glassy, crystalline surface and a genuine softness to light — held against a lamp, a slab glows rather than blocking. Veining is generally fine and grey, sometimes warmed with gold and, in some lots, cooled with blue. The crystal structure is visible close up and is the main reason people choose it over a flatter white.",
+    "applications": "Benchtops and islands, splashbacks and vanities, and — most distinctively — backlit panels, bar fronts and feature walls, where the translucency does something no other white stone in the range does. It is very hard, which makes it practical in a kitchen and slow to fabricate.",
+    "care": "Seal on installation and periodically thereafter. Crystallo is dense and comparatively forgiving, but it is still a natural stone: pH-neutral cleaner, no abrasive pads, and wipe spills rather than leaving them to sit.",
+    "faqs": [
+      {
+        "q": "What makes Crystallo different from other white quartzites?",
+        "a": "The crystal. Crystallo is markedly more crystalline than most quartzites, which gives it a glassy surface and real translucency. Most white quartzites read as opaque stone; Crystallo transmits light."
+      },
+      {
+        "q": "Can Crystallo be backlit?",
+        "a": "Yes, and it is one of the few natural stones that genuinely rewards it. Translucency varies by lot and by thickness, so if backlighting is the plan, tell us — that slab is worth choosing against a light rather than on a rack."
+      },
+      {
+        "q": "Is Crystallo hard to fabricate?",
+        "a": "It is hard stone, so cutting and polishing are slower and more demanding than for a marble and tooling wears faster. Use a stonemason who works with quartzite regularly."
+      },
+      {
+        "q": "Does Crystallo etch like marble?",
+        "a": "It is far less reactive. Quartzite resists the acids that etch a marble benchtop — lemon juice, wine, some cleaning products — though it should still be sealed and spills should still be wiped."
+      }
+    ]
+  },
+  "Tundra Grey": {
+    "intro": "A soft grey limestone marked with fine white veining and fossil detail — quieter and more architectural than the Brazilian whites, and used across floors, walls and joinery as readily as on benchtops.",
+    "origin": "Quarried in Turkey and shipped to Melbourne as full slabs. It is sometimes sold elsewhere as a marble; it is a limestone, and it behaves like one.",
+    "character": "A mid to light grey background with fine, irregular white veining and, in many lots, visible fossil and shell detail. The overall read is soft and matte rather than glossy, even in a polished finish. Blocks vary in how strongly the veining is drawn and in how cool or brown the base sits.",
+    "applications": "Floor and wall tile, bathroom surfaces, feature walls, fireplace surrounds and joinery. It is used for benchtops, though as a softer stone it suits a considered finish and a client who is comfortable with a surface that develops a patina rather than staying factory-new.",
+    "care": "Limestone is softer and more porous than quartzite or dolomite and asks for more care. Seal on installation and re-seal more often than you would a quartzite. Keep acidic liquids off it, use a pH-neutral cleaner, and use boards and coasters on any horizontal surface in daily use. Our general care and maintenance guide covers this in full.",
+    "faqs": [
+      {
+        "q": "Is Tundra Grey a limestone or a marble?",
+        "a": "A limestone. It is marketed as a marble in some markets, and the two are related — marble is limestone that has been metamorphosed — but Tundra Grey has not been through that change. It is softer and more porous than marble and should be specified on that basis."
+      },
+      {
+        "q": "Can Tundra Grey be used for a kitchen benchtop?",
+        "a": "It can, and it is, but go in with your eyes open. It is softer and more porous than quartzite, so it will mark and patina with use. Plenty of people choose it for exactly that character. If you want a surface that stays unchanged, a quartzite is the better answer."
+      },
+      {
+        "q": "What are the pale marks and outlines in the stone?",
+        "a": "Fossil and shell fragments. Limestone forms from sediment on ancient seabeds, so shell detail is frequently visible in the slab — in Tundra Grey it reads as pale flecks and outlines against the grey. It is a natural feature of the stone, not a defect."
+      },
+      {
+        "q": "Does Tundra Grey work outdoors?",
+        "a": "In sheltered applications and with an appropriate finish, yes — honed and brushed finishes are widely used for terraces and pool surrounds. Discuss slip rating and sealing with your fabricator for the specific application."
       }
     ]
   }
