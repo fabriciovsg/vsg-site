@@ -17,3 +17,5 @@ export default guard(async (req) => {
   const body = await resp.json();
   return json(req, { status: resp.status, ...body });
 });
+
+export const config = { path: '/api/check-trash' };
