@@ -24,7 +24,7 @@ export const DRIVE_API = 'https://www.googleapis.com/drive/v3';
 export const STOCK_FOLDER_ID          = '1BtszKasn-t-haVTX7JzUWTPhuriZsCCq';
 export const SLAB_IMAGES_FOLDER_ID    = '1e2uzwpG0iOzg7O79F-aqMXeUsUIVF-AA';
 export const PROJECT_IMAGES_FOLDER_ID = '13meCoYDTCLZ9_CuHO2JjgxoTAlg_ElEv';
-export const SITE_CONFIG_FILE_ID      = '1-CM8zoEfnObuVY53OW5chE_3jTJTQE1-';
+export const SITE_CONFIG_FILE_ID      = '1DBMY3AJGBl4S5QGq6PNTPzFzEt37dEbr';
 
 export const READONLY_SCOPE = 'https://www.googleapis.com/auth/drive.readonly';
 export const WRITE_SCOPE    = 'https://www.googleapis.com/auth/drive';
