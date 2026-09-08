@@ -19,7 +19,7 @@
 // when Drive can't be read — a config hiccup costs the custom wording, never
 // the email.
 
-import { driveReadText, SITE_CONFIG_FILE_ID } from '../lib/google.js';
+import { driveReadText, stockFileByName, SITE_CONFIG_FILENAME } from '../lib/google.js';
 import { sendMail, isEmail, MAIL_SENDER } from '../lib/gmail.js';
 
 // ── Fallback copy ───────────────────────────────────────────────────────────
@@ -68,7 +68,8 @@ async function siteConfig() {
   if (now - _cfgTry < CFG_RETRY) return _cfg || {};
   _cfgTry = now;
   try {
-    const parsed = JSON.parse(await driveReadText(SITE_CONFIG_FILE_ID));
+    const fileId = await stockFileByName(SITE_CONFIG_FILENAME);
+    const parsed = JSON.parse(await driveReadText(fileId));
     if (parsed && typeof parsed === 'object') { _cfg = parsed; _cfgAt = now; }
   } catch (err) {
     console.warn('[enquiry-confirmation] config unreadable, using fallback copy:',
