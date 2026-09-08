@@ -24,7 +24,14 @@ export const DRIVE_API = 'https://www.googleapis.com/drive/v3';
 export const STOCK_FOLDER_ID          = '1BtszKasn-t-haVTX7JzUWTPhuriZsCCq';
 export const SLAB_IMAGES_FOLDER_ID    = '1e2uzwpG0iOzg7O79F-aqMXeUsUIVF-AA';
 export const PROJECT_IMAGES_FOLDER_ID = '13meCoYDTCLZ9_CuHO2JjgxoTAlg_ElEv';
-export const SITE_CONFIG_FILE_ID      = '1DBMY3AJGBl4S5QGq6PNTPzFzEt37dEbr';
+
+// vsg-site-config.json is looked up by NAME, not a fixed file ID — a fixed
+// ID silently 404s forever the moment the file is replaced rather than
+// edited in place (this took the config down for two days on 6 Sep 2026,
+// undetected, because nothing retried or fell back to a fresh lookup).
+// clients.json and colour-cache.json already worked this way; this brings
+// the config file in line with them.
+export const SITE_CONFIG_FILENAME = 'vsg-site-config.json';
 
 export const READONLY_SCOPE = 'https://www.googleapis.com/auth/drive.readonly';
 export const WRITE_SCOPE    = 'https://www.googleapis.com/auth/drive';
@@ -35,8 +42,8 @@ export const WRITE_SCOPE    = 'https://www.googleapis.com/auth/drive';
 export const GMAIL_SEND_SCOPE = 'https://www.googleapis.com/auth/gmail.send';
 
 function b64url(data) {
-  const buf = typeof data === 'string' ? Buffer.from(data) : data;
-  return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    const buf = typeof data === 'string' ? Buffer.from(data) : data;
+    return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
 // Token cache lives in module scope, so it survives across warm invocations
@@ -46,53 +53,53 @@ function b64url(data) {
 const _tokens = new Map(); // scope|sub -> { token, expiry }
 
 export async function getAccessToken(scope = READONLY_SCOPE, sub = null) {
-  if (!SA_EMAIL || !RAW_KEY) {
-    throw new Error('Missing VSG_SERVICE_ACCOUNT_EMAIL or VSG_PRIVATE_KEY — check the variable Scopes include Functions');
-  }
-  // `sub` is the Workspace user being impersonated (domain-wide delegation).
+    if (!SA_EMAIL || !RAW_KEY) {
+          throw new Error('Missing VSG_SERVICE_ACCOUNT_EMAIL or VSG_PRIVATE_KEY — check the variable Scopes include Functions');
+    }
+    // `sub` is the Workspace user being impersonated (domain-wide delegation).
   // It MUST be part of the cache key: a token minted for one mailbox is a
   // token that can send as that mailbox, and handing it to a later call for a
   // different sender would be a real impersonation bug, not a caching one.
   const key = sub ? `${scope}|${sub}` : scope;
-  const hit = _tokens.get(key);
-  if (hit && Date.now() < hit.expiry - 60_000) return hit.token;
+    const hit = _tokens.get(key);
+    if (hit && Date.now() < hit.expiry - 60_000) return hit.token;
 
   const now = Math.floor(Date.now() / 1000);
-  const header = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT', kid: KEY_ID }));
-  const claim  = b64url(JSON.stringify({
-    iss: SA_EMAIL,
-    ...(sub ? { sub } : {}),
-    scope,
-    aud: 'https://oauth2.googleapis.com/token',
-    iat: now,
-    exp: now + 3600,
-  }));
-  const sig = b64url(crypto.createSign('RSA-SHA256').update(`${header}.${claim}`).sign(RAW_KEY));
-  const assertion = `${header}.${claim}.${sig}`;
+    const header = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT', kid: KEY_ID }));
+    const claim  = b64url(JSON.stringify({
+          iss: SA_EMAIL,
+          ...(sub ? { sub } : {}),
+          scope,
+          aud: 'https://oauth2.googleapis.com/token',
+          iat: now,
+          exp: now + 3600,
+    }));
+    const sig = b64url(crypto.createSign('RSA-SHA256').update(`${header}.${claim}`).sign(RAW_KEY));
+    const assertion = `${header}.${claim}.${sig}`;
 
   const resp = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${assertion}`,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${assertion}`,
   });
-  const data = await resp.json().catch(() => ({}));
-  if (!resp.ok || !data.access_token) {
-    // Do not echo the response body — it can contain credential detail.
-    throw new Error(`Token exchange failed (${resp.status})`);
-  }
-  _tokens.set(key, {
-    token: data.access_token,
-    expiry: Date.now() + (data.expires_in || 3600) * 1000,
-  });
-  return data.access_token;
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok || !data.access_token) {
+          // Do not echo the response body — it can contain credential detail.
+      throw new Error(`Token exchange failed (${resp.status})`);
+    }
+    _tokens.set(key, {
+          token: data.access_token,
+          expiry: Date.now() + (data.expires_in || 3600) * 1000,
+    });
+    return data.access_token;
 }
 
-async function driveFetch(url, init = {}, scope = READONLY_SCOPE) {
-  const token = await getAccessToken(scope);
-  return fetch(url, {
-    ...init,
-    headers: { ...(init.headers || {}), Authorization: `Bearer ${token}` },
-  });
+export async function driveFetch(url, init = {}, scope = READONLY_SCOPE) {
+    const token = await getAccessToken(scope);
+    return fetch(url, {
+          ...init,
+          headers: { ...(init.headers || {}), Authorization: `Bearer ${token}` },
+    });
 }
 
 /**
@@ -100,49 +107,61 @@ async function driveFetch(url, init = {}, scope = READONLY_SCOPE) {
  * only place WRITE_SCOPE is requested.
  */
 export async function driveWriteFile(fileId, content, mimeType = 'application/json') {
-  const url = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`;
-  const resp = await driveFetch(url, {
-    method: 'PATCH',
-    headers: { 'Content-Type': mimeType },
-    body: content,
-  }, WRITE_SCOPE);
-  if (!resp.ok) throw new Error(`Drive write failed (${resp.status})`);
-  return await resp.json().catch(() => ({}));
+    const url = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`;
+    const resp = await driveFetch(url, {
+          method: 'PATCH',
+          headers: { 'Content-Type': mimeType },
+          body: content,
+    }, WRITE_SCOPE);
+    if (!resp.ok) throw new Error(`Drive write failed (${resp.status})`);
+    return await resp.json().catch(() => ({}));
 }
 
 /** List children of a folder. Returns [] on any non-200 (matches page behaviour). */
 export async function driveList(folderId, extraQuery = '') {
-  const q = encodeURIComponent(
-    `'${folderId}' in parents and trashed=false${extraQuery ? ' and ' + extraQuery : ''}`
-  );
-  const url = `${DRIVE_API}/files?q=${q}&fields=files(id,name,mimeType,modifiedTime)&pageSize=1000`;
-  const resp = await driveFetch(url);
-  if (!resp.ok) return [];
-  return (await resp.json()).files || [];
+    const q = encodeURIComponent(
+          `'${folderId}' in parents and trashed=false${extraQuery ? ' and ' + extraQuery : ''}`
+        );
+    const url = `${DRIVE_API}/files?q=${q}&fields=files(id,name,mimeType,modifiedTime)&pageSize=1000`;
+    const resp = await driveFetch(url);
+    if (!resp.ok) return [];
+    return (await resp.json()).files || [];
 }
 
 /** Find one file by exact name within a folder. Returns null if absent. */
 export async function driveFindFile(folderId, filename) {
-  const safe = String(filename).replace(/'/g, "\\'");
-  const q = encodeURIComponent(`'${folderId}' in parents and trashed=false and name='${safe}'`);
-  const url = `${DRIVE_API}/files?q=${q}&fields=files(id,name,modifiedTime)&pageSize=1`;
-  const resp = await driveFetch(url);
-  if (!resp.ok) return null;
-  return ((await resp.json()).files || [])[0] || null;
+    const safe = String(filename).replace(/'/g, "\\'");
+    const q = encodeURIComponent(`'${folderId}' in parents and trashed=false and name='${safe}'`);
+    const url = `${DRIVE_API}/files?q=${q}&fields=files(id,name,modifiedTime)&pageSize=1`;
+    const resp = await driveFetch(url);
+    if (!resp.ok) return null;
+    return ((await resp.json()).files || [])[0] || null;
+}
+
+/**
+ * Resolve a file in the Stock folder by name, failing loudly if it's
+ * missing — a silent fallback here would just trade a 404 for a confusing
+ * empty config, which is worse. Callers that need the file to always exist
+ * (config, clients, colour cache) should use this instead of a hardcoded ID.
+ */
+export async function stockFileByName(filename) {
+    const f = await driveFindFile(STOCK_FOLDER_ID, filename);
+    if (!f) throw new Error(`${filename} not found in Stock folder`);
+    return f.id;
 }
 
 /** Read a file's bytes by ID. */
 export async function driveReadBytes(fileId) {
-  const resp = await driveFetch(`${DRIVE_API}/files/${fileId}?alt=media`);
-  if (!resp.ok) throw new Error(`Drive read failed (${resp.status})`);
-  return Buffer.from(await resp.arrayBuffer());
+    const resp = await driveFetch(`${DRIVE_API}/files/${fileId}?alt=media`);
+    if (!resp.ok) throw new Error(`Drive read failed (${resp.status})`);
+    return Buffer.from(await resp.arrayBuffer());
 }
 
 /** Read a file's contents as text. */
 export async function driveReadText(fileId) {
-  const resp = await driveFetch(`${DRIVE_API}/files/${fileId}?alt=media`);
-  if (!resp.ok) throw new Error(`Drive read failed (${resp.status})`);
-  return await resp.text();
+    const resp = await driveFetch(`${DRIVE_API}/files/${fileId}?alt=media`);
+    if (!resp.ok) throw new Error(`Drive read failed (${resp.status})`);
+    return await resp.text();
 }
 
 /**
@@ -151,8 +170,8 @@ export async function driveReadText(fileId) {
  * exposing a general "walk upwards" capability to the browser.
  */
 export async function driveGetParent(fileId) {
-  const resp = await driveFetch(`${DRIVE_API}/files/${fileId}?fields=parents`);
-  if (!resp.ok) return null;
-  const parents = (await resp.json()).parents || [];
-  return parents[0] || null;
+    const resp = await driveFetch(`${DRIVE_API}/files/${fileId}?fields=parents`);
+    if (!resp.ok) return null;
+    const parents = (await resp.json()).parents || [];
+    return parents[0] || null;
 }
