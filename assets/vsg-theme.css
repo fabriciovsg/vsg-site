@@ -109,7 +109,7 @@ body[data-theme$="light-gallery"] #about{background:#FAF8F4;}
 body[data-theme$="light-gallery"] .about-img-accent{border-color:#FAF8F4;}
 body[data-theme$="light-gallery"] #why{background:#FAF8F4;}
 
-/* "Present Collection" — the button that launches the gallery presentation. It
+/* "Theatre mode" — the button that launches the gallery presentation. It
    sits in the gallery toolbar alongside .filter-btn and .sort-select, so when
    #gallery goes cream it needs the same treatment they get above. It was missed:
    its default var(--gold-light) #D4AF6A on the cream #F5F0E8 gallery background
@@ -163,7 +163,7 @@ body[data-theme="navy-accent"] .callout{background:#1a2b45;}
    them "follow the theme", that is a regression, not a fix.
 
    1. THE PRESENTATION MODES — .sm-ov (per-stone "View Room Scenes") and .gp-ov
-      (collection-wide "Present Collection"), plus their .sm-thumbs / .gp-strip
+      (collection-wide "Theatre mode"), plus their .sm-thumbs / .gp-strip
       filmstrips and .gp-header bar. These are full-screen lightboxes, and /?showroom
       runs .gp-ov as an iPad kiosk. A pure-black surround is what lets a customer
       judge the actual colour of a slab: a navy surround pushes the perceived hue of
