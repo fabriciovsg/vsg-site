@@ -7,8 +7,11 @@
 // VISIBILITY: this script applies the same admin rules as the live gallery,
 // read fresh from vsg-site-config.json each build — hiddenLots excluded,
 // transit lots only if curated in visibleTransitLots (shown as a soft ETA
-// window, never a count), slab QUANTITIES suppressed while slabDisplay is
-// "hide", and unphotographed varieties kept out of the catalogue while
+// window, never a count), per-lot slab counts honour the three-state
+// slabDisplay flag — "count" shows the number, "lowstock" shows a muted
+// "Low Stock" badge below lowStockThreshold (default 4) and nothing
+// otherwise, "hide" shows nothing — and unphotographed varieties kept
+// out of the catalogue while
 // hideNoPhoto is on. If an admin setting changes, the pages follow at the
 // next build (3x daily).
 //
@@ -26,12 +29,6 @@ const SA_EMAIL = process.env.VSG_SERVICE_ACCOUNT_EMAIL;
 const KEY_ID   = process.env.VSG_PRIVATE_KEY_ID;
 const RAW_KEY  = (process.env.VSG_PRIVATE_KEY || '').replace(/\\n/g, '\n');
 const STOCK_FOLDER_ID = '1BtszKasn-t-haVTX7JzUWTPhuriZsCCq';
-// Same file ID the runtime uses (netlify/lib/google.js SITE_CONFIG_FILE_ID).
-// This generator used to resolve the config by NAME inside the Stock folder,
-// which is the same drift that broke the Stone Knowledge hub on 3 Aug: if a
-// second file of that name exists, or the real one lives elsewhere, the build
-// silently reads different config from the live site. Read by ID, like everyone else.
-const SITE_CONFIG_FILE_ID = '1-CM8zoEfnObuVY53OW5chE_3jTJTQE1-';
 const SITE = 'https://victoriastonegallery.com.au';
 const CWD = process.cwd();
 const DEV_DIR = path.join(CWD, 'dev-data');
@@ -78,20 +75,10 @@ async function loadData(){
   if(!list.files?.length){ console.error('Stone pages: no ListedReport in Stock folder'); process.exit(1); }
   console.log(`Stone pages: stock source ${list.files[0].name}`);
   const xls = await driveGetBuffer(`https://www.googleapis.com/drive/v3/files/${list.files[0].id}?alt=media`, token);
-  let cms = {};
-  try{
-    cms = JSON.parse(await driveGet(`https://www.googleapis.com/drive/v3/files/${SITE_CONFIG_FILE_ID}?alt=media&supportsAllDrives=true`, token, true));
-    console.log('Stone pages: config read by file ID');
-  }catch(err){
-    console.warn(`Stone pages: config file-ID read failed (${err.message}) — falling back to name lookup`);
-    const cfgList = await driveGet(`https://www.googleapis.com/drive/v3/files?q='${STOCK_FOLDER_ID}'+in+parents+and+name='vsg-site-config.json'+and+trashed=false&fields=files(id)`, token);
-    cms = cfgList.files?.length
-      ? JSON.parse(await driveGet(`https://www.googleapis.com/drive/v3/files/${cfgList.files[0].id}?alt=media`, token, true))
-      : {};
-  }
-  // Printed so a config mismatch shows up in the build log instead of as a
-  // mysteriously wrong nav three pages deep.
-  console.log(`Stone pages: config — bookingUrl:${cms.bookingUrl?'set':'MISSING'} fabricatorsVisible:${cms.fabricatorsVisible} enabledLocations:${(cms.enabledLocations||[]).length} hiddenLots:${(cms.hiddenLots||[]).length}`);
+  const cfgList = await driveGet(`https://www.googleapis.com/drive/v3/files?q='${STOCK_FOLDER_ID}'+in+parents+and+name='vsg-site-config.json'+and+trashed=false&fields=files(id)`, token);
+  const cms = cfgList.files?.length
+    ? JSON.parse(await driveGet(`https://www.googleapis.com/drive/v3/files/${cfgList.files[0].id}?alt=media`, token, true))
+    : {};
   return { wb: XLSX.read(xls), cms };
 }
 
@@ -152,7 +139,7 @@ function aggregate(wb, cms){
 }
 
 // ── page shell ───────────────────────────────────────────────
-function shell({ title, description, canonical, jsonld, body, cms = {} }){
+function shell({ title, description, canonical, jsonld, body }){
   // Chrome (topbar, nav, footer, logo symbol, hamburger) is lifted VERBATIM
   // from the site's own pages so generated pages are indistinguishable from
   // hand-built ones. If the site nav changes, re-harvest these blocks — they
@@ -380,9 +367,8 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
     <li><a href="/#about">About</a></li>
     <li><a href="/#why">Why VSG</a></li>
     <li><a href="/stones/">Stone Knowledge</a></li>
-    ${cms.fabricatorsVisible===false?'':'<li><a href="/#fabricators">Fabricators</a></li>'}
+    <li><a href="/#fabricators">Fabricators</a></li>
     <li><a href="/#gallery" class="nav-shortlist-btn">&#9825; My Shortlist</a></li>
-    ${cms.bookingUrl?'<li><a href="/?book=1" class="nav-book">Book a Visit</a></li>':''}
     <li><a href="/#contact" class="nav-cta">Contact Us</a></li>
   </ul>
 </nav>
@@ -557,7 +543,8 @@ function introFor(v, colour){
 }
 
 function stonePage(v, slug, manifest, cms, stamp){
-  const showSlabs = cms.slabDisplay !== 'hide';
+  const slabMode = cms.slabDisplay || 'lowstock';
+  const lowStockThreshold = Math.max(1, parseInt(cms.lowStockThreshold, 10) || 4);
   const avail = [...v.lots.values()].filter(l=>l.status==='AVAILABLE');
   const lotsWithImg = avail.filter(l=>manifest[l.lot]?.slab).sort((a,b)=>b.slabs-a.slabs);
   const chosenLot = (cms.catalogueThumbs||{})[v.name];
@@ -571,7 +558,12 @@ function stonePage(v, slug, manifest, cms, stamp){
   const cards = lotsWithImg.slice(0,6).map(l=>{
     const e = manifest[l.lot];
     const srcset = e.slabSrcset ? ` srcset="${esc(e.slabSrcset)}" sizes="(max-width:700px) 100vw, 33vw"` : '';
-    const qty = showSlabs ? `${l.slabs} slab${l.slabs!==1?'s':''} &middot; ` : '';
+    let qty = '';
+    if (slabMode === 'count') {
+      qty = `${l.slabs} slab${l.slabs!==1?'s':''} &middot; `;
+    } else if (slabMode === 'lowstock' && l.slabs < lowStockThreshold) {
+      qty = `<span style="color:#c8943a">Low Stock</span> &middot; `;
+    }
     const deepLink=`/?lot=${encodeURIComponent(l.lot)}&name=${encodeURIComponent(v.name)}#gallery`;
     return `<a class="lot-card" href="${deepLink}" title="View this lot in the gallery"><img src="${e.slab}"${srcset} alt="${esc(v.name)} ${esc((v.material||'').toLowerCase())} &mdash; lot ${esc(displayLot(l.lot))}" loading="lazy"><div class="lot-meta"><span>Lot ${esc(displayLot(l.lot))}</span><span>${qty}${l.th}mm ${esc(l.fin)}</span></div></a>`;
   }).join('\n    ');
@@ -636,10 +628,10 @@ ${faqHtml}
   return shell({
     title:`${v.name} ${v.material||''} Slabs Melbourne | Victoria Stone Gallery`.replace(/\s+/g,' '),
     description:`${v.name} ${(v.material||'stone').toLowerCase()} slabs in Melbourne — ${avail.length} lot${avail.length!==1?'s':''} in the gallery now${finishes.length?`. ${finishes.join(', ')} finishes`:''}. View current lots and arrange a viewing.`,
-    canonical:`${SITE}/stone/${slug}/`, jsonld:[productLd, faqLd], body, cms });
+    canonical:`${SITE}/stone/${slug}/`, jsonld:[productLd, faqLd], body });
 }
 
-function legacyPage(entry, cms = {}){
+function legacyPage(entry){
   const { name, material, slug } = entry;
   const matSlug = MAT_SLUG[material]||'';
   const body = `
@@ -657,7 +649,7 @@ function legacyPage(entry, cms = {}){
   return shell({
     title:`${name} ${material} Melbourne | Victoria Stone Gallery`,
     description:`${name} ${material.toLowerCase()} — not currently held in our Melbourne gallery. Register your interest, or explore comparable stones in stock now.`,
-    canonical:`${SITE}/stone/${slug}/`, jsonld:null, body, cms });
+    canonical:`${SITE}/stone/${slug}/`, jsonld:null, body });
 }
 
 function cataloguePage(entries, cms, stamp){
@@ -739,7 +731,7 @@ ${sections}`;
   return shell({
     title:'Natural Stone Catalogue Melbourne | Victoria Stone Gallery',
     description:`Browse ${total} natural stone varieties by name — marble, quartzite, granite, dolomite, travertine and limestone slabs in our Melbourne gallery, updated from live stock.`,
-    canonical:`${SITE}/catalogue/`, jsonld:null, body, cms });
+    canonical:`${SITE}/catalogue/`, jsonld:null, body });
 }
 
 // ── main ─────────────────────────────────────────────────────
@@ -785,7 +777,7 @@ async function main(){
     if(usedSlugs.has(entry.slug)){ console.log(`  legacy "${entry.name}" back in stock — live page wins, legacy skipped`); continue; }
     const dir = path.join(CWD,'stone',entry.slug);
     fs.mkdirSync(dir,{recursive:true});
-    fs.writeFileSync(path.join(dir,'index.html'), legacyPage(entry, cms));
+    fs.writeFileSync(path.join(dir,'index.html'), legacyPage(entry));
     written++;
     sitemapUrls.push(`${SITE}/stone/${entry.slug}/`);
   }
@@ -908,8 +900,6 @@ nav.scrolled{box-shadow:0 4px 32px rgba(0,0,0,.4);}
 .nav-links a:hover,.nav-links a.current{color:var(--gold-light);}
 .nav-cta{background:var(--gold);color:white!important;padding:10px 22px;letter-spacing:.12em;font-size:11px;white-space:nowrap;transition:background .2s!important;}
 .nav-cta:hover{background:var(--gold-light)!important;}
-.nav-book,.nav-links a.nav-book{background:transparent;border:1px solid var(--gold);color:var(--gold-light)!important;padding:9px 20px;letter-spacing:.12em;font-size:11px;white-space:nowrap;text-transform:uppercase;font-family:'Jost',sans-serif;cursor:pointer;text-decoration:none;transition:background .2s,color .2s;}
-.nav-book:hover,.nav-links a.nav-book:hover{background:var(--gold);color:#fff!important;}
 /* Selector doubled with .nav-links a… because that rule (0,1,1) outranks a bare
    class (0,1,0) and would otherwise force this link to the stone nav-link colour
    and 12px. The main site's version is a <button>, which .nav-links a never
