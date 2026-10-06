@@ -948,7 +948,7 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
       <option value="gallery" selected>Sort: Featured</option>
       <option value="name">Sort: Name A&#8211;Z</option>
     </select>
-    <button class="gp-launch-btn" onclick="openGalleryPresentation()">&#9654; Present Collection</button>
+    <button class="gp-launch-btn" onclick="openGalleryPresentation()">&#9654; Theatre mode</button>
   </div>
   <div class="colour-filter-row" id="colourFilterRow">
     <span class="colour-pill-label">Colour</span>
@@ -1282,7 +1282,8 @@ const CMS_DEFAULTS={
   footerTagline:"Melbourne's destination for rare and exceptional natural stone. Sourced from the world's finest quarries and producers — each slab a singular work of nature.",
   bookingUrl:"",
   bookingNote:"Booking ahead means we can have the right slabs ready and give you our full attention. If no time suits, call 03 9702 7539 and we'll do our best to accommodate you. Walk-ins are welcome any time during opening hours.",
-  slabDisplay:"lowstock", // "count" = show number, "lowstock" = show "Low Stock" under 4, "hide" = hide bar entirely
+  slabDisplay:"lowstock", // "count" = show number, "lowstock" = show "Low Stock" label under lowStockThreshold slabs, "hide" = show nothing
+  lowStockThreshold:4, // in "lowstock" mode, show the warning when a lot has fewer than this many slabs (admin-adjustable)
   hideNoPhoto:true, // hide lots that have no slab photo from the public grid and the live count
   enabledLocations:['VSG','JRD','SUR','AMU'], // default: all locations except SYD
   priceFilterVisible:true, // show price range filter pills on public showroom
@@ -2781,10 +2782,9 @@ function renderGrid(reset=false){
         <div class="slab-bar-track"><div class="slab-bar-fill" style="width:${barPct}%"></div></div>
         <span class="slab-bar-label">${qty} slab${qty!==1?'s':''}</span>
       </div>`;
-    }else if(slabMode==='lowstock'&&qty<4){
-      // Only show bar when stock is genuinely low — otherwise nothing
+    }else if(slabMode==='lowstock'&&qty<(parseInt(g('lowStockThreshold'),10)||4)){
+      // Label only — the progress bar is intentionally omitted in this mode.
       slabBar=`<div class="slab-bar-wrap">
-        <div class="slab-bar-track"><div class="slab-bar-fill" style="width:${barPct}%"></div></div>
         <span class="slab-bar-label" style="color:#c8943a">Low Stock</span>
       </div>`;
     }
@@ -2928,7 +2928,7 @@ async function openModal(stone){
     qtyField=`<div><div class="modal-spec-label">Availability</div><div class="modal-spec-val" style="color:#c8943a">On the way${etaText?' — arriving '+etaText+' (approx.)':''}</div></div>`;
   }else if(stone.qty){
     if(_slabMode==="count") qtyField=`<div><div class="modal-spec-label">Slabs Available</div><div class="modal-spec-val">${stone.qty}</div></div>`;
-    else if(_slabMode==="lowstock" && _q<4) qtyField=`<div><div class="modal-spec-label">Availability</div><div class="modal-spec-val" style="color:#c8943a">Low Stock</div></div>`;
+    else if(_slabMode==="lowstock" && _q<(parseInt(g("lowStockThreshold"),10)||4)) qtyField=`<div><div class="modal-spec-label">Availability</div><div class="modal-spec-val" style="color:#c8943a">Low Stock</div></div>`;
   }
   document.getElementById('modalSpecs').innerHTML=`
     ${dims?`<div><div class="modal-spec-label">Dimensions</div><div class="modal-spec-val">${dims}</div></div>`:''}
@@ -3472,9 +3472,14 @@ function renderAdminContent(){
           <div class="admin-label">Slab Quantity Display</div>
           <select class="admin-input" id="af-slabDisplay" style="padding:9px 12px">
             <option value="count" ${g('slabDisplay')==='count'?'selected':''}>Show exact count (e.g. "4 slabs")</option>
-            <option value="lowstock" ${(g('slabDisplay')||'lowstock')==='lowstock'?'selected':''}>Show "Low Stock" warning only (under 4 slabs) — hide bar otherwise</option>
+            <option value="lowstock" ${(g('slabDisplay')||'lowstock')==='lowstock'?'selected':''}>Show "Low Stock" label when a lot is below the threshold</option>
             <option value="hide" ${g('slabDisplay')==='hide'?'selected':''}>Hide completely — no bar, no label</option>
           </select>
+        </div>
+        <div class="admin-field">
+          <div class="admin-label">Low Stock Threshold</div>
+          <div style="font-size:12px;color:rgba(200,184,154,.55);margin-bottom:8px">Used only in "Low Stock" mode. Show the warning when a lot has fewer than this many slabs. Applies to the main gallery and the per-stone pages.</div>
+          <input class="admin-input" id="af-lowStockThreshold" type="number" min="1" max="20" step="1" value="${parseInt(g('lowStockThreshold'),10)||4}" style="padding:9px 12px;max-width:120px">
         </div>
         <div class="admin-field">
           <div class="admin-label">Lots Without Photos</div>
@@ -3614,6 +3619,8 @@ async function saveAdminContent(){
   // Showroom settings
   const slabEl=document.getElementById('af-slabDisplay');
   if(slabEl)cms.slabDisplay=slabEl.value;
+  const lstEl=document.getElementById('af-lowStockThreshold');
+  if(lstEl){const v=parseInt(lstEl.value,10); cms.lowStockThreshold=Math.max(1,Math.min(20,isNaN(v)?4:v));}
   const priceEl=document.getElementById('af-priceFilterVisible');
   if(priceEl)cms.priceFilterVisible=priceEl.value==='true';
   const pbEl=document.getElementById('af-priceBracketVisible');
