@@ -158,6 +158,23 @@ body[data-theme="navy-full"] .callout,
 body[data-theme="navy-light-gallery"] .callout,
 body[data-theme="navy-accent"] .callout{background:#1a2b45;}
 
+/* ── STOCK BADGE on lot/stone cards ────────────────────────────────────────────
+   Small gold-outlined pill that sits over the top-right of a slab photo. Used
+   today only for "Low Stock" on the main-page stone cards and the per-stone
+   lot cards; the markup is generic (<div class="lot-badge">), so future flags
+   ("New Arrival", "Reserved" …) can reuse the shape by swapping the text.
+
+   Positioned against the nearest positioned ancestor:
+   - index.html stone cards → .stone-card-img-wrap already has position:relative
+   - build-stone-pages.js lot cards → a.lot-card gets position:relative (set
+     inside the generator's inline STONE_CSS block)
+
+   pointer-events:none so the badge never swallows a click on the card itself.
+   backdrop-filter blurs the slab photography behind it so the text stays
+   readable over busy stone patterns; the solid 65 % dark fill is the fallback
+   for engines that don't support blur. */
+.lot-badge{position:absolute;top:10px;right:10px;z-index:3;font-family:'Jost',sans-serif;font-size:10px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-light);background:rgba(15,13,11,.65);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:1px solid var(--gold);padding:5px 10px;border-radius:2px;pointer-events:none;line-height:1;white-space:nowrap;}
+
 /* ── DELIBERATELY NOT THEMED ───────────────────────────────────────────────────
    These surfaces keep their literal colours on purpose. If a future change makes
    them "follow the theme", that is a regression, not a fix.
