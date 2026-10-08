@@ -2766,13 +2766,19 @@ function renderGrid(reset=false){
     // and remove them in place when a flag is toggled from the card itself.
     const hiddenBadge=isHidden?`<div class="card-hidden-badge">Hidden</div>`:'';
     const retakeBadge=isRetake?`<div class="card-retake-badge">&#128247; Retake</div>`:'';
-    const imgHTML=`<div class="stone-card-img-wrap" style="${isHidden?'opacity:.55;':''}">${imgInner}${hiddenBadge}${retakeBadge}</div>`;
-    const inList=isShortlisted(stone);
+    // Stock reads moved above imgHTML (they used to live after it) so the
+    // lowStockBadge can be interpolated inline. Template literals evaluate
+    // on assignment, so every string the template references has to exist
+    // by this line.
     const isTransit=stone.status==='TRANSIT';
     const qty=parseInt(stone.qty||'0');
     const BAR_MAX=30;
     const barPct=Math.min(100,Math.round(qty/BAR_MAX*100));
     const slabMode=g('slabDisplay')||'lowstock';
+    const lowStockBadge=(!isTransit && slabMode==='lowstock' && qty<(parseInt(g('lowStockThreshold'),10)||4))
+      ? '<div class="lot-badge">Low Stock</div>' : '';
+    const imgHTML=`<div class="stone-card-img-wrap" style="${isHidden?'opacity:.55;':''}">${imgInner}${hiddenBadge}${retakeBadge}${lowStockBadge}</div>`;
+    const inList=isShortlisted(stone);
     let slabBar='';
     if(isTransit){
       const etaText=stone.eta?formatEtaDisplay(stone.eta):'';
@@ -2783,10 +2789,11 @@ function renderGrid(reset=false){
         <span class="slab-bar-label">${qty} slab${qty!==1?'s':''}</span>
       </div>`;
     }else if(slabMode==='lowstock'&&qty<(parseInt(g('lowStockThreshold'),10)||4)){
-      // Label only — the progress bar is intentionally omitted in this mode.
-      slabBar=`<div class="slab-bar-wrap">
-        <span class="slab-bar-label" style="color:#c8943a">Low Stock</span>
-      </div>`;
+      // Low Stock now renders as a .lot-badge pill over the top-right of the
+      // slab image (styled in /assets/vsg-theme.css). Keeps the specs row and
+      // the finish tag aligned across all cards regardless of stock state.
+      // slabBar stays empty for this case — the badge is appended to imgHTML
+      // just below.
     }
     // 'hide' or lowstock with qty>=4 — slabBar stays empty
     // Price display

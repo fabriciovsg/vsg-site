@@ -7,8 +7,11 @@
 // VISIBILITY: this script applies the same admin rules as the live gallery,
 // read fresh from vsg-site-config.json each build — hiddenLots excluded,
 // transit lots only if curated in visibleTransitLots (shown as a soft ETA
-// window, never a count), slab QUANTITIES suppressed while slabDisplay is
-// "hide", and unphotographed varieties kept out of the catalogue while
+// window, never a count), per-lot slab counts honour the three-state
+// slabDisplay flag — "count" shows the number in the meta row, "lowstock"
+// shows a .lot-badge pill ("Low Stock") over the slab image when a lot has
+// fewer than lowStockThreshold slabs (default 4), "hide" shows nothing —
+// and unphotographed varieties kept out of the catalogue while
 // hideNoPhoto is on. If an admin setting changes, the pages follow at the
 // next build (3x daily).
 //
@@ -557,7 +560,8 @@ function introFor(v, colour){
 }
 
 function stonePage(v, slug, manifest, cms, stamp){
-  const showSlabs = cms.slabDisplay !== 'hide';
+  const slabMode = cms.slabDisplay || 'lowstock';
+  const lowStockThreshold = Math.max(1, parseInt(cms.lowStockThreshold, 10) || 4);
   const avail = [...v.lots.values()].filter(l=>l.status==='AVAILABLE');
   const lotsWithImg = avail.filter(l=>manifest[l.lot]?.slab).sort((a,b)=>b.slabs-a.slabs);
   const chosenLot = (cms.catalogueThumbs||{})[v.name];
@@ -571,9 +575,20 @@ function stonePage(v, slug, manifest, cms, stamp){
   const cards = lotsWithImg.slice(0,6).map(l=>{
     const e = manifest[l.lot];
     const srcset = e.slabSrcset ? ` srcset="${esc(e.slabSrcset)}" sizes="(max-width:700px) 100vw, 33vw"` : '';
-    const qty = showSlabs ? `${l.slabs} slab${l.slabs!==1?'s':''} &middot; ` : '';
+    // Three-state slabDisplay. count: 'N slabs' prefix on the meta row.
+    // lowstock: no meta prefix — a .lot-badge pill is placed over the image.
+    // hide: nothing. (The .lot-badge CSS lives in /assets/vsg-theme.css
+    // and is duplicated into STONE_CSS below because stone pages don't
+    // link that stylesheet.)
+    let qty = '';
+    let badge = '';
+    if (slabMode === 'count') {
+      qty = `${l.slabs} slab${l.slabs!==1?'s':''} &middot; `;
+    } else if (slabMode === 'lowstock' && l.slabs < lowStockThreshold) {
+      badge = `<div class="lot-badge">Low Stock</div>`;
+    }
     const deepLink=`/?lot=${encodeURIComponent(l.lot)}&name=${encodeURIComponent(v.name)}#gallery`;
-    return `<a class="lot-card" href="${deepLink}" title="View this lot in the gallery"><img src="${e.slab}"${srcset} alt="${esc(v.name)} ${esc((v.material||'').toLowerCase())} &mdash; lot ${esc(displayLot(l.lot))}" loading="lazy"><div class="lot-meta"><span>Lot ${esc(displayLot(l.lot))}</span><span>${qty}${l.th}mm ${esc(l.fin)}</span></div></a>`;
+    return `<a class="lot-card" href="${deepLink}" title="View this lot in the gallery"><img src="${e.slab}"${srcset} alt="${esc(v.name)} ${esc((v.material||'').toLowerCase())} &mdash; lot ${esc(displayLot(l.lot))}" loading="lazy">${badge}<div class="lot-meta"><span>Lot ${esc(displayLot(l.lot))}</span><span>${qty}${l.th}mm ${esc(l.fin)}</span></div></a>`;
   }).join('\n    ');
 
   const specs = [
@@ -841,7 +856,11 @@ h2{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(26px,3
 h2 em{font-style:italic;color:var(--stone-dark)}
 .section-sub{color:var(--mid);font-size:13px;margin-bottom:26px}
 .lots{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px}
-a.lot-card{display:block;text-decoration:none;color:inherit}
+a.lot-card{display:block;text-decoration:none;color:inherit;position:relative}
+/* .lot-badge mirrors the definition in /assets/vsg-theme.css. Duplicated here
+   because stone pages don't link that stylesheet — their CSS is self-contained
+   in this inlined STONE_CSS block. If you change one, change both. */
+.lot-badge{position:absolute;top:10px;right:10px;z-index:3;font-family:'Jost',sans-serif;font-size:10px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-light);background:rgba(15,13,11,.65);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:1px solid var(--gold);padding:5px 10px;border-radius:2px;pointer-events:none;line-height:1;white-space:nowrap}
 .lot-card img{width:100%;aspect-ratio:16/9.5;object-fit:cover;display:block;transition:opacity .25s}
 a.lot-card:hover img{opacity:.85}
 a.lot-card:hover .lot-meta span:first-child{color:var(--gold-light)}
