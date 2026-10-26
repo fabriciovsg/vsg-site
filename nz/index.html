@@ -291,6 +291,9 @@ body{margin:0;background:var(--surface-dark);color:var(--surface-dark-text);
         <input type="hidden" name="bot-field">
         <input type="hidden" name="slabs" id="slabsField">
         <input type="hidden" name="account" id="accountField">
+        <!-- Notification subject, filled in on submit so each trade enquiry is its
+             own Gmail conversation. Netlify substitutes %{submissionId}. -->
+        <input type="hidden" name="subject" id="subjectField" data-remove-prefix value="NZ Direct enquiry · #%{submissionId}">
         <input class="form-input" type="text" name="name" placeholder="Your name" required>
         <input class="form-input" type="email" name="email" placeholder="Email" required>
         <input class="form-input" type="tel" name="phone" placeholder="Phone (optional)">
@@ -598,6 +601,17 @@ $('enqForm').addEventListener('submit', async function(e){
   const label = btn.textContent;
   btn.textContent = 'Sending…'; btn.disabled = true;
   $('enqErr').textContent = '';
+  try{
+    // Unique subject per enquiry: "NZ Direct enquiry — <account> — <name> — 3 slabs · #id"
+    const clean = (v, k) => String(v || '').replace(/\s+/g, ' ').trim().slice(0, k);
+    const name = clean(this.elements.name && this.elements.name.value, 60);
+    const acct = clean($('accountField').value, 60);
+    const parts = ['NZ Direct enquiry'];
+    if (acct) parts.push(acct);
+    if (name && name.toLowerCase() !== acct.toLowerCase()) parts.push(name);
+    if (shortlist.length) parts.push(shortlist.length + ' slab' + (shortlist.length === 1 ? '' : 's'));
+    $('subjectField').value = parts.join(' — ') + ' · #%{submissionId}';
+  }catch(_){}
   try{
     const r = await fetch('/', {
       method:'POST',

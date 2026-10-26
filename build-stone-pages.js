@@ -572,7 +572,11 @@ function stonePage(v, slug, manifest, cms, stamp){
   const maxw = Math.max(0,...avail.map(l=>l.w)), maxh = Math.max(0,...avail.map(l=>l.h));
   const eta = v.transitEtas.sort()[0];
   const matSlug = MAT_SLUG[v.material]||'';
-  const cards = lotsWithImg.slice(0,6).map(l=>{
+  // No cap on the lot grid: show every in-stock lot that has a slab photo.
+  // Was .slice(0,6) originally; the limit was removed on 2026-10-22 because
+  // deep-stock varieties (Taj Mahal, Negresco, Mont Blanc) hid several
+  // available lots behind the fold.
+  const cards = lotsWithImg.map(l=>{
     const e = manifest[l.lot];
     const srcset = e.slabSrcset ? ` srcset="${esc(e.slabSrcset)}" sizes="(max-width:700px) 100vw, 33vw"` : '';
     // Three-state slabDisplay. count: 'N slabs' prefix on the meta row.

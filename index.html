@@ -1091,6 +1091,12 @@ c0 93 3 172 8 176 4 5 66 6 137 4 119 -3 134 -6 176 -30z M23545 1660 c-3 -6
         <input type="hidden" name="form-name" value="contact">
         <input type="text" name="website" value="" tabindex="-1" autocomplete="off" aria-hidden="true" class="contact-honeypot">
         <input type="hidden" name="stone" id="enquiryStoneField" value="">
+        <!-- Notification email subject. Filled in on submit (name + stone) so each
+             enquiry lands as its own Gmail conversation instead of stacking on one
+             thread. %{submissionId} is substituted by Netlify and guarantees
+             uniqueness even for repeat enquiries; this default is what arrives if
+             the script never runs. -->
+        <input type="hidden" name="subject" id="enquirySubjectField" data-remove-prefix value="Website enquiry · #%{submissionId}">
         <div class="enquiry-chip" id="enquiryChip">
           <div class="enquiry-chip-txt"><span class="enquiry-chip-lbl" id="enquiryChipLbl">Enquiring about</span><b id="enquiryChipName"></b><span id="enquiryChipMeta"></span></div>
           <button type="button" class="enquiry-chip-x" onclick="clearEnquiryStone()" aria-label="Clear stone">&times;</button>
@@ -4501,6 +4507,26 @@ let vsgLastSubmitter=null;
 document.querySelectorAll('#contactForm button[type="submit"]').forEach(b=>{
   b.addEventListener('click',()=>{vsgLastSubmitter=b;});
 });
+// Unique, scannable subject for the Netlify notification email, e.g.
+//   "Website enquiry — Jane Smith — Taj Mahal (+2 more) · #<submissionId>"
+// Gmail threads by subject, so an identical subject on every submission was
+// merging unrelated enquiries into one conversation. Never throws: any failure
+// leaves the static default in the markup, which is still unique.
+function setEnquirySubject(form){
+  try{
+    const f=form.querySelector('#enquirySubjectField');
+    if(!f) return;
+    const clean=(v,n)=>String(v||'').replace(/\s+/g,' ').trim().slice(0,n);
+    const name=clean((form.querySelector('input[name="name"]')||{}).value,60);
+    const stones=String((document.getElementById('enquiryStoneField')||{}).value||'')
+      .split('|').map(x=>clean(x.replace(/^\s*\d+\.\s*/,''),70)).filter(Boolean);
+    const parts=['Website enquiry'];
+    if(name) parts.push(name);
+    if(stones.length) parts.push(stones[0]+(stones.length>1?' (+'+(stones.length-1)+' more)':''));
+    f.value=parts.join(' — ')+' · #%{submissionId}';
+  }catch(_){}
+}
+
 document.getElementById('contactForm').addEventListener('submit',async function(e){
   e.preventDefault();
   const btn=e.submitter||vsgLastSubmitter||this.querySelector('button[type="submit"]');
@@ -4510,6 +4536,7 @@ document.getElementById('contactForm').addEventListener('submit',async function(
   const error=document.getElementById('contactError');
   btn.textContent='Sending…';btn.disabled=true;
   success.style.display='none';error.style.display='none';
+  setEnquirySubject(this);
   try{
     const resp=await fetch('/',{
       method:'POST',
