@@ -96,29 +96,43 @@ async function main() {
     }));
   }
 
-  // Build CDN manifest from results + cache for any not yet processed
+  // Build CDN manifest. Every image resolves to one of two sources:
+  //   1. its WebP in this deploy — only if the file actually exists on disk now, or
+  //   2. a public Drive thumbnail — for anything this build could not produce
+  //      (time limit hit, Drive 500/503, or the Netlify cache failed to restore).
+  // Before this, (2) didn't exist: unprocessed images were either listed with paths
+  // to WebP files that weren't in the deploy (broken "?" images) or dropped from the
+  // manifest entirely ("No room scenes found"). Slab and project files are shared
+  // "anyone with the link", so the Drive thumbnail endpoint serves them without auth.
+  // A later build that gets through the queue swaps the WebPs back in automatically.
+  let driveFallbacks = 0;
+  const resolveImage = (id) => {
+    const c = cache[id];
+    if (c && c.path800 && cachedOutputsExist(c)) {
+      return {
+        thumb:  ver(c, c.path800),
+        full:   ver(c, c.path1600 || c.path1200 || c.path800),
+        srcset: buildSrcset(c),
+      };
+    }
+    driveFallbacks++;
+    return {
+      thumb:  driveThumb(id, 800),
+      full:   driveThumb(id, 1600),
+      srcset: null, // never point srcset at files that may not exist — browsers prefer it over src
+    };
+  };
+
   const cdnManifest = {};
   for (const [lot, entry] of Object.entries(manifest)) {
-    const r = results[lot] || {};
     const slabId = entry.slab ? extractFileId(entry.slab) : null;
-    const sc = slabId ? cache[slabId] : null;
-    const slab800  = sc && sc.path800 ? ver(sc, sc.path800) : null;
-    const slab1600 = sc && (sc.path1600 || sc.path1200)
-      ? ver(sc, sc.path1600 || sc.path1200) : null;
-    const projects = (entry.projects || []).map((url, i) => {
-      const id = extractFileId(url);
-      const c = cache[id];
-      if (!c || !c.path800) return { thumb: null, full: null };
-      return {
-        thumb: ver(c, c.path800),
-        full:  ver(c, c.path1600 || c.path1200 || c.path800),
-      };
-    }).filter(p => p.thumb);
-    if (slab800 || projects.length) {
+    const slab = slabId ? resolveImage(slabId) : null;
+    const projects = (entry.projects || []).map(url => resolveImage(extractFileId(url)));
+    if (slab || projects.length) {
       cdnManifest[lot] = {
-        slab:      slab800  || null,
-        slabFull:  slab1600 || slab800 || null,
-        slabSrcset: slabId ? buildSrcset(cache[slabId]) : null,
+        slab:          slab ? slab.thumb  : null,
+        slabFull:      slab ? slab.full   : null,
+        slabSrcset:    slab ? slab.srcset : null,
         projects:      projects.map(p => p.thumb),
         projectsFull:  projects.map(p => p.full),
         projectCount:  projects.length
@@ -139,6 +153,9 @@ async function main() {
   const elapsed = ((Date.now()-startTime)/1000/60).toFixed(1);
   console.log(`\n✓ Done in ${elapsed}min — processed:${processed} skipped:${skipped} errors:${errors}`);
   console.log(`  CDN manifest: ${Object.keys(cdnManifest).length} lots`);
+  if (driveFallbacks) {
+    console.log(`  ⚠ ${driveFallbacks} image(s) served from Drive this deploy (not yet converted to WebP) — the next build will pick them up`);
+  }
 }
 
 // Cached paths are stored as WEB paths ("/img/slabs/foo-800.webp") for the CDN
@@ -224,6 +241,11 @@ async function downloadFile(fileId, dest, token) {
       ws.on('finish', resolve); ws.on('error', reject);
     }).on('error', reject);
   });
+}
+
+// Public Drive thumbnail — fallback when no WebP exists in this deploy.
+function driveThumb(fileId, width) {
+  return `https://drive.google.com/thumbnail?id=${encodeURIComponent(fileId)}&sz=w${width}`;
 }
 
 function extractFileId(url) {
